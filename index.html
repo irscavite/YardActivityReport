@@ -172,7 +172,7 @@ body.mobile-app{
 .mobile-app .distribution-total{padding:7px 8px;border-radius:10px}
 .mobile-app .distribution-total span{display:none}
 .mobile-app .distribution-total strong{font-size:17px}
-.mobile-app .distribution-chart{height:350px;border-radius:13px}
+.mobile-app .distribution-chart{height:470px;border-radius:13px}
 .mobile-app .distribution-legend{justify-content:flex-start;flex-wrap:wrap;gap:11px;margin-top:8px;font-size:8px}
 .mobile-app .distribution-legend i{width:8px;height:8px}
 
@@ -238,7 +238,7 @@ body.mobile-app{
   .mobile-app .badge{max-width:none}
   .mobile-app .metric strong,.mobile-app .empty-activity-row .metric strong{font-size:23px}
   .mobile-app .loaded-activity-row .metric strong{font-size:19px}
-  .mobile-app .distribution-chart{height:330px}
+  .mobile-app .distribution-chart{height:450px}
 }
 
 @media(min-width:461px){
@@ -351,16 +351,16 @@ body.mobile-app{
     <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
   </div>
   <div class="section">
-    <div class="section-head"><div><h2>Inventory by Shipping Line</h2><small>Empty inventory per selected shipping line, plus HRD Export Loaded Inventory and grand total</small></div></div>
+    <div class="section-head"><div><h2>Inventory by Shipping Line</h2><small>OOCL total includes CEZ-1 and CEZ-2 only. EVG is hidden in this card view; ODD is displayed as OTHERS.</small></div></div>
     <div id="shippingLineCards" class="lines"></div>
   </div>
   <div class="section distribution-section">
     <div class="section-head distribution-head">
       <div class="section-head-copy"><h2>Inventory Distribution</h2></div>
-      <div class="distribution-total"><span>Total Inventory</span><strong id="distributionGrandTotal">0</strong></div>
+      <div class="distribution-total"><span>Grand Total</span><strong id="distributionGrandTotal">0</strong></div>
     </div>
     <div class="chart distribution-chart"><canvas id="distributionChart"></canvas></div>
-    <div class="distribution-legend"><span><i></i>Empty Inventory</span><span class="loaded"><i></i>Loaded Inventory</span></div>
+    <div class="distribution-legend"></div>
   </div>
   <div id="summaryStatus" class="status">Connecting...</div>
 </section>
@@ -382,7 +382,7 @@ body.mobile-app{
   <div class="section operational-sheet">
     <div class="report-layout">
       <div>
-        <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2><small>Select one shipping line to view</small></div></div>
+        <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2><small>CMA, OOCL, ONE, and MAERSK only</small></div></div>
         <div class="report-filter-bar">
           <div class="field report-line-field"><label for="reportLineFilter">Shipping Line</label><select id="reportLineFilter" onchange="renderSelectedShippingLine()"></select></div>
           <button type="button" class="action-btn primary line-jpg-btn" onclick="downloadSelectedLineJpg()">Download Table JPG</button>
@@ -405,7 +405,7 @@ body.mobile-app{
   </div>
 
   <div class="section report-availability-chart">
-    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2><small>Available and damaged empty-container totals for all shipping lines in the selected period</small></div></div>
+    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2><small>CMA, OOCL, ONE, and MAERSK only for the selected period</small></div></div>
     <div class="chart"><canvas id="reportChart"></canvas></div>
     <div class="legend"><span class="available">Available</span><span class="damage">Damage</span></div>
   </div>
@@ -419,6 +419,27 @@ const REQUIRED_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','EVG'];
 // UI label and Firebase client key are intentionally separate.
 // CMA is display-only; its Firebase data remains under APL.
 const FIREBASE_LINE_KEY={'CMA':'APL'};
+
+// User-facing labels only. Internal Firebase/report keys remain unchanged.
+const USER_LINE_LABELS={'ODD':'OTHERS'};
+
+// Only these lines are selectable in Report > Shipping Line Summary.
+// Other lines remain available to overall report calculations and charts.
+const REPORT_DROPDOWN_LINES=['CMA','OOCL','ONE','MAERSK'];
+
+// Current Summary pie chart only. EVG is hidden but included in Grand Total.
+const SUMMARY_PIE_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD'];
+
+function displayLineName(line){
+  const key=String(line||'').toUpperCase();
+  return USER_LINE_LABELS[key]||line;
+}
+// EVG remains included in Firebase calculations, Yard Utilization and reports.
+// It is hidden from the Current Summary cards and Inventory Distribution view.
+function inventoryCardLines(){
+  return INCLUDED_LINES.filter(line=>String(line||'').toUpperCase()!=='EVG');
+}
+
 let INCLUDED_LINES=REQUIRED_LINES.slice();
 const REFRESH_MS=30000;
 let latestData=null,historyData={},reportMode='daily',lastReportRows=[],preparedReportRows=[],reportPeriodLabel='—',reportOverallUtilization={bacaoOccupied:0,enlinOccupied:0,bacaoPct:0,enlinPct:0};
@@ -571,6 +592,7 @@ function getByLine(record){
     const category=statusCategory(row);
     if(category!=='available'&&category!=='damage')return;
     const line=recordLine(row);
+    if(line==='OOCL'&&!isCez1OrCez2(row))return;
     if(line in recordCounts)recordCounts[line]++;
   });
 
@@ -587,6 +609,7 @@ function selectedInventory(record){
   const rows=inventoryRecords(record);
   if(rows.length){
     return rows.reduce((total,row)=>{
+      if(!includeInInventoryTotals(row))return total;
       const category=statusCategory(row);
       return total+((category==='available'||category==='damage')?1:0);
     },0);
@@ -656,6 +679,24 @@ function hasInventoryIdentity(row){
   return /(container|client|shipping|carrier|operator)/.test(keys);
 }
 function normalizeLocation(value){return String(value||'').trim().toUpperCase().replace(/[_\s]+/g,'-').replace(/-+/g,'-');}
+
+// OOCL inventory totals must include only rows located at CEZ-1 or CEZ-2.
+// This helper is intentionally NOT used by yardCounts/renderUtilization,
+// so the existing Yard Utilization calculation remains unchanged.
+function inventoryRowLocation(row){
+  return normalizeLocation(
+    row?.location??row?.Location??row?.LOCATION??row?.yardLocation??row?.YardLocation??
+    fieldByPattern(row,[/^location$/i,/yard.*location/i,/^yard$/i,/^site$/i])
+  );
+}
+function isCez1OrCez2(row){
+  const loc=inventoryRowLocation(row);
+  return loc==='CEZ-1'||loc.startsWith('CEZ-1-')||loc==='CEZ-2'||loc.startsWith('CEZ-2-');
+}
+function includeInInventoryTotals(row){
+  return recordLine(row)!=='OOCL'||isCez1OrCez2(row);
+}
+
 function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
 function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation??fieldByPattern(row,[/location/i,/yard/i,/site/i]));if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
 function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/700*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 700`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s). Enlin: ${fmt(cez2)} empty container slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
@@ -694,6 +735,7 @@ function recordRemarks(row){
 function getApprovedTotal(record){
   let approved=0;
   for(const row of inventoryRecords(record)){
+    if(!includeInInventoryTotals(row))continue;
     const remarks=normalizeRemarks(recordRemarks(row));
     if(/\bapproved\b/.test(remarks))approved++;
   }
@@ -807,9 +849,9 @@ function getEmptyStatusTotals(record){
   let available=0,damage=0;
   const rows=inventoryRecords(record);
   for(const row of rows){
-    // Count every Empty record in Latest -> Inventory -> Records using its Status field.
-    // Do not exclude a row merely because its shipping-line label is absent
-    // from the dashboard's selected-line list.
+    // OOCL contributes to inventory totals only when Location is CEZ-1 or CEZ-2.
+    // Other shipping lines keep their existing behavior.
+    if(!includeInInventoryTotals(row))continue;
     const category=statusCategory(row);
     if(category==='available')available++;
     else if(category==='damage')damage++;
@@ -990,6 +1032,7 @@ function lineInventoryStats(record,line){
   if(!inventoryRows.length&&latestData&&latestData!==record)inventoryRows=inventoryRecords(latestData);
   for(const row of inventoryRows){
     if(recordLine(row)!==line)continue;
+    if(line==='OOCL'&&!isCez1OrCez2(row))continue;
 
     const category=statusCategory(row);
     if(category==='damage')damage++;
@@ -1027,7 +1070,8 @@ function renderSelectedShippingLine(){
   const r=preparedReportRows.find(x=>x.line===selected);
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${r.line}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${r.line}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="repaired-row"><td colspan="2" class="label">Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">Shipping Line %</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 700</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  const displayLine=displayLineName(r.line);
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="repaired-row"><td colspan="2" class="label">Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">Shipping Line %</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 700</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
 function renderReport(){
   if(!$('reportPanel').classList.contains('active'))return;
@@ -1103,8 +1147,14 @@ function renderReport(){
   reportPeriodLabel=period;
   const lineFilter=$('reportLineFilter');
   const previousLine=lineFilter.value;
-  lineFilter.innerHTML=rows.map(r=>`<option value="${r.line}">${r.line}</option>`).join('');
-  if(rows.some(r=>r.line===previousLine))lineFilter.value=previousLine;
+  const dropdownRows=REPORT_DROPDOWN_LINES
+    .map(line=>rows.find(r=>r.line===line))
+    .filter(Boolean);
+  lineFilter.innerHTML=dropdownRows
+    .map(r=>`<option value="${r.line}">${displayLineName(r.line)}</option>`)
+    .join('');
+  if(dropdownRows.some(r=>r.line===previousLine))lineFilter.value=previousLine;
+  else if(dropdownRows.length)lineFilter.value=dropdownRows[0].line;
   renderSelectedShippingLine();
 
   const availablePct=totals.volume>0?(totals.available/totals.volume)*100:0;
@@ -1123,7 +1173,17 @@ function renderReport(){
   $('reportExtraSection').classList.toggle('hidden',!extras.length);
   $('reportExtraGrid').innerHTML=extras.map(x=>`<div class="extra-item ${/weather/i.test(x.label)?'weather':''}"><span>${x.label}</span><strong>${typeof x.value==='number'?fmt(x.value):String(x.value)}</strong></div>`).join('');
   $('reportDataNote').textContent='';
-  drawGroupedBarChart('reportChart',lines,rows.map(x=>x.available),rows.map(x=>x.damage));
+  // Report graph follows the same four-line selection as the dropdown.
+  // Other shipping lines remain included in overall report calculations.
+  const reportChartRows=REPORT_DROPDOWN_LINES
+    .map(line=>rows.find(row=>row.line===line))
+    .filter(Boolean);
+  drawGroupedBarChart(
+    'reportChart',
+    reportChartRows.map(row=>displayLineName(row.line)),
+    reportChartRows.map(row=>row.available),
+    reportChartRows.map(row=>row.damage)
+  );
   setStatus('reportStatus',all.length?`Report generated from ${all.length} saved record(s).`:'No records found for the selected period.',!all.length);
 }
 function drawGroupedBarChart(id,labels,a,b){const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);const compact=w<720,m={l:compact?42:54,r:18,t:30,b:compact?72:58},cw=w-m.l-m.r,ch=h-m.t-m.b,max=Math.max(1,...a,...b),step=cw/Math.max(1,labels.length),bw=Math.min(compact?18:28,step*.28);ctx.font='10px Segoe UI';ctx.textBaseline='middle';for(let i=0;i<=4;i++){const value=Math.round(max*i/4),y=h-m.b-ch*i/4;ctx.strokeStyle=i===0?'#cfd8e5':'#e8edf4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke();ctx.fillStyle='#98a2b3';ctx.textAlign='right';ctx.fillText(fmt(value),m.l-8,y);}labels.forEach((label,i)=>{const cx=m.l+step*i+step/2;[[num(a[i]),-bw-2,'#2855d9'],[num(b[i]),2,'#dc3545']].forEach(([v,off,color])=>{const bh=ch*v/max,x=cx+off;ctx.fillStyle=color;ctx.fillRect(x,h-m.b,bw,-bh);if(v>0){ctx.fillStyle='#344054';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(fmt(v),x+bw/2,h-m.b-bh-4);}});ctx.save();ctx.translate(cx,h-m.b+18);ctx.fillStyle='#475467';ctx.font=`${compact?'800 9px':'800 10px'} Segoe UI`;ctx.textAlign=compact?'right':'center';ctx.textBaseline='middle';if(compact)ctx.rotate(-Math.PI/4);ctx.fillText(label,0,0);ctx.restore();});if(!labels.length){ctx.fillStyle='#667085';ctx.textAlign='center';ctx.font='13px Segoe UI';ctx.fillText('No shipping-line data available',w/2,h/2);}}
@@ -1194,7 +1254,7 @@ async function downloadSelectedLineJpg(){
     outputCtx.imageSmoothingQuality='high';
     outputCtx.drawImage(canvas,0,0,targetWidth,targetHeight);
 
-    const filename=`${String(r.line).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${reportMode}-report-${reportPeriodLabel.replace(/[^0-9a-z]+/gi,'-')}.jpg`;
+    const filename=`${String(displayLineName(r.line)).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${reportMode}-report-${reportPeriodLabel.replace(/[^0-9a-z]+/gi,'-')}.jpg`;
     const blob=await new Promise((resolve,reject)=>output.toBlob(b=>b?resolve(b):reject(new Error('Unable to create JPG file.')),'image/jpeg',0.96));
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1205,7 +1265,7 @@ async function downloadSelectedLineJpg(){
     a.click();
     a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
-    setStatus('reportStatus',`${r.line} table downloaded as JPG.`);
+    setStatus('reportStatus',`${displayLineName(r.line)} table downloaded as JPG.`);
   }catch(error){
     setStatus('reportStatus',`Unable to download table image: ${error.message}`,true);
   }finally{
@@ -1248,7 +1308,7 @@ function exportReportCsv(){
   ];
   for(const r of lineRows){
     const share=currentGrandInventory>0?(num(currentByLine[r.line])/currentGrandInventory)*100:0;
-    rows.push([r.line,r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.repaired,r.hold,r.forRepo]);
+    rows.push([displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.repaired,r.hold,r.forRepo]);
   }
   const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');
@@ -1276,24 +1336,201 @@ function renderLatest(){
   $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
-  const emptyCards=INCLUDED_LINES.map(line=>`<div class="line-card"><div class="name">${line}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div><small>empty inventory</small></div>`).join('');
+  const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div><small>empty inventory</small></div>`).join('');
   const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
   const totalCard=`<div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">${fmt(grandInventory)}</div><span class="inventory-share">100.0%</span></div><small>${fmt(emptyInventory)} empty + ${fmt(loadedInventory)} loaded</small></div>`;
   $('shippingLineCards').innerHTML=emptyCards+loadedCard+totalCard;
 
-  $('distributionGrandTotal').textContent=fmt(grandInventory);
-  const chartLabels=[...INCLUDED_LINES,'HRD EXPORT'];
-  const chartValues=[...INCLUDED_LINES.map(x=>by[x]),loadedInventory];
-  drawInventoryDistributionChart('distributionChart',chartLabels,chartValues,grandInventory);
+  // Inventory Distribution is a user-facing view. EVG stays in Firebase,
+  // overall inventory calculations and Yard Utilization, but is excluded here.
+  const distributionLines=SUMMARY_PIE_LINES;
+  const visibleEmptyTotal=distributionLines.reduce((sum,line)=>sum+num(by[line]),0);
+  const evgHiddenTotal=num(by.EVG);
+  const visibleChartTotal=visibleEmptyTotal+loadedInventory;
+  const distributionGrandTotal=visibleChartTotal+evgHiddenTotal;
+  $('distributionGrandTotal').textContent=fmt(distributionGrandTotal);
+  const chartLabels=[...distributionLines.map(displayLineName),'HRD EXPORT'];
+  const chartValues=[...distributionLines.map(line=>by[line]),loadedInventory];
+  drawInventoryDistributionPie(
+    'distributionChart',
+    chartLabels,
+    chartValues,
+    visibleChartTotal,
+    distributionGrandTotal,
+    evgHiddenTotal
+  );
 }
 async function loadHistory(){try{const data=await readWithFallback('records');historyData=data||{};if($('reportPanel').classList.contains('active'))renderReport();}catch(e){historyData={};setStatus('reportStatus',e.message,true);}}
 function normalizeDateKey(key,r){return r?.recordDate||key;}
 function fitCanvas(id){const c=$(id),dpr=window.devicePixelRatio||1,rect=c.parentElement.getBoundingClientRect();c.width=Math.max(320,rect.width)*dpr;c.height=Math.max(250,rect.height)*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w:rect.width,h:rect.height};}
 function drawBase(ctx,w,h){ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}
 function roundedRect(ctx,x,y,w,h,r){const radius=Math.max(0,Math.min(r,Math.abs(w)/2,Math.abs(h)/2));ctx.beginPath();ctx.moveTo(x+radius,y);ctx.arcTo(x+w,y,x+w,y+h,radius);ctx.arcTo(x+w,y+h,x,y+h,radius);ctx.arcTo(x,y+h,x,y,radius);ctx.arcTo(x,y,x+w,y,radius);ctx.closePath();}
-function drawInventoryDistributionChart(id,labels,values,total){const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);const compact=w<620,m={l:compact?88:126,r:compact?92:112,t:24,b:32},cw=Math.max(80,w-m.l-m.r),ch=h-m.t-m.b,max=Math.max(1,...values),rowH=ch/Math.max(1,labels.length),barH=Math.min(34,rowH*.52);ctx.font='10px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';for(let i=0;i<=4;i++){const x=m.l+cw*i/4;ctx.strokeStyle=i===0?'#cfd8e5':'#e9eef5';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,h-m.b);ctx.stroke();ctx.fillStyle='#98a2b3';ctx.fillText(fmt(Math.round(max*i/4)),x,h-14);}labels.forEach((label,i)=>{const value=num(values[i]),shareValue=total?value/total*100:0,y=m.t+rowH*i+(rowH-barH)/2,barW=cw*(value/max),isLoaded=label==='HRD EXPORT';ctx.fillStyle='#f0f4f9';roundedRect(ctx,m.l,y,cw,barH,barH/2);ctx.fill();if(barW>0){const grad=ctx.createLinearGradient(m.l,y,m.l+Math.max(barW,1),y);if(isLoaded){grad.addColorStop(0,'#0f766e');grad.addColorStop(1,'#16a085');}else{grad.addColorStop(0,'#173f9f');grad.addColorStop(1,'#4f7fe8');}ctx.fillStyle=grad;roundedRect(ctx,m.l,y,Math.max(barW,3),barH,barH/2);ctx.fill();}ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#344054';ctx.font=`${compact?'700 10px':'800 12px'} Segoe UI`;ctx.fillText(label,m.l-12,y+barH/2);ctx.textAlign='left';ctx.fillStyle=isLoaded?'#087f5b':'#173f9f';ctx.font=`900 ${compact?'11px':'13px'} Segoe UI`;ctx.fillText(`${fmt(value)}  •  ${shareValue.toFixed(1)}%`,m.l+cw+10,y+barH/2);});if(!total){ctx.fillStyle='#667085';ctx.textAlign='center';ctx.font='13px Segoe UI';ctx.fillText('No inventory data available',w/2,h/2);}}
-async function refreshAll(){await loadLatest();if($('reportPanel').classList.contains('active'))await loadHistory();}
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=INCLUDED_LINES.map(x=>`<div class="line-card"><div class="name">${x}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(loadLatest,REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function shadeHex(hex,amount){
+  const value=String(hex||'').replace('#','');
+  if(!/^[0-9a-f]{6}$/i.test(value))return hex;
+  const n=parseInt(value,16);
+  const clamp=x=>Math.max(0,Math.min(255,x));
+  const r=clamp((n>>16)+amount);
+  const g=clamp(((n>>8)&255)+amount);
+  const b=clamp((n&255)+amount);
+  return '#'+[r,g,b].map(x=>Math.round(x).toString(16).padStart(2,'0')).join('');
+}
+function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,evgHiddenTotal){
+  const{ctx,w,h}=fitCanvas(id);
+  drawBase(ctx,w,h);
+
+  const cleanValues=values.map(num);
+  const total=num(visibleTotal)||cleanValues.reduce((sum,value)=>sum+value,0);
+  if(!labels.length||total<=0){
+    ctx.fillStyle='#667085';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.font='12px Segoe UI';
+    ctx.fillText('No inventory data available',w/2,h/2);
+    return;
+  }
+
+  const colors=['#123b70','#326bd1','#10a3b5','#d19a18','#13945a','#f08a32','#7b61c9'];
+  const cx=w/2;
+  const cy=Math.min(182,h*.34);
+  const radius=Math.max(88,Math.min(w*.25,h*.20));
+
+  const spotlight=ctx.createRadialGradient(cx,cy,15,cx,cy,radius*1.5);
+  spotlight.addColorStop(0,'rgba(40,85,217,.08)');
+  spotlight.addColorStop(1,'rgba(40,85,217,0)');
+  ctx.fillStyle=spotlight;
+  ctx.fillRect(0,0,w,h);
+
+  const slices=[];
+  let start=-Math.PI/2;
+  labels.forEach((label,index)=>{
+    const value=cleanValues[index]||0;
+    const angle=value/total*Math.PI*2;
+    slices.push({
+      label,
+      value,
+      pct:value/total*100,
+      start,
+      end:start+angle,
+      color:colors[index%colors.length]
+    });
+    start+=angle;
+  });
+
+  // Clean flat 2D pie.
+  for(const slice of slices){
+    if(slice.value<=0)continue;
+    const gradient=ctx.createRadialGradient(
+      cx-radius*.25,cy-radius*.25,radius*.08,cx,cy,radius
+    );
+    gradient.addColorStop(0,shadeHex(slice.color,20));
+    gradient.addColorStop(1,slice.color);
+
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,radius,slice.start,slice.end);
+    ctx.closePath();
+    ctx.fillStyle=gradient;
+    ctx.fill();
+    ctx.strokeStyle='#ffffff';
+    ctx.lineWidth=2.5;
+    ctx.stroke();
+  }
+
+  // Clean center with no text or number.
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius*.29,0,Math.PI*2);
+  ctx.fillStyle='#ffffff';
+  ctx.fill();
+  ctx.strokeStyle='#e1e7ef';
+  ctx.lineWidth=1.2;
+  ctx.stroke();
+
+  // All visible categories use external labels.
+  const callouts=[];
+  for(const slice of slices){
+    if(slice.value<=0)continue;
+    const middle=(slice.start+slice.end)/2;
+    const edgeX=cx+Math.cos(middle)*radius*.97;
+    const edgeY=cy+Math.sin(middle)*radius*.97;
+    const side=Math.cos(middle)>=0?1:-1;
+    callouts.push({slice,edgeX,edgeY,side});
+  }
+
+  const left=callouts.filter(item=>item.side<0).sort((a,b)=>a.edgeY-b.edgeY);
+  const right=callouts.filter(item=>item.side>0).sort((a,b)=>a.edgeY-b.edgeY);
+
+  function drawCalloutGroup(items,side){
+    if(!items.length)return;
+
+    const chipW=Math.min(126,w*.37);
+    const chipH=34;
+    const spacing=43;
+    const groupHeight=(items.length-1)*spacing;
+    const minY=Math.max(28,cy-radius*.98);
+    const maxY=Math.min(h-chipH-92,cy+radius+145);
+    let startY=Math.max(minY,cy-groupHeight/2);
+    if(startY+groupHeight>maxY)startY=Math.max(minY,maxY-groupHeight);
+
+    items.forEach((item,index)=>{
+      const targetY=startY+index*spacing;
+      const elbowX=cx+side*radius*1.06;
+      const chipX=side>0
+        ? Math.min(w-chipW-8,elbowX+10)
+        : Math.max(8,elbowX-chipW-10);
+      const lineEndX=side>0?chipX:chipX+chipW;
+
+      ctx.save();
+
+      ctx.fillStyle=item.slice.color;
+      ctx.beginPath();
+      ctx.arc(item.edgeX,item.edgeY,3,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.strokeStyle=item.slice.color;
+      ctx.lineWidth=1.8;
+      ctx.beginPath();
+      ctx.moveTo(item.edgeX,item.edgeY);
+      ctx.lineTo(elbowX,targetY);
+      ctx.lineTo(lineEndX,targetY);
+      ctx.stroke();
+
+      ctx.shadowColor='rgba(15,47,95,.10)';
+      ctx.shadowBlur=6;
+      ctx.fillStyle='#ffffff';
+      ctx.strokeStyle=shadeHex(item.slice.color,-8);
+      ctx.lineWidth=1.2;
+      roundedRect(ctx,chipX,targetY-chipH/2,chipW,chipH,9);
+      ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.stroke();
+
+      ctx.fillStyle=item.slice.color;
+      roundedRect(ctx,chipX+6,targetY-chipH/2+6,5,chipH-12,3);
+      ctx.fill();
+
+      ctx.textAlign='left';
+      ctx.textBaseline='middle';
+      ctx.fillStyle='#344054';
+      ctx.font='950 8px Segoe UI';
+      ctx.fillText(item.slice.label,chipX+18,targetY-6);
+
+      ctx.fillStyle='#667085';
+      ctx.font='800 7.5px Segoe UI';
+      ctx.fillText(
+        `${fmt(item.slice.value)} • ${item.slice.pct.toFixed(1)}%`,
+        chipX+18,
+        targetY+7
+      );
+
+      ctx.restore();
+    });
+  }
+
+  drawCalloutGroup(left,-1);
+  drawCalloutGroup(right,1);
+}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(loadLatest,REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 </script>
 </body>
