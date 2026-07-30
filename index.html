@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2f5f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>Yard Utilization Mobile</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e5eaf1;--primary:#2855d9;--nav:#111827;--success:#087f5b;--warning:#a15c00;--shadow:0 12px 34px rgba(15,23,42,.08);--radius:18px;font-family:Inter,Segoe UI,Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;color:var(--text);background:radial-gradient(circle at 0 0,rgba(40,85,217,.09),transparent 34%),linear-gradient(180deg,#f8faff,#f1f5f9);min-height:100vh}.app{max-width:1550px;margin:auto;padding:24px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px 28px;border-radius:22px;color:#fff;background:linear-gradient(118deg,#111827,#172554 58%,#123c69);box-shadow:0 24px 58px rgba(15,23,42,.18)}h1{margin:0;font-size:28px;letter-spacing:-.035em}.subtitle{margin-top:7px;color:#cbd5e1;font-size:12px}.top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.badge{padding:9px 12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);border-radius:11px;font-size:12px;font-weight:800}.badge.online{color:#b9f6df}.badge.error{color:#ffe1a8}.btn{border:1px solid rgba(255,255,255,.22);background:#fff;color:#183b94;padding:10px 15px;border-radius:11px;font-weight:800;cursor:pointer}.tabs{display:flex;gap:7px;margin:18px 0;padding:6px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.88);box-shadow:0 10px 30px rgba(15,23,42,.06)}.tab{border:0;background:transparent;color:var(--muted);padding:10px 18px;border-radius:10px;font-weight:800;cursor:pointer}.tab.active{background:#fff;color:#2147b1;box-shadow:0 5px 14px rgba(15,23,42,.09)}.panel{display:none}.panel.active{display:block}.section{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}.section-head h2{margin:0;font-size:18px}.section-head small,.muted{color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.empty-activity-row{grid-template-columns:repeat(6,minmax(0,1fr))}.empty-activity-row .metric{padding:16px 14px}.empty-activity-row .metric strong{font-size:34px}.empty-activity-row .metric small{font-size:10px}.activity-group{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}.activity-label{margin-bottom:10px;color:#475467;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.09em}.loaded-activity-row{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1120px}.loaded-activity-row .metric{border-color:#cdd9f7;background:linear-gradient(180deg,#fdfefe,#f2f6ff)}.loaded-activity-row .metric strong{color:#2147b1}.metric{padding:18px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,#fff,#f8fafc);box-shadow:0 6px 18px rgba(15,23,42,.045)}.metric span{display:block;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}.metric strong{display:block;margin-top:8px;font-size:38px;line-height:1;color:#173f9f;letter-spacing:-.04em}.metric small{display:block;margin-top:8px;color:var(--muted)}.lines{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.util-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.util-card{padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fff,#f8fafc)}.util-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.util-title{font-size:12px;font-weight:900;color:#475467;letter-spacing:.08em}.util-count{margin-top:8px;font-size:31px;font-weight:900;color:#173f9f}.util-percent{font-size:34px;font-weight:900;color:var(--success);letter-spacing:-.04em}.progress{height:13px;margin-top:15px;background:#e7edf5;border-radius:999px;overflow:hidden}.progress>div{height:100%;width:0;background:linear-gradient(90deg,#2855d9,#087f5b);border-radius:999px;transition:width .35s ease}.util-note{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:11px}.line-card{padding:17px;border:1px solid var(--line);border-radius:16px;background:#fff}.line-card .name{font-size:12px;font-weight:900;color:#475467;letter-spacing:.08em}.line-card .count-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:7px 0 3px}.line-card .count{font-size:31px;font-weight:900;color:var(--success);margin:0}.line-card .inventory-share{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#eaf8f3;color:#087f5b;font-size:12px;font-weight:950;white-space:nowrap}.line-card small{color:var(--muted)}.line-card.loaded-card{border-color:#cdd9f7;background:linear-gradient(180deg,#fdfefe,#f2f6ff)}.line-card.loaded-card .count{color:#2147b1}.line-card.total-card{border-color:#a7d8c6;background:linear-gradient(180deg,#f8fffc,#ecfdf5)}.line-card.total-card .count{color:#087f5b}.total-row td{font-weight:900;background:#ecfdf5}.loaded-row td{background:#f5f8ff}.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:15px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:right}th{background:#f4f7fb;color:#475467;font-size:10px;text-transform:uppercase;letter-spacing:.06em}th:first-child,td:first-child{text-align:left}tr:last-child td{border-bottom:0}.chart{position:relative;height:310px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(180deg,#fff,#fbfcff);overflow:hidden}canvas{width:100%;height:100%;display:block}.distribution-section{padding:24px}.distribution-head{align-items:center}.distribution-head .section-head-copy{min-width:0}.distribution-total{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #a7d8c6;border-radius:14px;background:linear-gradient(135deg,#f4fff9,#ecfdf5);box-shadow:0 8px 20px rgba(8,127,91,.08)}.distribution-total span{color:#475467;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.distribution-total strong{color:#087f5b;font-size:22px;line-height:1}.distribution-chart{height:430px;border-color:#dbe3ee;border-radius:18px;background:linear-gradient(180deg,#ffffff,#f8fbff);box-shadow:inset 0 1px 0 rgba(255,255,255,.85)}.distribution-legend{display:flex;align-items:center;justify-content:flex-end;gap:18px;margin-top:12px;color:#667085;font-size:11px;font-weight:800}.distribution-legend span{display:inline-flex;align-items:center;gap:7px}.distribution-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:#2147b1}.distribution-legend .loaded i{background:#087f5b}.controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.field input,.field select{min-height:42px;border:1px solid #d7dee8;border-radius:11px;padding:9px 11px;background:#fff;font:inherit}.status{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:800;background:#f7f9fc;color:var(--muted);border:1px solid var(--line)}.status.ok{background:#ecfdf5;color:#087f5b;border-color:#a7f3d0}.status.error{background:#fff8e6;color:#7a4d00;border-color:#efd99e}.empty{text-align:center!important;color:var(--muted);padding:28px!important}.footnote{font-size:11px;color:var(--muted);margin-top:10px}.hidden{display:none!important}@media(max-width:1300px){.lines{grid-template-columns:repeat(4,1fr)}}@media(max-width:1200px){.empty-activity-row{grid-template-columns:repeat(3,1fr)}}@media(max-width:1000px){.metrics{grid-template-columns:repeat(2,1fr)}.lines{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.distribution-chart{height:410px}}@media(max-width:650px){.util-grid{grid-template-columns:1fr}.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column;padding:20px}.metrics,.lines{grid-template-columns:1fr 1fr}.metric strong{font-size:31px}.distribution-section{padding:18px}.distribution-head{align-items:flex-start}.distribution-total{padding:8px 10px}.distribution-total strong{font-size:18px}.distribution-chart{height:390px}.distribution-legend{justify-content:flex-start}}@media(max-width:420px){.metrics,.lines{grid-template-columns:1fr}}
+@media(min-width:651px) and (max-width:1200px){.empty-activity-row{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.empty-activity-row .metric{padding:13px 9px}.empty-activity-row .metric span{font-size:9px;letter-spacing:.04em}.empty-activity-row .metric strong{font-size:28px}.empty-activity-row .metric small{font-size:9px;line-height:1.25}}
+
+.report-switch{display:flex;gap:7px;padding:5px;background:#eef2f8;border-radius:12px}.report-switch button{border:0;background:transparent;padding:9px 15px;border-radius:9px;font-weight:900;color:#667085;cursor:pointer}.report-switch button.active{background:#fff;color:#2147b1;box-shadow:0 4px 12px rgba(15,23,42,.1)}
+.report-actions{display:flex;gap:8px;flex-wrap:wrap}.action-btn{border:1px solid #d8e0eb;background:#fff;color:#2147b1;padding:10px 13px;border-radius:10px;font-weight:800;cursor:pointer}.action-btn.primary{background:#2855d9;color:#fff;border-color:#2855d9}.percent-pill{display:inline-block;min-width:72px;padding:5px 9px;border-radius:999px;background:#eaf8f3;color:#087f5b;font-weight:900;text-align:center}.negative{color:#b42318}.positive{color:#087f5b}.report-period{font-weight:900;color:#173f9f}.report-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.78fr);gap:16px}.legend{display:flex;gap:16px;align-items:center;color:#667085;font-size:11px;margin-top:8px}.legend span:before{content:'';display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}.legend .in:before,.legend .available:before{background:#2855d9}.legend .out:before{background:#087f5b}.legend .damage:before{background:#dc3545}.report-availability-chart{width:100%}.report-availability-chart .chart{height:380px}
+.report-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.report-heading #reportGeneratedAt{margin-left:auto;color:var(--success);font-weight:900}.operational-sheet{padding:14px}.ops-table{min-width:1050px;border:2px solid #263244}.ops-table th,.ops-table td{border:1px solid #667085;padding:11px 10px}.ops-table th{background:#f8fafc;color:#111827;font-size:11px}.ops-table tbody td:first-child{font-weight:900}.ops-table tfoot th{background:#fff31a;color:#111827;font-size:12px}.extra-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.extra-item{border:1px solid var(--line);border-radius:14px;padding:15px;background:#f8fafc}.extra-item span{display:block;color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase}.extra-item strong{display:block;margin-top:7px;font-size:24px;color:#173f9f}.extra-item.weather strong{color:var(--success);font-style:italic}@media(max-width:850px){.extra-grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.extra-grid{grid-template-columns:1fr}}
+.shipping-report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:18px}.line-report-card{background:#fff;border:2px solid #263244;break-inside:avoid;overflow:hidden}.line-report-date{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:2px solid #263244;font-size:18px;font-weight:900}.line-report-date .stamp{color:#11a36a}.line-report-table{width:100%;border-collapse:collapse;table-layout:fixed}.line-report-table th,.line-report-table td{border:1px solid #667085;padding:9px 8px;text-align:center}.line-report-table th{background:#fff;color:#111827;font-size:13px}.line-report-table .line-name{font-size:18px;font-weight:900}.line-report-table .label{text-align:left;font-weight:800}.line-report-table .value{font-weight:900;color:#e52521}.line-report-table .good{color:#11a36a}.line-report-table .yellow th{background:#fff31a;font-style:italic}.line-report-table .section-label{background:#f8fafc;font-weight:900;text-align:left}.line-report-table .compact td{padding:7px 8px}.line-report-empty{padding:28px;text-align:center;color:#667085}@media(max-width:650px){.shipping-report-grid{grid-template-columns:1fr}.line-report-card{font-size:12px}.line-report-date{font-size:15px}.line-report-table th,.line-report-table td{padding:7px 5px}}
+
+.report-kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:16px}.report-kpi{position:relative;overflow:hidden;border-radius:18px;padding:17px 18px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 28px rgba(15,23,42,.08)}.report-kpi:before{content:'';position:absolute;inset:0 auto 0 0;width:5px;background:var(--accent,#2855d9)}.report-kpi .kpi-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085}.report-kpi .kpi-value{margin-top:7px;font-size:30px;line-height:1;font-weight:950;color:var(--accent,#2855d9)}.report-kpi .kpi-note{margin-top:7px;font-size:11px;color:#667085}.report-layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.report-section-title{display:flex;align-items:center;gap:11px;margin:0 0 14px}.report-section-title h2{margin:0;font-size:18px}.report-section-title small{color:#667085}.title-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#2855d9,#173f9f);color:#fff;font-weight:900}.overall-card{position:sticky;top:16px;border-radius:18px;overflow:hidden;border:1px solid #d8e0eb;background:#fff;box-shadow:0 14px 34px rgba(15,23,42,.12)}.overall-title{display:flex;align-items:center;gap:9px;padding:15px 17px;background:linear-gradient(120deg,#102a56,#173f9f);color:#fff;font-size:15px;font-weight:950;text-transform:uppercase;letter-spacing:.04em}.overall-table{min-width:0}.overall-table th,.overall-table td{padding:12px 13px}.overall-table th{background:#eef3f9;color:#344054}.overall-table td:first-child{font-weight:800}.overall-table .overall-value{font-size:16px;font-weight:950;color:#155acb}.overall-table .overall-danger{color:#d92d20}.overall-table .overall-rate-row td{background:linear-gradient(90deg,#edfbe8,#e4f6dc);color:#146c2e}.overall-table .overall-rate{font-size:21px;font-weight:950}.shipping-report-grid{grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:16px}.line-report-card{border:1px solid #d8e0eb;border-radius:17px;box-shadow:0 10px 25px rgba(15,23,42,.08);transition:transform .18s ease,box-shadow .18s ease}.line-report-card:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(15,23,42,.13)}.line-report-card:nth-child(6n+1){--line-accent:#d81b7d;--line-soft:#fff0f7}.line-report-card:nth-child(6n+2){--line-accent:#173f7a;--line-soft:#edf4ff}.line-report-card:nth-child(6n+3){--line-accent:#0c9fb2;--line-soft:#ecfbfd}.line-report-card:nth-child(6n+4){--line-accent:#171717;--line-soft:#f2f2f2}.line-report-card:nth-child(6n+5){--line-accent:#169447;--line-soft:#effbf3}.line-report-card:nth-child(6n+6){--line-accent:#ff6b00;--line-soft:#fff4eb}.line-report-date{background:linear-gradient(120deg,var(--line-accent),color-mix(in srgb,var(--line-accent) 78%,#0b1630));color:#fff;border:0;padding:12px 15px}.line-report-date .stamp{color:#fff;opacity:.92;font-size:13px}.line-report-table th{background:var(--line-soft);color:#344054;border-color:#d8e0eb}.line-report-table td{border-color:#e5eaf1}.line-report-table .line-name{color:var(--line-accent)}.line-report-table .value{color:var(--line-accent)}.line-report-table tr.rate-row td{background:linear-gradient(90deg,#effbea,#e3f7da)}.line-report-table tr.repaired-row td{background:linear-gradient(90deg,#eefaf3,#ddf5e8)}.line-report-table tr.hold-row td{background:linear-gradient(90deg,#fff8e1,#fff1bd)}.line-report-table tr.repo-row td{background:linear-gradient(90deg,#fff1f0,#ffe2df)}.line-report-table tr.repaired-row .value{color:#087f5b}.line-report-table tr.hold-row .value{color:#a15c00}.line-report-table tr.repo-row .value{color:#b42318}.line-report-table tr.movement-row td{background:linear-gradient(90deg,#eef5ff,#e2ecff)}.line-report-table .rate-pill{display:inline-block;min-width:78px;padding:5px 10px;border-radius:999px;background:var(--line-accent);color:#fff;font-weight:950}.report-note{margin-top:15px;padding:11px 13px;border-radius:11px;background:#f5f8fc;border:1px solid #e1e7ef}.operational-sheet{padding:18px;background:linear-gradient(180deg,#ffffff,#f9fbfe)}@media(max-width:1180px){.report-layout{grid-template-columns:1fr}.overall-card{position:static}.shipping-report-grid{grid-template-columns:repeat(auto-fit,minmax(390px,1fr))}}@media(max-width:650px){.shipping-report-grid{grid-template-columns:1fr}.report-kpi-strip{grid-template-columns:1fr 1fr}.report-kpi .kpi-value{font-size:25px}}@media(max-width:430px){.report-kpi-strip{grid-template-columns:1fr}}
+
+.line-selector-title{align-items:flex-end}.line-selector-title>div:nth-child(2){flex:1}.report-line-field{min-width:250px}.report-line-field select{width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:12px;padding:9px 38px 9px 12px;background:#fff;color:#172033;font-weight:850;box-shadow:0 5px 14px rgba(15,23,42,.06)}.single-line-grid{display:block}.single-line-grid .line-report-card{max-width:820px;margin:0 auto}.single-line-grid .line-report-card:hover{transform:none}.report-layout{grid-template-columns:minmax(0,1fr) 390px}@media(max-width:900px){.line-selector-title{align-items:stretch;flex-wrap:wrap}.report-line-field{width:100%;min-width:0}.single-line-grid .line-report-card{max-width:none}}
+
+/* Navy Blue Professional Report Theme */
+:root{--primary:#123b70;--navy:#0f2f5f;--navy-2:#173f73;--navy-soft:#eaf1f9;--navy-soft-2:#f4f7fb;--line:#d9e2ee;--text:#172033;--muted:#667085;--success:#176b43}
+body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
+.topbar{background:linear-gradient(118deg,#0b2548,#103769 58%,#174a83);box-shadow:0 18px 44px rgba(15,47,95,.20)}
+.tab.active{color:var(--navy);border:1px solid #d9e4f1}.action-btn,.btn{color:var(--navy)}.action-btn.primary{background:var(--navy);border-color:var(--navy)}
+.report-switch button.active{color:var(--navy)}.report-period,.metric strong,.util-count,.extra-item strong{color:var(--navy)}
+.progress>div{background:linear-gradient(90deg,#174a83,#2d639c)}
+.report-kpi{box-shadow:0 8px 22px rgba(15,47,95,.08)}.report-kpi:before{background:var(--navy)!important}.report-kpi .kpi-value{color:var(--navy)!important}
+.operational-sheet{background:#fff}.report-layout{grid-template-columns:minmax(0,1fr) 390px;align-items:start}
+.report-section-title{display:flex;align-items:center;gap:11px;margin-bottom:8px}.report-section-title .title-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--navy-soft);color:var(--navy)}
+.report-filter-bar{display:flex;justify-content:flex-start;align-items:flex-end;margin:10px 0 16px;padding:12px 14px;border:1px solid #dbe5f0;border-radius:13px;background:#f8fafc}
+.report-line-field{width:300px;min-width:240px}.report-line-field select{width:100%;min-height:44px;border:1px solid #bfcddd;border-radius:10px;padding:9px 38px 9px 12px;background:#fff;color:var(--navy);font-weight:850;box-shadow:none}
+.report-line-field select:focus{outline:3px solid rgba(23,74,131,.14);border-color:#557da7}
+.single-line-grid{display:block}.single-line-grid .line-report-card{max-width:none;margin:0;border:1px solid #cbd8e7;border-radius:14px;box-shadow:0 9px 24px rgba(15,47,95,.08)}
+.line-report-date{background:var(--navy);color:#fff;border-bottom:0;padding:13px 16px}.line-report-date .stamp{color:#dbeafe;font-size:13px}
+.line-report-table th{background:#eaf1f9;color:#17365f;border-color:#cbd8e7}.line-report-table td{border-color:#dbe4ef}.line-report-table tbody tr:nth-child(even):not(.rate-row):not(.movement-row){background:#f8fafc}
+.line-report-table .line-name{color:var(--navy)}.line-report-table .value{color:var(--navy)}.line-report-table .good{color:#176b43}
+.line-report-table .rate-row,.line-report-table .movement-row{background:#edf5ef}.rate-pill,.percent-pill{background:#dcefe3!important;color:#176b43!important;border:1px solid #bad9c6}
+.overall-card{border:1px solid #cbd8e7!important;border-radius:14px!important;overflow:hidden;box-shadow:0 9px 24px rgba(15,47,95,.08)!important}.overall-title{background:var(--navy)!important;color:#fff!important}.overall-table th{background:#eaf1f9!important;color:#17365f!important}.overall-table td{border-color:#dbe4ef!important}.overall-table tr.rate{background:#edf5ef!important}.overall-table .number{color:var(--navy)!important}
+.legend .in:before,.legend .out:before{background:var(--navy)}
+@media(max-width:900px){.report-layout{grid-template-columns:1fr}.report-filter-bar{padding:10px}.report-line-field{width:100%;min-width:0}}
+@media print{body{background:#fff}.topbar,.tabs,.report-actions,.controls,.status{display:none!important}.app{max-width:none;padding:0}.panel{display:none!important}#reportPanel{display:block!important}.section{box-shadow:none;break-inside:avoid}.chart{height:260px}}
+
+.report-filter-bar{gap:12px;flex-wrap:wrap}.line-jpg-btn{margin-left:auto;white-space:nowrap}.overall-table th:nth-child(2),.overall-table td:nth-child(2),.overall-table th:nth-child(3),.overall-table td:nth-child(3){text-align:right}.overall-table .overall-percent{font-size:15px;font-weight:950;color:#146c2e;white-space:nowrap}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
+@media(max-width:650px){.line-jpg-btn{width:100%;margin-left:0}}
+
+/* ==========================================================
+   DEDICATED MOBILE APP UI — intentionally phone-sized at all
+   viewport widths so the mobile version is obvious on desktop.
+   ========================================================== */
+html{background:#dfe7f1;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+body.mobile-app{
+  margin:0;
+  min-width:280px;
+  overflow-x:hidden;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  background:linear-gradient(180deg,#dfe7f1,#edf2f7);
+  -webkit-tap-highlight-color:transparent;
+}
+.mobile-app .app{
+  width:100%;
+  max-width:460px;
+  min-height:100vh;
+  margin:0 auto;
+  padding:8px 8px calc(92px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,#f3f7fb 0%,#eef3f8 100%);
+  box-shadow:0 0 45px rgba(15,47,95,.16);
+}
+.mobile-app button,.mobile-app input,.mobile-app select{font:inherit;touch-action:manipulation}
+.mobile-app button:focus-visible,.mobile-app input:focus-visible,.mobile-app select:focus-visible{outline:3px solid rgba(40,85,217,.22);outline-offset:2px}
+
+/* Header */
+.mobile-app .topbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  padding:14px;
+  border-radius:17px;
+  background:linear-gradient(135deg,#0b2548,#123b70 64%,#1c548e);
+  box-shadow:0 12px 28px rgba(15,47,95,.22);
+}
+.mobile-app .topbar h1{font-size:20px;line-height:1.08;letter-spacing:-.025em}
+.mobile-app .subtitle{display:block;margin-top:4px;color:#bfd2ea;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.mobile-app .top-actions{display:grid;grid-template-columns:1fr;gap:6px;align-items:stretch}
+.mobile-app .badge{max-width:124px;padding:6px 8px;border-radius:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:9px}
+.mobile-app .btn{min-height:36px;padding:7px 9px;border-radius:9px;font-size:10px}
+
+/* Fixed bottom navigation */
+.mobile-app .tabs{
+  position:fixed;
+  z-index:100;
+  left:50%;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  width:min(444px,calc(100vw - 16px));
+  margin:0;
+  padding:6px;
+  border:1px solid rgba(203,216,231,.95);
+  border-radius:18px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 14px 36px rgba(15,47,95,.2);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.mobile-app .tab{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:48px;
+  padding:7px 10px;
+  border-radius:13px;
+  font-size:11px;
+}
+.mobile-app .tab-icon{font-size:17px;line-height:1}
+.mobile-app .tab.active{background:#eaf1f9;color:#0f2f5f;box-shadow:none}
+
+/* Panels and sections */
+.mobile-app .panel{padding-top:9px}
+.mobile-app .section{
+  margin-bottom:10px;
+  padding:13px;
+  border-radius:16px;
+  box-shadow:0 7px 20px rgba(15,47,95,.07);
+}
+.mobile-app .section-head{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:11px}
+.mobile-app .section-head h2{font-size:16px;line-height:1.22}
+.mobile-app .section-head small{display:block;margin-top:3px;font-size:9px;line-height:1.4}
+
+/* Dashboard cards */
+.mobile-app .metrics,.mobile-app .empty-activity-row,.mobile-app .lines{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mobile-app .metric,.mobile-app .empty-activity-row .metric{min-width:0;padding:11px 9px;border-radius:13px}
+.mobile-app .metric span,.mobile-app .empty-activity-row .metric span{min-height:22px;font-size:8px;line-height:1.3;letter-spacing:.04em}
+.mobile-app .metric strong,.mobile-app .empty-activity-row .metric strong{margin-top:5px;font-size:27px}
+.mobile-app .metric small{font-size:8px}
+.mobile-app .activity-group{margin-top:11px;padding-top:11px}
+.mobile-app .activity-label{margin-bottom:7px;font-size:8px}
+.mobile-app .loaded-activity-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:none}
+.mobile-app .loaded-activity-row .metric{padding:10px 5px;text-align:center}
+.mobile-app .loaded-activity-row .metric span{min-height:30px;font-size:7px}
+.mobile-app .loaded-activity-row .metric strong{font-size:21px}
+
+/* Utilization */
+.mobile-app .util-grid{grid-template-columns:1fr;gap:8px}
+.mobile-app .util-card{padding:13px;border-radius:14px}
+.mobile-app .util-top{align-items:center}
+.mobile-app .util-count{font-size:23px}
+.mobile-app .util-percent{font-size:24px}
+.mobile-app .progress{height:10px;margin-top:10px}
+.mobile-app .util-note{font-size:8px;line-height:1.35}
+.mobile-app .footnote{font-size:8px;line-height:1.4}
+
+/* Shipping line summary cards */
+.mobile-app .line-card{min-width:0;padding:11px;border-radius:13px}
+.mobile-app .line-card .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
+.mobile-app .line-card .count-row{gap:5px}
+.mobile-app .line-card .count{font-size:24px}
+.mobile-app .line-card .inventory-share{padding:3px 5px;font-size:8px}
+.mobile-app .line-card small{font-size:8px}
+
+/* Inventory distribution */
+.mobile-app .distribution-section{padding:13px}
+.mobile-app .distribution-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px}
+.mobile-app .distribution-total{padding:7px 8px;border-radius:10px}
+.mobile-app .distribution-total span{display:none}
+.mobile-app .distribution-total strong{font-size:17px}
+.mobile-app .distribution-chart{height:350px;border-radius:13px}
+.mobile-app .distribution-legend{justify-content:flex-start;flex-wrap:wrap;gap:11px;margin-top:8px;font-size:8px}
+.mobile-app .distribution-legend i{width:8px;height:8px}
+
+/* Report top controls */
+.mobile-app .report-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:6px}
+.mobile-app .report-actions .action-btn{width:100%;min-height:40px;padding:7px 6px;font-size:9px}
+.mobile-app #reportPanel>.section:first-child .controls{display:grid!important;grid-template-columns:1fr;align-items:stretch!important;gap:9px}
+.mobile-app .report-switch{display:grid;grid-template-columns:repeat(3,1fr);width:100%;padding:4px}
+.mobile-app .report-switch button{min-height:40px;min-width:0;padding:7px 3px;font-size:9px}
+.mobile-app #reportPanel>.section:first-child .field,.mobile-app #reportPanel>.section:first-child input{width:100%}
+.mobile-app .field input,.mobile-app .field select{width:100%;min-height:44px;padding:8px 10px;font-size:16px}
+.mobile-app .field label{font-size:8px}
+.mobile-app .report-heading{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 7px;margin-top:10px;padding-top:10px;font-size:10px}
+.mobile-app .report-heading #reportGeneratedAt{grid-column:1/-1;margin-left:0;font-size:8px}
+.mobile-app .report-period{overflow-wrap:anywhere}
+
+/* Mobile report ordering and cards */
+.mobile-app .operational-sheet{padding:11px}
+.mobile-app .report-layout{display:flex;flex-direction:column;gap:11px}
+.mobile-app .report-layout>aside{order:-1;width:100%}
+.mobile-app .overall-card{position:static;border-radius:13px!important}
+.mobile-app .overall-title{padding:11px 12px;font-size:11px}
+.mobile-app .overall-table{width:100%;min-width:0;table-layout:fixed}
+.mobile-app .overall-table th,.mobile-app .overall-table td{padding:8px 6px;font-size:9px;overflow-wrap:anywhere}
+.mobile-app .overall-table th:first-child,.mobile-app .overall-table td:first-child{width:50%}
+.mobile-app .overall-table .overall-value{font-size:12px}
+.mobile-app .overall-table .overall-rate{font-size:15px}
+.mobile-app .overall-table .overall-percent{font-size:10px}
+.mobile-app .report-section-title{align-items:flex-start;margin-bottom:7px}
+.mobile-app .title-icon{flex:0 0 auto;width:31px;height:31px}
+.mobile-app .report-section-title h2{font-size:14px}
+.mobile-app .report-section-title small{font-size:8px}
+.mobile-app .report-filter-bar{display:grid;grid-template-columns:1fr;gap:7px;margin:7px 0 9px;padding:9px}
+.mobile-app .report-line-field{width:100%;min-width:0}
+.mobile-app .line-jpg-btn{width:100%;min-height:42px;margin:0;font-size:10px}
+.mobile-app .shipping-report-grid{grid-template-columns:1fr;gap:9px}
+.mobile-app .single-line-grid .line-report-card{width:100%;max-width:none;border-radius:13px}
+.mobile-app .line-report-date{padding:9px 10px;font-size:12px}
+.mobile-app .line-report-date .stamp{max-width:58%;font-size:8px;text-align:right}
+.mobile-app .line-report-table{width:100%;min-width:0;table-layout:fixed}
+.mobile-app .line-report-table th,.mobile-app .line-report-table td{padding:7px 3px;font-size:8px;line-height:1.25;overflow-wrap:anywhere}
+.mobile-app .line-report-table th{font-size:7px}
+.mobile-app .line-report-table .line-name{font-size:11px}
+.mobile-app .line-report-table .rate-pill{min-width:56px;padding:3px 5px}
+.mobile-app .utilization-value strong{display:block;margin-bottom:2px}
+.mobile-app .report-note{padding:8px 9px;font-size:8px;line-height:1.4}
+
+/* Charts and statuses */
+.mobile-app .report-availability-chart .chart{height:310px}
+.mobile-app .legend{flex-wrap:wrap;gap:10px;font-size:8px}
+.mobile-app .status{margin-top:7px;padding:8px 9px;border-radius:9px;font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+.mobile-app .extra-grid{grid-template-columns:1fr}
+.mobile-app .extra-item{padding:12px}
+.mobile-app .extra-item strong{font-size:20px}
+
+/* Keep hidden items hidden despite layout overrides */
+.mobile-app .hidden{display:none!important}
+
+@media(max-width:350px){
+  .mobile-app .app{padding-left:6px;padding-right:6px}
+  .mobile-app .topbar{grid-template-columns:1fr}
+  .mobile-app .top-actions{grid-template-columns:1fr 1fr;width:100%}
+  .mobile-app .badge{max-width:none}
+  .mobile-app .metric strong,.mobile-app .empty-activity-row .metric strong{font-size:23px}
+  .mobile-app .loaded-activity-row .metric strong{font-size:19px}
+  .mobile-app .distribution-chart{height:330px}
+}
+
+@media(min-width:461px){
+  body.mobile-app{padding-top:18px;padding-bottom:18px}
+  .mobile-app .app{min-height:calc(100vh - 36px);border-radius:26px}
+}
+
+@media print{
+  body.mobile-app{background:#fff;padding:0}
+  .mobile-app .app{max-width:none;padding:0;box-shadow:none;background:#fff}
+  .mobile-app .tabs{display:none!important}
+}
+
+</style>
+</head>
+<body class="mobile-app">
+<div class="app">
+<header class="topbar">
+  <div><h1>Yard Utilization</h1><div class="subtitle">Mobile Dashboard</div></div>
+  <div class="top-actions"><div id="connectionBadge" class="badge">Connecting…</div><button type="button" class="btn" onclick="refreshAll()">Refresh Now</button></div>
+</header>
+<nav class="tabs" aria-label="Mobile navigation">
+  <button type="button" id="summaryTab" class="tab active" onclick="showPanel('summary')" aria-label="Current Summary"><span class="tab-icon">⌂</span><span>Summary</span></button>
+  <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Reports"><span class="tab-icon">▦</span><span>Reports</span></button>
+</nav>
+
+<section id="summaryPanel" class="panel active">
+  <div class="section">
+    <div class="section-head"><div><h2>Latest Yard Activity</h2><small id="lastUpdated">Waiting for Firebase data…</small></div></div>
+    <div class="metrics empty-activity-row">
+      <div class="metric"><span>Empty In</span><strong id="incomingTotal">0</strong></div>
+      <div class="metric"><span>Empty Out</span><strong id="outgoingTotal">0</strong></div>
+      <div class="metric"><span>Available</span><strong id="availableEmptyTotal">0</strong></div>
+      <div class="metric"><span>Damage</span><strong id="damagedEmptyTotal">0</strong></div>
+      <div class="metric"><span>Approved</span><strong id="approvedTotal">0</strong></div>
+      <div class="metric"><span>Empty Inventory</span><strong id="inventoryTotal">0</strong></div>
+    </div>
+    <div class="activity-group">
+      <div class="activity-label">Loaded — HRD Export</div>
+      <div class="metrics loaded-activity-row">
+        <div class="metric"><span>Loaded Incoming</span><strong id="loadedIncomingTotal">0</strong></div>
+        <div class="metric"><span>Loaded Outgoing</span><strong id="loadedOutgoingTotal">0</strong></div>
+        <div class="metric"><span>Loaded Inventory</span><strong id="loadedInventoryTotal">0</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-head"><div><h2>Yard Utilization</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small></div></div>
+    <div class="util-grid">
+      <div class="util-card">
+        <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 700</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
+        <div class="progress"><div id="cez1Bar"></div></div>
+        <div class="util-note"><span>Occupied empty + loaded slots</span><span>Capacity: 700</span></div>
+      </div>
+      <div class="util-card">
+        <div class="util-top"><div><div class="util-title">Enlin</div><div id="cez2Count" class="util-count">0 / 1,100</div></div><div id="cez2Percent" class="util-percent">0.00%</div></div>
+        <div class="progress"><div id="cez2Bar"></div></div>
+        <div class="util-note"><span>Occupied empty-container slots</span><span>Capacity: 1,100</span></div>
+      </div>
+    </div>
+    <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
+  </div>
+  <div class="section">
+    <div class="section-head"><div><h2>Inventory by Shipping Line</h2><small>Empty inventory per selected shipping line, plus HRD Export Loaded Inventory and grand total</small></div></div>
+    <div id="shippingLineCards" class="lines"></div>
+  </div>
+  <div class="section distribution-section">
+    <div class="section-head distribution-head">
+      <div class="section-head-copy"><h2>Inventory Distribution</h2><small>Current inventory share of each shipping line based on Total Inventory = 100%</small></div>
+      <div class="distribution-total"><span>Total Inventory</span><strong id="distributionGrandTotal">0</strong></div>
+    </div>
+    <div class="chart distribution-chart"><canvas id="distributionChart"></canvas></div>
+    <div class="distribution-legend"><span><i></i>Empty Inventory</span><span class="loaded"><i></i>Loaded Inventory</span></div>
+  </div>
+  <div id="summaryStatus" class="status">Connecting to Firebase…</div>
+</section>
+
+<section id="reportPanel" class="panel">
+  <div class="section">
+    <div class="section-head">
+      <div><h2>Yard Operational Report</h2><small id="reportSubtitle">Dynamic report based only on fields available in Firebase</small></div>
+      <div class="report-actions"><button type="button" class="action-btn" onclick="exportReportCsv()">Export CSV</button><button type="button" class="action-btn" onclick="window.print()">Print / PDF</button></div>
+    </div>
+    <div class="controls" style="justify-content:space-between;align-items:center">
+      <div class="report-switch"><button type="button" id="dailyMode" class="active" onclick="setReportMode('daily')">Daily</button><button type="button" id="weeklyMode" onclick="setReportMode('weekly')">Weekly</button><button type="button" id="monthlyMode" onclick="setReportMode('monthly')">Monthly</button></div>
+      <div class="field"><label>Reference Date</label><input id="reportDate" type="date" onchange="renderReport()"></div>
+    </div>
+    <div class="report-heading"><strong>Date:</strong><span id="reportPeriod" class="report-period">—</span><span id="reportGeneratedAt">—</span></div>
+  </div>
+
+
+  <div class="section operational-sheet">
+    <div class="report-layout">
+      <div>
+        <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2><small>Select one shipping line to view</small></div></div>
+        <div class="report-filter-bar">
+          <div class="field report-line-field"><label for="reportLineFilter">Shipping Line</label><select id="reportLineFilter" onchange="renderSelectedShippingLine()"></select></div>
+          <button type="button" class="action-btn primary line-jpg-btn" onclick="downloadSelectedLineJpg()">Download Table JPG</button>
+        </div>
+        <div id="shippingLineReportTables" class="shipping-report-grid single-line-grid"></div>
+      </div>
+      <aside>
+        <div class="overall-card">
+          <div class="overall-title"><span>▥</span> Overall Summary</div>
+          <table class="overall-table"><thead><tr><th>Item</th><th>Value</th><th>%</th></tr></thead><tbody id="overallReportBody"></tbody></table>
+        </div>
+      </aside>
+    </div>
+    <div id="reportDataNote" class="footnote report-note"></div>
+  </div>
+
+  <div id="reportExtraSection" class="section hidden">
+    <div class="section-head"><div><h2>Operational Information</h2><small>Only Firebase fields with saved values are shown</small></div></div>
+    <div id="reportExtraGrid" class="extra-grid"></div>
+  </div>
+
+  <div class="section report-availability-chart">
+    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2><small>Available and damaged empty-container totals for all shipping lines in the selected period</small></div></div>
+    <div class="chart"><canvas id="reportChart"></canvas></div>
+    <div class="legend"><span class="available">Available</span><span class="damage">Damage</span></div>
+  </div>
+  <div id="reportStatus" class="status">Open this tab to generate a report.</div>
+</section>
+</div>
+<script>
+const FIREBASE_BASE='https://yardutilization-default-rtdb.asia-southeast1.firebasedatabase.app';
+const ROOT='irsDailyData';
+const REQUIRED_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','EVG'];
+// UI label and Firebase client key are intentionally separate.
+// CMA is display-only; its Firebase data remains under APL.
+const FIREBASE_LINE_KEY={'CMA':'APL'};
+let INCLUDED_LINES=REQUIRED_LINES.slice();
+const REFRESH_MS=30000;
+let latestData=null,historyData={},reportMode='daily',lastReportRows=[],preparedReportRows=[],reportPeriodLabel='—',reportOverallUtilization={bacaoOccupied:0,enlinOccupied:0,bacaoPct:0,enlinPct:0};
+const $=id=>document.getElementById(id);
+const num=v=>Number(v)||0;
+const fmt=v=>num(v).toLocaleString();
+function showPanel(name){for(const n of ['summary','report']){$(n+'Panel').classList.toggle('active',name===n);$(n+'Tab').classList.toggle('active',name===n);}if(name==='report'&&!Object.keys(historyData).length)loadHistory();else if(name==='report')renderReport();}
+function setStatus(id,text,error=false){const el=$(id);el.textContent=text;el.className='status '+(error?'error':'ok');}
+function setConnection(ok,text){const el=$('connectionBadge');el.textContent=text;el.className='badge '+(ok?'online':'error');}
+async function getJson(path){const r=await fetch(`${FIREBASE_BASE}/${path}.json?ts=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error(`Firebase HTTP ${r.status}`);return r.json();}
+async function readWithFallback(name){let data=await getJson(`${ROOT}/${name}`);if(data==null)data=await getJson(name);return data;}
+async function readLatestData(){
+  // Firebase keys are case-sensitive. Check the exact Empty branch first.
+  const paths=[`${ROOT}/Latest`,'Latest',`${ROOT}/latest`,'latest',`${ROOT}/Lates`,'Lates',`${ROOT}/lates`,'lates'];
+  for(const path of paths){
+    try{const data=await getJson(path);if(data!=null)return data;}catch(error){}
+  }
+  return null;
+}
+async function readLatestInventoryRecords(){
+  // Exact source requested for Total Available, Damage and Approved:
+  // Latest -> Inventory -> Records.
+  const paths=[
+    `${ROOT}/Latest/Inventory/Records`,
+    'Latest/Inventory/Records',
+    `${ROOT}/Latest/Inventory/records`,
+    'Latest/Inventory/records',
+    `${ROOT}/latest/Inventory/Records`,
+    'latest/Inventory/Records',
+    `${ROOT}/Latest/inventory/records`,
+    'Latest/inventory/records',
+    `${ROOT}/latest/inventory/records`,
+    'latest/inventory/records'
+  ];
+  for(const path of paths){
+    try{
+      const data=await getJson(path);
+      if(data!=null&&typeof data==='object')return data;
+    }catch(error){}
+  }
+  return null;
+}
+function normalizedKey(value){return String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function firebaseLineKey(line){return FIREBASE_LINE_KEY[String(line||'').toUpperCase()]||line;}
+function sourceValueForLine(source,line){
+  if(!source||typeof source!=='object')return undefined;
+  const primary=firebaseLineKey(line);
+  const wanted=[primary,primary?.replace?.(/\s+/g,'_'),primary?.replace?.(/\s+/g,'')].map(normalizedKey);
+  for(const [key,value] of Object.entries(source)){if(wanted.includes(normalizedKey(key)))return value;}
+  return undefined;
+}
+function valueByKey(node,names){
+  if(!node||typeof node!=='object')return undefined;
+  const wanted=names.map(normalizedKey);
+  for(const [key,value] of Object.entries(node)){if(wanted.includes(normalizedKey(key)))return value;}
+  return undefined;
+}
+function numericValue(value){
+  if(value&&typeof value==='object')value=value.total??value.count??value.qty??value.quantity??value.value??value.inventory;
+  if(typeof value==='string')value=value.replace(/,/g,'').trim();
+  return num(value);
+}
+async function readLatestOutgoingRecords(){
+  // Exact repaired-outgoing source. Support capitalization variants and the
+  // historical "Lates" spelling used by some Firebase exports.
+  const paths=[
+    `${ROOT}/Latest/Outgoing/Records`,'Latest/Outgoing/Records',
+    `${ROOT}/Latest/Outgoing/records`,'Latest/Outgoing/records',
+    `${ROOT}/Latest/outgoing/Records`,'Latest/outgoing/Records',
+    `${ROOT}/Latest/outgoing/records`,'Latest/outgoing/records',
+    `${ROOT}/Lates/Outgoing/Records`,'Lates/Outgoing/Records',
+    `${ROOT}/Lates/Outgoing/records`,'Lates/Outgoing/records',
+    `${ROOT}/lates/outgoing/Records`,'lates/outgoing/Records',
+    `${ROOT}/lates/outgoing/records`,'lates/outgoing/records',
+    `${ROOT}/Latest/Out/Records`,'Latest/Out/Records',
+    `${ROOT}/latest/out/records`,'latest/out/records'
+  ];
+  for(const path of paths){
+    try{
+      const data=await getJson(path);
+      if(data!==null&&data!==undefined&&typeof data==='object')return data;
+    }catch(error){}
+  }
+  return null;
+}
+
+async function readLoadedTotals(){
+  // HRD Export is saved separately from the Empty data. The actual Firebase
+  // branch is commonly named "Lates", so check it first, then legacy variants.
+  const paths=[
+    `${ROOT}/Lates/Loaded/Totals`,
+    'Lates/Loaded/Totals',
+    `${ROOT}/lates/loaded/totals`,
+    'lates/loaded/totals',
+    `${ROOT}/Latest/Loaded/Totals`,
+    'Latest/Loaded/Totals',
+    `${ROOT}/latest/Loaded/Totals`,
+    'latest/Loaded/Totals',
+    `${ROOT}/latest/loaded/totals`,
+    'latest/loaded/totals'
+  ];
+  for(const path of paths){
+    try{
+      const data=await getJson(path);
+      if(data&&typeof data==='object')return data;
+    }catch(error){}
+  }
+  return null;
+}
+function getLoadedTotals(record){
+  if(record?.__loadedTotals&&typeof record.__loadedTotals==='object')return record.__loadedTotals;
+  const lates=valueByKey(record,['Lates','Latest']);
+  const loaded=valueByKey(lates,['Loaded'])||valueByKey(record,['Loaded']);
+  return valueByKey(loaded,['Totals','Total'])||{};
+}
+function getLoadedActivity(record){
+  const totals=getLoadedTotals(record);
+  const incoming=valueByKey(totals,['Incoming','Loaded Incoming','Incoming Total','Total Incoming','In']);
+  const outgoing=valueByKey(totals,['Outgoing','Loaded Outgoing','Outgoing Total','Total Outgoing','Out']);
+  const inventory=valueByKey(totals,['Inventory','Loaded Inventory','Inventory Total','Total Inventory']);
+  return{
+    incoming:numericValue(incoming),
+    outgoing:numericValue(outgoing),
+    inventory:numericValue(inventory)
+  };
+}
+function inventoryRecordIdentity(row){
+  const raw=row?.containerNo??row?.ContainerNo??row?.CONTAINER_NO??row?.containerNumber??row?.ContainerNumber??
+    row?.container_number??row?.unitNo??row?.UnitNo??row?.equipmentNo??row?.EquipmentNo??row?.id??row?.ID;
+  const key=String(raw??'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return key;
+}
+function getByLine(record){
+  const source=record?.inventory?.byShippingLine||record?.inventoryByShippingLine||record?.byShippingLine||{};
+  const out=Object.fromEntries(INCLUDED_LINES.map(line=>[line,0]));
+  // Direct totals use the actual Firebase key. For the CMA UI card,
+  // this explicitly reads APL instead of looking for a CMA branch.
+  const directByUiLine=Object.fromEntries(INCLUDED_LINES.map(line=>{
+    const value=sourceValueForLine(source,line);
+    return [line,value===undefined?undefined:numericValue(value)];
+  }));
+
+  // Primary source: Latest -> Inventory -> Records.
+  // Count only real Empty inventory rows whose Status is Available or
+  // For Repair R.E. Do not add any manual +1 and do not infer totals from
+  // an array index or a metadata/summary row.
+  const rows=inventoryRecords(record);
+  const recordCounts=Object.fromEntries(INCLUDED_LINES.map(line=>[line,0]));
+  rows.forEach(row=>{
+    const category=statusCategory(row);
+    if(category!=='available'&&category!=='damage')return;
+    const line=recordLine(row);
+    if(line in recordCounts)recordCounts[line]++;
+  });
+
+  // Use the exact record counts whenever Inventory Records are available.
+  // The older precomputed byShippingLine values are fallback only because
+  // some of them contain an unwanted extra +1.
+  for(const line of INCLUDED_LINES){
+    const direct=directByUiLine[line];
+    out[line]=rows.length?recordCounts[line]:(direct!==undefined?direct:0);
+  }
+  return out;
+}
+function selectedInventory(record){
+  const rows=inventoryRecords(record);
+  if(rows.length){
+    return rows.reduce((total,row)=>{
+      const category=statusCategory(row);
+      return total+((category==='available'||category==='damage')?1:0);
+    },0);
+  }
+  return Object.values(getByLine(record)).reduce((a,b)=>a+b,0);
+}
+function inventoryRecords(record){
+  // Primary source for the Latest Yard Activity:
+  // Latest -> Inventory -> Records -> [record index].
+  // Return every object under Records so Status can be read directly even
+  // when a row has no shipping-line or container identity field.
+  const exactRecords=record?.__inventoryRecords??record?.Latest?.Inventory?.Records??record?.latest?.Inventory?.Records;
+  if(Array.isArray(exactRecords))return exactRecords.filter(x=>x&&typeof x==='object');
+  if(exactRecords&&typeof exactRecords==='object')return Object.values(exactRecords).filter(x=>x&&typeof x==='object');
+
+  // Compatibility fallbacks for historical or older layouts.
+  const directCandidates=[
+    record?.inventory?.records, record?.inventory?.Records,
+    record?.Inventory?.records, record?.Inventory?.Records,
+    record?.Latest?.Inventory?.Records, record?.Latest?.Inventory?.records,
+    record?.latest?.Inventory?.Records, record?.latest?.inventory?.records,
+    record?.inventoryRecords, record?.InventoryRecords,
+    record?.agingInventory?.records, record?.AgingInventory?.records,
+    record?.aging_inventory?.records, record?.agingInventory,
+    record?.AgingInventory, record?.inventory?.items, record?.Inventory?.items,
+    record?.inventory, record?.Inventory, record?.aging_inventory, record?.stock, record?.Stock
+  ];
+  for(const candidate of directCandidates){
+    if(Array.isArray(candidate)&&candidate.length)return candidate.filter(x=>x&&typeof x==='object');
+    if(candidate&&typeof candidate==='object'){
+      const vals=Object.values(candidate).filter(x=>x&&typeof x==='object');
+      if(vals.length&&vals.some(looksLikeInventoryRow))return vals;
+    }
+  }
+
+  const rows=[],seen=new Set();
+  function walk(node,path='',inventoryContext=false){
+    if(!node||typeof node!=='object')return;
+    const pathText=path.toLowerCase();
+    if(/(?:incoming|outgoing|movement|gate.?in|gate.?out|received|pullout|release)/i.test(pathText) && !/inventory|aging/i.test(pathText))return;
+    const context=inventoryContext||/(?:inventory|aging|yard.?stock|container.?stock)/i.test(pathText);
+    if(looksLikeInventoryRow(node)&&(context||hasInventoryIdentity(node))){
+      const sig=String(node.id??node.key??node.containerNo??node.containerNumber??node.ContainerNo??node.ContainerNumber??JSON.stringify(node));
+      if(!seen.has(sig)){seen.add(sig);rows.push(node);}return;
+    }
+    for(const [key,value] of Object.entries(node)){
+      if(value&&typeof value==='object')walk(value,path?path+'.'+key:key,context||/(?:inventory|aging|yard.?stock|container.?stock)/i.test(key));
+    }
+  }
+  walk(record);
+  return rows;
+}
+function fieldByPattern(row,patterns){
+  for(const [key,value] of Object.entries(row||{})){
+    if(value===undefined||value===null||String(value).trim()==='')continue;
+    if(patterns.some(rx=>rx.test(key)))return value;
+  }
+  return '';
+}
+function looksLikeInventoryRow(row){
+  if(!row||typeof row!=='object'||Array.isArray(row))return false;
+  const keys=Object.keys(row).join(' ').toLowerCase();
+  return /status|condition/.test(keys)&&/(client|shipping|line|carrier|operator|container|equipment|unit|box)/.test(keys);
+}
+function hasInventoryIdentity(row){
+  const keys=Object.keys(row||{}).join(' ').toLowerCase();
+  return /(container|client|shipping|carrier|operator)/.test(keys);
+}
+function normalizeLocation(value){return String(value||'').trim().toUpperCase().replace(/[_\s]+/g,'-').replace(/-+/g,'-');}
+function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
+function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation??fieldByPattern(row,[/location/i,/yard/i,/site/i]));if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
+function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/700*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 700`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s). Enlin: ${fmt(cez2)} empty container slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
+function getIncoming(record){return num(record?.totals?.incoming??record?.incoming?.total??record?.incoming);}
+function getOutgoing(record){return num(record?.totals?.outgoing??record?.outgoing?.total??record?.outgoing);}
+function normalizeLine(value){
+  const v=String(value||'').trim().toUpperCase().replace(/[_.-]+/g,' ').replace(/[^A-Z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+  if(v==='WANHAI'||v==='WAN HAI LINES'||v==='WAN HAI LINE')return'WAN HAI';
+  if(v==='APL'||v==='CMA'||v==='CMA CGM'||v==='CMA CGM GROUP')return'CMA';
+  if(v==='EVERGREEN'||v==='EVER GREEN'||v==='EVERGREEN MARINE'||v==='EVERGREEN MARINE CORP')return'EVG';
+  if(v==='OCEAN NETWORK EXPRESS')return'ONE';
+  if(v==='ORIENT OVERSEAS CONTAINER LINE'||v==='ORIENT OVERSEAS')return'OOCL';
+  if(v==='MAERSK LINE'||v==='MAERSK LINES')return'MAERSK';
+  return v;
+} // CMA is display-only; Firebase APL data remains mapped to CMA.
+function allRecordRows(record){const groups=[inventoryRecords(record),movementRows(record,'incoming'),movementRows(record,'outgoing')];const rows=[],seen=new Set();for(const group of groups){for(const row of group){if(!row||typeof row!=='object')continue;const key=row.id??row.key??row.containerNo??row.containerNumber??row.ContainerNo??row.ContainerNumber??null;if(key!=null){const sig=String(key);if(seen.has(sig))continue;seen.add(sig);}rows.push(row);}}return rows;}
+function remarksText(value){
+  if(value===undefined||value===null)return '';
+  if(Array.isArray(value))return value.map(remarksText).filter(Boolean).join(' ');
+  if(typeof value==='object')return Object.values(value).map(remarksText).filter(Boolean).join(' ');
+  return String(value);
+}
+function normalizeRemarks(value){return remarksText(value).toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
+function isCancelledRepairRemark(value){
+  // Exclude only an explicitly cancelled REPAIR. Remarks such as
+  // "REPAIRED 7/29 ... CANCELLED WW" mean the washing was cancelled,
+  // not the completed repair, and must remain counted as Repaired.
+  const text=normalizeRemarks(value);
+  return /\b(?:cancel(?:led|ed)?\s+(?:the\s+)?repair(?:ed)?|repair(?:ed)?\s+(?:(?:is|was)\s+)?cancel(?:led|ed)?)\b/.test(text);
+}
+function recordRemarks(row){
+  // Exact source: Latest -> Inventory -> Records -> [index] -> Remarks.
+  // Count each inventory record once when its Remarks contains the word Approved.
+  return valueByKey(row,['Remarks']);
+}
+function getApprovedTotal(record){
+  let approved=0;
+  for(const row of inventoryRecords(record)){
+    const remarks=normalizeRemarks(recordRemarks(row));
+    if(/\bapproved\b/.test(remarks))approved++;
+  }
+  return approved;
+}
+function getRepairCounts(record){let repaired=0;for(const row of inventoryRecords(record)){const rawRemarks=recordRemarks(row);const remarks=normalizeRemarks(rawRemarks);if(!remarks)continue;if(/\brepaired\b/.test(remarks)&&!isCancelledRepairRemark(rawRemarks))repaired++;}return{approved:getApprovedTotal(record),repaired};}
+function repairRate(approved,repaired){return approved>0?repaired/approved*100:0;}
+function movementRows(record,type){
+  const title=type.charAt(0).toUpperCase()+type.slice(1);
+  const lowerBlock=record?.[type];
+  const titleBlock=record?.[title];
+  const latestLower=record?.latest?.[type]??record?.Latest?.[type]??record?.Lates?.[type]??record?.lates?.[type];
+  const latestTitle=record?.latest?.[title]??record?.Latest?.[title]??record?.Lates?.[title]??record?.lates?.[title];
+  const exactInjected=type==='outgoing'?record?.__outgoingRecords:(type==='incoming'?record?.__incomingRecords:null);
+  const outAlias=type==='outgoing'?(record?.Out??record?.out??record?.Latest?.Out??record?.Lates?.Out):null;
+  const candidates=[
+    exactInjected,
+    lowerBlock?.records,lowerBlock?.Records,lowerBlock?.items,lowerBlock?.Items,
+    titleBlock?.records,titleBlock?.Records,titleBlock?.items,titleBlock?.Items,
+    latestLower?.records,latestLower?.Records,latestLower?.items,latestLower?.Items,
+    latestTitle?.records,latestTitle?.Records,latestTitle?.items,latestTitle?.Items,
+    outAlias?.records,outAlias?.Records,outAlias?.items,outAlias?.Items,
+    record?.[type+'Records'],record?.[title+'Records'],
+    record?.movements?.[type],record?.movements?.[title],
+    record?.Movements?.[type],record?.Movements?.[title],
+    record?.[type+'Data'],record?.[title+'Data'],
+    Array.isArray(lowerBlock)?lowerBlock:null,
+    Array.isArray(titleBlock)?titleBlock:null
+  ];
+  const rows=[];
+  const seenObjects=new Set();
+  const seenSignatures=new Set();
+  function addCandidate(candidate){
+    if(!candidate||typeof candidate!=='object')return;
+    const values=Array.isArray(candidate)?candidate:Object.values(candidate);
+    for(const row of values){
+      if(!row||typeof row!=='object'||Array.isArray(row))continue;
+      if(seenObjects.has(row))continue;
+      seenObjects.add(row);
+      const identity=recordContainerIdentity(row);
+      const remarks=normalizeRemarks(row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??'');
+      const line=recordLine(row);
+      const date=String(row?.Date??row?.date??row?.TransactionDate??row?.transactionDate??'');
+      const sig=identity?`${identity}|${line}|${remarks}|${date}`:JSON.stringify(row);
+      if(seenSignatures.has(sig))continue;
+      seenSignatures.add(sig);
+      rows.push(row);
+    }
+  }
+  candidates.forEach(addCandidate);
+  if(rows.length)return rows;
+
+  // Recursive fallback for exports where Outgoing/Incoming Records are wrapped
+  // in an extra object level.
+  const wanted=type==='outgoing'?/(?:^|[./_ -])(outgoing|out)(?:$|[./_ -])/i:/(?:^|[./_ -])incoming(?:$|[./_ -])/i;
+  function walk(node,path=''){
+    if(!node||typeof node!=='object')return;
+    for(const [key,value] of Object.entries(node)){
+      if(!value||typeof value!=='object')continue;
+      const next=path?`${path}.${key}`:key;
+      if(wanted.test(next)&&/^(records|items)$/i.test(key))addCandidate(value);
+      walk(value,next);
+    }
+  }
+  walk(record);
+  return rows;
+}
+function getMovementByLine(record,type){const block=record?.[type];const direct=block?.byShippingLine||record?.[type+'ByShippingLine']||record?.totals?.[type+'ByShippingLine']||record?.movementByShippingLine?.[type]||{};const out=Object.fromEntries(INCLUDED_LINES.map(x=>[x,0]));let found=false;for(const line of INCLUDED_LINES){const val=sourceValueForLine(direct,line);if(val!==undefined){out[line]=num(typeof val==='object'?(val.total??val.count??val.qty):val);found=true;}}
+for(const row of movementRows(record,type)){const line=normalizeLine(row?.Client??row?.client??row?.CLIENT??row?.shippingLine??row?.shipping_line??row?.line??row?.carrier??row?.operator??row?.ShippingLine);if(!(line in out))continue;const q=num(row?.quantity??row?.qty??row?.count??row?.total??1);out[line]+=q||1;found=true;}return{values:out,found};}
+function share(value,totalMovement){return totalMovement>0?value/totalMovement*100:0;}
+function isoLocal(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10);}
+function parseLocal(s){const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);}
+function reportRange(){const base=parseLocal($('reportDate').value||isoLocal(new Date()));let start=new Date(base),end=new Date(base);if(reportMode==='weekly'){const day=(base.getDay()+6)%7;start.setDate(base.getDate()-day);end=new Date(start);end.setDate(start.getDate()+6);}else if(reportMode==='monthly'){start=new Date(base.getFullYear(),base.getMonth(),1);end=new Date(base.getFullYear(),base.getMonth()+1,0);}return{start:isoLocal(start),end:isoLocal(end)};}
+function setReportMode(mode){reportMode=mode;for(const m of ['daily','weekly','monthly'])$(m+'Mode').classList.toggle('active',m===mode);renderReport();}
+function objectLines(obj){return obj&&typeof obj==='object'?Object.keys(obj).map(normalizeLine).filter(Boolean):[];}
+function discoverLines(records){const set=new Set();for(const {record} of records){const sources=[record?.inventory?.byShippingLine,record?.inventoryByShippingLine,record?.byShippingLine,record?.incoming?.byShippingLine,record?.outgoing?.byShippingLine,record?.incomingByShippingLine,record?.outgoingByShippingLine];sources.forEach(x=>objectLines(x).forEach(v=>set.add(v)));for(const row of inventoryRecords(record)){const v=recordLine(row);if(v)set.add(v);}for(const type of ['incoming','outgoing'])for(const row of movementRows(record,type)){const v=recordLine(row);if(v)set.add(v);}}return [...set].sort();}
+function recordStatus(row){
+  // Exact source: Latest -> Inventory -> Records -> [index] -> Status.
+  // Firebase keys are case-sensitive, but tolerate capitalization variants.
+  const value=valueByKey(row,['Status']);
+  if(value===undefined||value===null)return '';
+  if(typeof value==='object'){
+    const nested=value.value??value.label??value.name??value.text??value.status??value.condition;
+    return nested===undefined?Object.values(value).join(' '):nested;
+  }
+  return value;
+}
+function statusCategory(row){
+  // Use the exact Status field from each Inventory record.
+  // Condition is retained only as a compatibility fallback for older records.
+  let raw=recordStatus(row);
+  if(String(raw??'').trim()==='')raw=valueByKey(row,['Condition']);
+
+  const text=String(raw??'')
+    .toLowerCase()
+    .replace(/[._-]+/g,' ')
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+
+  if(!text)return 'unknown';
+  if(text==='available'||text==='avail'||text==='av'||text.startsWith('available '))return 'available';
+  if(
+    text==='damaged'||text==='damage'||text.startsWith('damaged ')||text.startsWith('damage ')||
+    /^for repair r e(?:\b|$)/.test(text)||/^for repair re(?:\b|$)/.test(text)||
+    /^for box r e(?:\b|$)/.test(text)||/^for box re(?:\b|$)/.test(text)
+  )return 'damage';
+  return 'unknown';
+}
+function getEmptyStatusTotals(record){
+  let available=0,damage=0;
+  const rows=inventoryRecords(record);
+  for(const row of rows){
+    // Count every Empty record in Latest -> Inventory -> Records using its Status field.
+    // Do not exclude a row merely because its shipping-line label is absent
+    // from the dashboard's selected-line list.
+    const category=statusCategory(row);
+    if(category==='available')available++;
+    else if(category==='damage')damage++;
+  }
+  return{available,damage};
+}
+function recordLine(row){
+  const direct=row?.Client??row?.client??row?.CLIENT??row?.clientName??row?.ClientName??
+    row?.shippingLine??row?.ShippingLine??row?.SHIPPING_LINE??row?.shipping_line??
+    row?.line??row?.Line??row?.carrier??row?.Carrier??row?.operator??row?.Operator;
+  return normalizeLine(direct||fieldByPattern(row,[/^client/i,/shipping.*line/i,/^line$/i,/carrier/i,/operator/i]));
+}
+
+function recordContainerIdentity(row){
+  const direct=row?.containerNo??row?.containerNumber??row?.ContainerNo??row?.ContainerNumber??
+    row?.container_no??row?.container_id??row?.ContainerID??row?.container??row?.Container??
+    row?.CONTAINER??row?.equipmentNo??row?.EquipmentNo??row?.equipment??row?.Equipment??
+    row?.unitNo??row?.UnitNo??row?.unit??row?.Unit??row?.boxNo??row?.BoxNo??row?.box??row?.Box??
+    row?.containerNumberText??row?.ContainerNumberText??row?.id??row?.ID??row?.key;
+  const fallback=fieldByPattern(row,[
+    /^container$/i,/container.*(?:no|number|id|code|#)/i,
+    /^equipment$/i,/equipment.*(?:no|number|id|code|#)/i,
+    /^unit$/i,/unit.*(?:no|number|id|code|#)/i,
+    /^box$/i,/box.*(?:no|number|id|code|#)/i
+  ]);
+  return String(direct??fallback??'').trim().toUpperCase().replace(/\s+/g,'');
+}
+function repairIsoDate(year,month,day){
+  year=Number(year);month=Number(month);day=Number(day);
+  if(year<100)year+=year>=70?1900:2000;
+  const date=new Date(year,month-1,day);
+  if(date.getFullYear()!==year||date.getMonth()!==month-1||date.getDate()!==day)return '';
+  return isoLocal(date);
+}
+function parseRepairDateText(text,defaultYear){
+  const value=String(text||'').replace(/(\d)(st|nd|rd|th)\b/ig,'$1');
+  const monthNames={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+  const monthToken='jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+  // Check D-MMM-Y before MMM-D-Y so 29-Jul-26 is not truncated to Jul-26.
+  let match=value.match(new RegExp(`\\b(\\d{1,2})[\\s./-]+(${monthToken})(?:[\\s,./-]+(\\d{2,4}))?\\b`,'i'));
+  if(match)return repairIsoDate(match[3]||defaultYear,monthNames[match[2].toLowerCase().replace(/\.$/,'')],match[1]);
+  match=value.match(new RegExp(`\\b(${monthToken})[\\s./-]+(\\d{1,2})(?:[\\s,./-]+(\\d{2,4}))?\\b`,'i'));
+  if(match)return repairIsoDate(match[3]||defaultYear,monthNames[match[1].toLowerCase().replace(/\.$/,'')],match[2]);
+  match=value.match(/\b(20\d{2}|19\d{2})\s*[\/. -]\s*(\d{1,2})\s*[\/. -]\s*(\d{1,2})\b/);
+  if(match)return repairIsoDate(match[1],match[2],match[3]);
+  match=value.match(/\b(\d{1,2})\s*[\/. -]\s*(\d{1,2})(?:\s*[\/. -]\s*(\d{2,4}))?\b/);
+  if(!match)return '';
+  let first=Number(match[1]),second=Number(match[2]);
+  let month=first,day=second;
+  if(first>12&&second<=12){day=first;month=second;}
+  return repairIsoDate(match[3]||defaultYear,month,day);
+}
+function repairedDatesFromRemarks(value,defaultYear=new Date().getFullYear()){
+  const raw=remarksText(value);
+  const repairedRx=/\b(?:repaired|repair\s+(?:done|completed|complete)|completed\s+repair)\b/ig;
+  if(!repairedRx.test(raw))return[];
+  repairedRx.lastIndex=0;
+  const dates=[];
+  let match;
+  while((match=repairedRx.exec(raw))){
+    const context=raw.slice(Math.max(0,match.index-55),Math.min(raw.length,match.index+match[0].length+90));
+    if(isCancelledRepairRemark(context))continue;
+    const after=raw.slice(match.index+match[0].length,Math.min(raw.length,match.index+match[0].length+80));
+    const before=raw.slice(Math.max(0,match.index-55),match.index);
+    let parsed=parseRepairDateText(after,defaultYear);
+    if(!parsed){
+      const possible=[...before.matchAll(/(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s.,/-]+\d{1,2}(?:[\s,./-]+\d{2,4})?|\d{1,2}[\s./-]+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:[\s,./-]+\d{2,4})?|(?:19|20)\d{2}\s*[\/. -]\s*\d{1,2}\s*[\/. -]\s*\d{1,2}|\d{1,2}\s*[\/. -]\s*\d{1,2}(?:\s*[\/. -]\s*\d{2,4})?/ig)];
+      if(possible.length)parsed=parseRepairDateText(possible[possible.length-1][0],defaultYear);
+    }
+    if(parsed)dates.push(parsed);
+  }
+  return [...new Set(dates)];
+}
+function repairContainerIdentity(row){
+  // Strict repaired deduplication identity: Container Number (or an explicit
+  // equipment/unit/box number used as the container identifier). Generic row
+  // IDs are intentionally excluded because they are not container numbers.
+  const direct=row?.containerNo??row?.containerNumber??row?.ContainerNo??row?.ContainerNumber??
+    row?.container_no??row?.container_number??row?.CONTAINER_NO??row?.CONTAINER_NUMBER??
+    row?.container??row?.Container??row?.CONTAINER??
+    row?.equipmentNo??row?.EquipmentNo??row?.equipmentNumber??row?.EquipmentNumber??
+    row?.unitNo??row?.UnitNo??row?.unitNumber??row?.UnitNumber??
+    row?.boxNo??row?.BoxNo??row?.boxNumber??row?.BoxNumber;
+  const fallback=fieldByPattern(row,[
+    /^container$/i,/container.*(?:no|number|id|code|#)/i,
+    /^(?:equipment|unit|box)$/i,/(?:equipment|unit|box).*(?:no|number|id|code|#)/i
+  ]);
+  return String(direct??fallback??'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+function recordCollection(node){
+  if(Array.isArray(node))return node.filter(row=>row&&typeof row==='object'&&!Array.isArray(row));
+  if(node&&typeof node==='object')return Object.values(node).filter(row=>row&&typeof row==='object'&&!Array.isArray(row));
+  return[];
+}
+function exactLatestRepairRows(type){
+  if(!latestData||typeof latestData!=='object')return[];
+  if(type==='inventory'){
+    // Exact Firebase source: Latest -> Inventory -> records/Records.
+    return recordCollection(
+      latestData.__inventoryRecords??
+      latestData?.Inventory?.records??latestData?.Inventory?.Records??
+      latestData?.inventory?.records??latestData?.inventory?.Records??
+      latestData?.Latest?.Inventory?.records??latestData?.Latest?.Inventory?.Records
+    );
+  }
+  // Exact Firebase source: Latest -> Outgoing -> records/Records.
+  return recordCollection(
+    latestData.__outgoingRecords??
+    latestData?.Outgoing?.records??latestData?.Outgoing?.Records??
+    latestData?.outgoing?.records??latestData?.outgoing?.Records??
+    latestData?.Latest?.Outgoing?.records??latestData?.Latest?.Outgoing?.Records
+  );
+}
+function exactHistoricalRepairRows(record,type){
+  if(!record||typeof record!=='object')return[];
+  const block=type==='inventory'
+    ?(record.Inventory??record.inventory)
+    :(record.Outgoing??record.outgoing);
+  // Exact Firebase source: records -> [date] -> Inventory/Outgoing -> Records.
+  return recordCollection(block?.Records??block?.records);
+}
+function repairedCountsForRange(start,end){
+  const counts={};
+  const defaultYear=new Date().getFullYear();
+  const sourceGroups=[];
+
+  // The repaired count is intentionally limited to these four Firebase sources:
+  // 1) Latest -> Outgoing -> records -> Remarks
+  // 2) Latest -> Inventory -> records -> Remarks
+  // 3) records -> [date] -> Outgoing -> Records -> Remarks
+  // 4) records -> [date] -> Inventory -> Records -> Remarks
+  sourceGroups.push(exactLatestRepairRows('outgoing'));
+  sourceGroups.push(exactLatestRepairRows('inventory'));
+  for(const record of Object.values(historyData||{})){
+    sourceGroups.push(exactHistoricalRepairRows(record,'outgoing'));
+    sourceGroups.push(exactHistoricalRepairRows(record,'inventory'));
+  }
+
+  // Build a shipping-line lookup first because Outgoing rows may no longer
+  // contain Client/Shipping Line after the container leaves Inventory.
+  const lineByContainer=new Map();
+  for(const rows of sourceGroups){
+    for(const row of rows){
+      const container=repairContainerIdentity(row);
+      const line=recordLine(row);
+      if(container&&line&&!lineByContainer.has(container))lineByContainer.set(container,line);
+    }
+  }
+
+  // Deduplication rule requested by the user: Container Number only.
+  // The same container found in any of the four sources is counted once in
+  // the selected Daily / Weekly / Monthly report period.
+  const seenContainers=new Set();
+  for(const rows of sourceGroups){
+    for(const row of rows){
+      const container=repairContainerIdentity(row);
+      if(!container||seenContainers.has(container))continue;
+      const remarks=row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??fieldByPattern(row,[/^remarks?$/i,/remark/i]);
+      const dates=repairedDatesFromRemarks(remarks,defaultYear);
+      if(!dates.some(date=>date>=start&&date<=end))continue;
+      const line=recordLine(row)||lineByContainer.get(container)||'';
+      if(!line)continue;
+      seenContainers.add(container);
+      counts[line]=(counts[line]||0)+1;
+    }
+  }
+  return counts;
+}
+function lineInventoryStats(record,line){
+  let available=0,damage=0,approved=0,repaired=0,hold=0,forRepo=0;
+
+  // Available, Damage, Volume, Approved, HOLD and FOR REPO come from Inventory.
+  // The report's Repaired value is replaced later by the exact four-source,
+  // date-filtered and Container Number-deduplicated repaired counter.
+  // Some saved daily records contain movement totals but omit detailed inventory rows.
+  // In that case, use the detailed current Inventory snapshot instead of returning zero.
+  let inventoryRows=inventoryRecords(record);
+  if(!inventoryRows.length&&latestData&&latestData!==record)inventoryRows=inventoryRecords(latestData);
+  for(const row of inventoryRows){
+    if(recordLine(row)!==line)continue;
+
+    const category=statusCategory(row);
+    if(category==='damage')damage++;
+    else if(category==='available')available++;
+
+    const remarks=normalizeRemarks(
+      row?.remarks??row?.Remarks??row?.REMARKS??row?.remark??row?.Remark??
+      fieldByPattern(row,[/remark/i,/comment/i,/note/i])
+    );
+    if(/\bapproved\b/.test(remarks))approved++;
+    if(/\bhold\b/.test(remarks))hold++;
+    if(/\bfor\s+repo\b/.test(remarks))forRepo++;
+
+    const cancelledRepair=isCancelledRepairRemark(remarks);
+    if(/\brepaired\b/.test(remarks)&&!cancelledRepair)repaired++;
+  }
+
+  return{
+    available,
+    damage,
+    volume:available+damage,
+    approved,
+    repaired,
+    hold,
+    forRepo
+  };
+}
+function pickValue(record,paths){for(const path of paths){let v=record;for(const part of path.split('.'))v=v?.[part];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
+function reportExtras(record){const fields=[['Running Equipment at Bacao',['runningEquipmentBacao','equipment.runningBacao','operations.runningEquipmentBacao','runningEquipmentAtBacao']],['Running Equipment at Enlin',['runningEquipmentEnlin','equipment.runningEnlin','operations.runningEquipmentEnlin','runningEquipmentAtEnlin']],['Weather Condition',['weatherCondition','weather.condition','operations.weatherCondition','weather']],['Bacao Utilization',['bacaoUtilization','utilization.bacao','yardUtilization.bacao']],['Enlin Utilization',['enlinUtilization','utilization.enlin','yardUtilization.enlin']],['HRD Forecast for Pullout',['hrdForecast','forecastPullout','pulloutForecast']],['Actual Pullout',['actualPullout','pullout.actual','operations.actualPullout']]];return fields.map(([label,paths])=>({label,value:pickValue(record,paths)})).filter(x=>x.value!==null&&typeof x.value!=='object');}
+function renderSelectedShippingLine(){
+  const holder=$('shippingLineReportTables');
+  const filter=$('reportLineFilter');
+  if(!holder||!filter)return;
+  const selected=filter.value||preparedReportRows[0]?.line;
+  const r=preparedReportRows.find(x=>x.line===selected);
+  if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
+  const overall=reportOverallUtilization;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${r.line}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${r.line}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="repaired-row"><td colspan="2" class="label">Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">Shipping Line %</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 700</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+}
+function renderReport(){
+  if(!$('reportPanel').classList.contains('active'))return;
+  const{start,end}=reportRange();
+  const all=Object.entries(historyData).map(([key,record])=>({date:normalizeDateKey(key,record),record})).filter(x=>x.date>=start&&x.date<=end).sort((a,b)=>a.date.localeCompare(b.date));
+  lastReportRows=all;
+  const snapshot=all.length?all[all.length-1].record:latestData||{};
+  const discoveredLines=discoverLines(all.length?all:[{record:snapshot}]);
+  const lines=[...new Set([...REQUIRED_LINES,...discoveredLines])];
+  INCLUDED_LINES=lines;
+  const rows=[];
+  let totals={available:0,damage:0,volume:0,approved:0,inn:0,out:0};
+  for(const line of lines){
+    let stats={available:0,damage:0,volume:0,approved:0,hold:0,forRepo:0},inn=0,out=0;
+    for(const x of all){
+      const st=lineInventoryStats(x.record,line);
+      Object.keys(stats).forEach(k=>stats[k]+=st[k]);
+      inn+=getMovementByLine(x.record,'incoming').values[line]||0;
+      out+=getMovementByLine(x.record,'outgoing').values[line]||0;
+    }
+    rows.push({line,...stats,inn,out});
+    Object.keys(stats).forEach(k=>totals[k]+=stats[k]);
+    totals.inn+=inn;totals.out+=out;
+  }
+  // Repaired is read only from the exact Latest and historical Inventory /
+  // Outgoing Records paths. Missing years use the current year, and the same
+  // Container Number is counted once across all four sources.
+  const repairedByLine=repairedCountsForRange(start,end);
+  for(const row of rows)row.repaired=repairedByLine[row.line]||0;
+  // Overall Total Repaired is the sum of all unique repaired events across
+  // every shipping line for the selected Daily / Weekly / Monthly period.
+  totals.repaired=Object.values(repairedByLine).reduce((sum,value)=>sum+num(value),0);
+
+  // Utilization is an overall yard snapshot, not a per-shipping-line total.
+  // Use the latest snapshot inside the selected report period. If that saved
+  // record has no Inventory rows or Loaded totals, use the current Firebase
+  // latest snapshot as a compatibility fallback.
+  const snapshotHasInventory=inventoryRecords(snapshot).length>0;
+  const utilizationSource=snapshotHasInventory?snapshot:(latestData||snapshot);
+  const overallYards=yardCounts(utilizationSource);
+  const snapshotLoadedTotals=getLoadedTotals(snapshot);
+  const snapshotLoadedRaw=valueByKey(snapshotLoadedTotals,['Inventory','Loaded Inventory','Inventory Total','Total Inventory']);
+  const loadedForOverall=snapshotLoadedRaw!==undefined&&snapshotLoadedRaw!==null&&snapshotLoadedRaw!==''
+    ?numericValue(snapshotLoadedRaw)
+    :getLoadedActivity(latestData||snapshot).inventory;
+  const bacaoOccupied=overallYards.cez1+loadedForOverall;
+  const enlinOccupied=overallYards.cez2;
+  reportOverallUtilization={
+    bacaoOccupied,
+    enlinOccupied,
+    bacaoPct:(bacaoOccupied/700)*100,
+    enlinPct:(enlinOccupied/1100)*100
+  };
+
+  // Match the Shipping Line % shown in Current Summary exactly.
+  // Current Summary uses the latest current Empty inventory per line divided
+  // by TOTAL INVENTORY (all Empty + HRD EXPORT Loaded Inventory).
+  const currentShareSource=latestData||snapshot;
+  const currentByLine=getByLine(currentShareSource);
+  const currentEmptyInventory=selectedInventory(currentShareSource);
+  const currentLoadedInventory=getLoadedActivity(currentShareSource).inventory;
+  const currentGrandInventory=currentEmptyInventory+currentLoadedInventory;
+  for(const row of rows){
+    row.shippingPct=currentGrandInventory>0
+      ?(num(currentByLine[row.line])/currentGrandInventory)*100
+      :0;
+  }
+
+  const period=start===end?start:`${start} to ${end}`;
+  const extrasForCards=reportExtras(snapshot);
+  const extraRows=extrasForCards.map(x=>`<tr class="compact"><td colspan="3" class="label">${x.label}</td><td class="value ${/weather/i.test(x.label)?'good':''}">${typeof x.value==='number'?fmt(x.value):String(x.value)}</td></tr>`).join('');
+  preparedReportRows=rows;
+  reportPeriodLabel=period;
+  const lineFilter=$('reportLineFilter');
+  const previousLine=lineFilter.value;
+  lineFilter.innerHTML=rows.map(r=>`<option value="${r.line}">${r.line}</option>`).join('');
+  if(rows.some(r=>r.line===previousLine))lineFilter.value=previousLine;
+  renderSelectedShippingLine();
+
+  const availablePct=totals.volume>0?(totals.available/totals.volume)*100:0;
+  const damagePct=totals.volume>0?(totals.damage/totals.volume)*100:0;
+  $('overallReportBody').innerHTML=`
+    <tr><td>Total Available</td><td class="overall-value">${fmt(totals.available)}</td><td class="overall-percent">${availablePct.toFixed(2)}%</td></tr>
+    <tr><td>Total Damage</td><td class="overall-value overall-danger">${fmt(totals.damage)}</td><td class="overall-percent">${damagePct.toFixed(2)}%</td></tr>
+    <tr class="overall-total-row"><td>Total Empty Containers</td><td class="overall-value">${fmt(totals.volume)}</td><td class="overall-percent">100.00%</td></tr>
+    <tr class="overall-approved-row"><td>Total Approved</td><td class="overall-value">${fmt(totals.approved)}</td><td>—</td></tr>
+    <tr class="overall-repaired-row"><td>Total Repaired</td><td class="overall-value">${fmt(totals.repaired)}</td><td>—</td></tr>`;
+
+  $('reportPeriod').textContent=period;
+  $('reportGeneratedAt').textContent=new Date().toLocaleString('en-PH',{dateStyle:'short',timeStyle:'short'});
+  $('reportSubtitle').textContent=`${reportMode[0].toUpperCase()+reportMode.slice(1)} yard report • ${all.length} saved day(s)`;
+  const extras=reportExtras(snapshot);
+  $('reportExtraSection').classList.toggle('hidden',!extras.length);
+  $('reportExtraGrid').innerHTML=extras.map(x=>`<div class="extra-item ${/weather/i.test(x.label)?'weather':''}"><span>${x.label}</span><strong>${typeof x.value==='number'?fmt(x.value):String(x.value)}</strong></div>`).join('');
+  $('reportDataNote').textContent='';
+  drawGroupedBarChart('reportChart',lines,rows.map(x=>x.available),rows.map(x=>x.damage));
+  setStatus('reportStatus',all.length?`Report generated from ${all.length} saved record(s).`:'No records found for the selected period.',!all.length);
+}
+function drawGroupedBarChart(id,labels,a,b){const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);const compact=w<720,m={l:compact?42:54,r:18,t:30,b:compact?72:58},cw=w-m.l-m.r,ch=h-m.t-m.b,max=Math.max(1,...a,...b),step=cw/Math.max(1,labels.length),bw=Math.min(compact?18:28,step*.28);ctx.font='10px Segoe UI';ctx.textBaseline='middle';for(let i=0;i<=4;i++){const value=Math.round(max*i/4),y=h-m.b-ch*i/4;ctx.strokeStyle=i===0?'#cfd8e5':'#e8edf4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke();ctx.fillStyle='#98a2b3';ctx.textAlign='right';ctx.fillText(fmt(value),m.l-8,y);}labels.forEach((label,i)=>{const cx=m.l+step*i+step/2;[[num(a[i]),-bw-2,'#2855d9'],[num(b[i]),2,'#dc3545']].forEach(([v,off,color])=>{const bh=ch*v/max,x=cx+off;ctx.fillStyle=color;ctx.fillRect(x,h-m.b,bw,-bh);if(v>0){ctx.fillStyle='#344054';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(fmt(v),x+bw/2,h-m.b-bh-4);}});ctx.save();ctx.translate(cx,h-m.b+18);ctx.fillStyle='#475467';ctx.font=`${compact?'800 9px':'800 10px'} Segoe UI`;ctx.textAlign=compact?'right':'center';ctx.textBaseline='middle';if(compact)ctx.rotate(-Math.PI/4);ctx.fillText(label,0,0);ctx.restore();});if(!labels.length){ctx.fillStyle='#667085';ctx.textAlign='center';ctx.font='13px Segoe UI';ctx.fillText('No shipping-line data available',w/2,h/2);}}
+function collectPageCss(){
+  let css='';
+  for(const sheet of Array.from(document.styleSheets)){
+    try{css+=Array.from(sheet.cssRules||[]).map(rule=>rule.cssText).join('\n')+'\n';}catch(e){}
+  }
+  return css;
+}
+async function ensureHtml2Canvas(){
+  if(window.html2canvas)return window.html2canvas;
+  await new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-html2canvas]');
+    if(existing){
+      existing.addEventListener('load',resolve,{once:true});
+      existing.addEventListener('error',()=>reject(new Error('Unable to load the table image exporter.')),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    script.async=true;
+    script.dataset.html2canvas='true';
+    script.onload=resolve;
+    script.onerror=()=>reject(new Error('Unable to load the table image exporter. Check your internet connection.'));
+    document.head.appendChild(script);
+  });
+  if(!window.html2canvas)throw new Error('Table image exporter is unavailable.');
+  return window.html2canvas;
+}
+async function downloadSelectedLineJpg(){
+  const filter=$('reportLineFilter');
+  const selected=filter?.value||preparedReportRows[0]?.line;
+  const r=preparedReportRows.find(x=>x.line===selected);
+  const source=document.querySelector('#shippingLineReportTables .line-report-card');
+  if(!r||!source){setStatus('reportStatus','No shipping-line table available to download.',true);return;}
+
+  const button=document.querySelector('.line-jpg-btn');
+  const oldText=button?.textContent;
+  try{
+    if(button){button.disabled=true;button.textContent='Preparing JPG…';}
+    await (document.fonts?.ready||Promise.resolve());
+    const capture=await ensureHtml2Canvas();
+
+    // Capture only the visible shipping-line card so the JPG matches the screen exactly.
+    const canvas=await capture(source,{
+      backgroundColor:'#ffffff',
+      scale:Math.max(2,window.devicePixelRatio||1),
+      useCORS:true,
+      allowTaint:false,
+      logging:false,
+      scrollX:-window.scrollX,
+      scrollY:-window.scrollY,
+      width:source.offsetWidth,
+      height:source.offsetHeight,
+      windowWidth:document.documentElement.clientWidth,
+      windowHeight:document.documentElement.clientHeight
+    });
+
+    // Keep the exact captured appearance, but reduce the downloaded JPG to a compact width.
+    const targetWidth=Math.min(900,canvas.width);
+    const targetHeight=Math.round(canvas.height*(targetWidth/canvas.width));
+    const output=document.createElement('canvas');
+    output.width=targetWidth;
+    output.height=targetHeight;
+    const outputCtx=output.getContext('2d');
+    outputCtx.imageSmoothingEnabled=true;
+    outputCtx.imageSmoothingQuality='high';
+    outputCtx.drawImage(canvas,0,0,targetWidth,targetHeight);
+
+    const filename=`${String(r.line).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${reportMode}-report-${reportPeriodLabel.replace(/[^0-9a-z]+/gi,'-')}.jpg`;
+    const blob=await new Promise((resolve,reject)=>output.toBlob(b=>b?resolve(b):reject(new Error('Unable to create JPG file.')),'image/jpeg',0.96));
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=filename;
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    setStatus('reportStatus',`${r.line} table downloaded as JPG.`);
+  }catch(error){
+    setStatus('reportStatus',`Unable to download table image: ${error.message}`,true);
+  }finally{
+    if(button){button.disabled=false;button.textContent=oldText||'Download Table JPG';}
+  }
+}
+function exportReportCsv(){
+  const{start,end}=reportRange();
+  const lines=discoverLines(lastReportRows);
+  const repairedByLine=repairedCountsForRange(start,end);
+  const lineRows=[];
+  for(const line of lines){
+    let stats={available:0,damage:0,volume:0,approved:0,hold:0,forRepo:0};
+    for(const x of lastReportRows){
+      const z=lineInventoryStats(x.record,line);
+      Object.keys(stats).forEach(k=>stats[k]+=z[k]);
+    }
+    lineRows.push({line,...stats,repaired:repairedByLine[line]||0});
+  }
+  const currentSource=latestData||(lastReportRows.length?lastReportRows[lastReportRows.length-1].record:{});
+  const currentByLine=getByLine(currentSource);
+  const currentGrandInventory=selectedInventory(currentSource)+getLoadedActivity(currentSource).inventory;
+  const totalAvailable=lineRows.reduce((sum,row)=>sum+row.available,0);
+  const totalDamage=lineRows.reduce((sum,row)=>sum+row.damage,0);
+  const totalEmpty=totalAvailable+totalDamage;
+  const totalApproved=lineRows.reduce((sum,row)=>sum+row.approved,0);
+  const totalRepaired=Object.values(repairedByLine).reduce((sum,value)=>sum+num(value),0);
+  const rows=[
+    ['Report Type',reportMode],
+    ['Period',start===end?start:start+' to '+end],
+    [],
+    ['Overall Summary','Value','%'],
+    ['Total Available',totalAvailable,totalEmpty>0?(totalAvailable/totalEmpty*100).toFixed(2)+'%':'0.00%'],
+    ['Total Damage',totalDamage,totalEmpty>0?(totalDamage/totalEmpty*100).toFixed(2)+'%':'0.00%'],
+    ['Total Empty Containers',totalEmpty,totalEmpty>0?'100.00%':'0.00%'],
+    ['Total Approved',totalApproved,''],
+    ['Total Repaired',totalRepaired,''],
+    [],
+    ['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','Repaired','HOLD','FOR REPO']
+  ];
+  for(const r of lineRows){
+    const share=currentGrandInventory>0?(num(currentByLine[r.line])/currentGrandInventory)*100:0;
+    rows.push([r.line,r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.repaired,r.hold,r.forRepo]);
+  }
+  const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`yard-${reportMode}-operational-report-${start}-${end}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function stamp(record){const raw=record?.fetchedAt||record?.lastUpdated||record?.generatedAt;return raw?new Date(raw).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'No timestamp available';}
+async function loadLatest(){try{const [data,loadedTotals,inventoryRecordsData,outgoingRecordsData]=await Promise.all([readLatestData(),readLoadedTotals(),readLatestInventoryRecords(),readLatestOutgoingRecords()]);if(!data&&!inventoryRecordsData&&!outgoingRecordsData)throw new Error('No data found in Firebase Latest');latestData={...(data||{})};if(loadedTotals)latestData.__loadedTotals=loadedTotals;if(inventoryRecordsData)latestData.__inventoryRecords=inventoryRecordsData;if(outgoingRecordsData)latestData.__outgoingRecords=outgoingRecordsData;renderLatest();setConnection(true,'Connected');const emptyMessage=inventoryRecordsData?'':'';const loadedMessage=loadedTotals?'':'';const repairedMessage=outgoingRecordsData?'':'';setStatus('summaryStatus',emptyMessage+loadedMessage+repairedMessage,!inventoryRecordsData||!loadedTotals);}catch(e){setConnection(false,'Connection Error');setStatus('summaryStatus',e.message,true);}}
+function renderLatest(){
+  const by=getByLine(latestData),emptyInventory=selectedInventory(latestData),incoming=getIncoming(latestData),outgoing=getOutgoing(latestData),repair=getRepairCounts(latestData),emptyStatus=getEmptyStatusTotals(latestData),loaded=getLoadedActivity(latestData);
+  const loadedInventory=loaded.inventory;
+  const grandInventory=emptyInventory+loadedInventory;
+  renderUtilization(latestData);
+  $('incomingTotal').textContent=fmt(incoming);
+  $('outgoingTotal').textContent=fmt(outgoing);
+  $('inventoryTotal').textContent=fmt(emptyInventory);
+  $('damagedEmptyTotal').textContent=fmt(emptyStatus.damage);
+  $('availableEmptyTotal').textContent=fmt(emptyStatus.available);
+  $('loadedIncomingTotal').textContent=fmt(loaded.incoming);
+  $('loadedOutgoingTotal').textContent=fmt(loaded.outgoing);
+  $('loadedInventoryTotal').textContent=fmt(loadedInventory);
+  $('approvedTotal').textContent=fmt(repair.approved);
+  $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
+
+  const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
+  const emptyCards=INCLUDED_LINES.map(line=>`<div class="line-card"><div class="name">${line}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div><small>empty inventory</small></div>`).join('');
+  const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
+  const totalCard=`<div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">${fmt(grandInventory)}</div><span class="inventory-share">100.0%</span></div><small>${fmt(emptyInventory)} empty + ${fmt(loadedInventory)} loaded</small></div>`;
+  $('shippingLineCards').innerHTML=emptyCards+loadedCard+totalCard;
+
+  $('distributionGrandTotal').textContent=fmt(grandInventory);
+  const chartLabels=[...INCLUDED_LINES,'HRD EXPORT'];
+  const chartValues=[...INCLUDED_LINES.map(x=>by[x]),loadedInventory];
+  drawInventoryDistributionChart('distributionChart',chartLabels,chartValues,grandInventory);
+}
+async function loadHistory(){try{const data=await readWithFallback('records');historyData=data||{};if($('reportPanel').classList.contains('active'))renderReport();}catch(e){historyData={};setStatus('reportStatus',e.message,true);}}
+function normalizeDateKey(key,r){return r?.recordDate||key;}
+function fitCanvas(id){const c=$(id),dpr=window.devicePixelRatio||1,rect=c.parentElement.getBoundingClientRect();c.width=Math.max(320,rect.width)*dpr;c.height=Math.max(250,rect.height)*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w:rect.width,h:rect.height};}
+function drawBase(ctx,w,h){ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}
+function roundedRect(ctx,x,y,w,h,r){const radius=Math.max(0,Math.min(r,Math.abs(w)/2,Math.abs(h)/2));ctx.beginPath();ctx.moveTo(x+radius,y);ctx.arcTo(x+w,y,x+w,y+h,radius);ctx.arcTo(x+w,y+h,x,y+h,radius);ctx.arcTo(x,y+h,x,y,radius);ctx.arcTo(x,y,x+w,y,radius);ctx.closePath();}
+function drawInventoryDistributionChart(id,labels,values,total){const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);const compact=w<620,m={l:compact?88:126,r:compact?92:112,t:24,b:32},cw=Math.max(80,w-m.l-m.r),ch=h-m.t-m.b,max=Math.max(1,...values),rowH=ch/Math.max(1,labels.length),barH=Math.min(34,rowH*.52);ctx.font='10px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';for(let i=0;i<=4;i++){const x=m.l+cw*i/4;ctx.strokeStyle=i===0?'#cfd8e5':'#e9eef5';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,h-m.b);ctx.stroke();ctx.fillStyle='#98a2b3';ctx.fillText(fmt(Math.round(max*i/4)),x,h-14);}labels.forEach((label,i)=>{const value=num(values[i]),shareValue=total?value/total*100:0,y=m.t+rowH*i+(rowH-barH)/2,barW=cw*(value/max),isLoaded=label==='HRD EXPORT';ctx.fillStyle='#f0f4f9';roundedRect(ctx,m.l,y,cw,barH,barH/2);ctx.fill();if(barW>0){const grad=ctx.createLinearGradient(m.l,y,m.l+Math.max(barW,1),y);if(isLoaded){grad.addColorStop(0,'#0f766e');grad.addColorStop(1,'#16a085');}else{grad.addColorStop(0,'#173f9f');grad.addColorStop(1,'#4f7fe8');}ctx.fillStyle=grad;roundedRect(ctx,m.l,y,Math.max(barW,3),barH,barH/2);ctx.fill();}ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#344054';ctx.font=`${compact?'700 10px':'800 12px'} Segoe UI`;ctx.fillText(label,m.l-12,y+barH/2);ctx.textAlign='left';ctx.fillStyle=isLoaded?'#087f5b':'#173f9f';ctx.font=`900 ${compact?'11px':'13px'} Segoe UI`;ctx.fillText(`${fmt(value)}  •  ${shareValue.toFixed(1)}%`,m.l+cw+10,y+barH/2);});if(!total){ctx.fillStyle='#667085';ctx.textAlign='center';ctx.font='13px Segoe UI';ctx.fillText('No inventory data available',w/2,h/2);}}
+async function refreshAll(){await loadLatest();if($('reportPanel').classList.contains('active'))await loadHistory();}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=INCLUDED_LINES.map(x=>`<div class="line-card"><div class="name">${x}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(loadLatest,REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+initialize();
+</script>
+</body>
+</html>
