@@ -1465,7 +1465,7 @@ function renderLatest(){
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
   const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div><small>empty inventory</small></div>`).join('');
-  const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
+  const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
   const totalCard=`<div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">${fmt(grandInventory)}</div><span class="inventory-share">100.0%</span></div><small>${fmt(emptyInventory)} empty + ${fmt(loadedInventory)} loaded</small></div>`;
   $('shippingLineCards').innerHTML=emptyCards+loadedCard+totalCard;
 
@@ -1477,7 +1477,7 @@ function renderLatest(){
   const visibleChartTotal=visibleEmptyTotal+loadedInventory;
   const distributionGrandTotal=visibleChartTotal+evgHiddenTotal;
   $('distributionGrandTotal').textContent=fmt(distributionGrandTotal);
-  const chartLabels=[...distributionLines.map(displayLineName),'HRD EXPORT'];
+  const chartLabels=[...distributionLines.map(displayLineName),'HRD Import Laden'];
   const chartValues=[...distributionLines.map(line=>by[line]),loadedInventory];
   drawInventoryDistributionPie(
     'distributionChart',
@@ -1658,7 +1658,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(left,-1);
   drawCalloutGroup(right,1);
 }
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD EXPORT</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(loadLatest,REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(loadLatest,REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 </script>
 </body>
