@@ -338,9 +338,9 @@ body.mobile-app{
     <div class="section-head"><div><h2>Yard Utilization</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small></div></div>
     <div class="util-grid">
       <div class="util-card">
-        <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 700</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
+        <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 750</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
         <div class="progress"><div id="cez1Bar"></div></div>
-        <div class="util-note"><span>Occupied empty + loaded slots</span><span>Capacity: 700</span></div>
+        <div class="util-note"><span>Occupied empty + loaded slots</span><span>Capacity: 750</span></div>
       </div>
       <div class="util-card">
         <div class="util-top"><div><div class="util-title">Enlin</div><div id="cez2Count" class="util-count">0 / 1,100</div></div><div id="cez2Percent" class="util-percent">0.00%</div></div>
@@ -748,7 +748,7 @@ function includeInSummaryInventory(row){
 
 function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
 function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation??fieldByPattern(row,[/location/i,/yard/i,/site/i]));if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
-function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/700*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 700`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s). Enlin: ${fmt(cez2)} empty container slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
+function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/750*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 750`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s). Enlin: ${fmt(cez2)} empty container slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
 function getIncoming(record){return num(record?.totals?.incoming??record?.incoming?.total??record?.incoming);}
 function getOutgoing(record){return num(record?.totals?.outgoing??record?.outgoing?.total??record?.outgoing);}
 function normalizeLine(value){
@@ -1127,7 +1127,7 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="repaired-row"><td colspan="2" class="label">Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">Shipping Line %</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 700</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="repaired-row"><td colspan="2" class="label">Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">Shipping Line %</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
 function renderReport(){
   if(!$('reportPanel').classList.contains('active'))return;
@@ -1181,7 +1181,7 @@ function renderReport(){
   reportOverallUtilization={
     bacaoOccupied,
     enlinOccupied,
-    bacaoPct:(bacaoOccupied/700)*100,
+    bacaoPct:(bacaoOccupied/750)*100,
     enlinPct:(enlinOccupied/1100)*100
   };
 
