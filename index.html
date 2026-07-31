@@ -351,7 +351,7 @@ body.mobile-app{
     <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
   </div>
   <div class="section">
-    <div class="section-head"><div><h2>Inventory by Shipping Line</h2><small>YARD 2.1 and IRS/NSM are excluded. OOCL includes CEZ-1 and CEZ-2 only. EVG is hidden; ODD is displayed as OTHERS.</small></div></div>
+    <div class="section-head"><div><h2>Inventory by Shipping Line</h2></div></div>
     <div id="shippingLineCards" class="lines"></div>
   </div>
   <div class="section distribution-section">
@@ -382,7 +382,7 @@ body.mobile-app{
   <div class="section operational-sheet">
     <div class="report-layout">
       <div>
-        <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2><small>CMA, ONE, and MAERSK only</small></div></div>
+        <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2></div></div>
         <div class="report-filter-bar">
           <div class="field report-line-field"><label for="reportLineFilter">Shipping Line</label><select id="reportLineFilter" onchange="renderSelectedShippingLine()"></select></div>
           <button type="button" class="action-btn primary line-jpg-btn" onclick="downloadSelectedLineJpg()">Download Table JPG</button>
@@ -405,7 +405,7 @@ body.mobile-app{
   </div>
 
   <div class="section report-availability-chart">
-    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2><small>CMA, ONE, and MAERSK only for the selected period</small></div></div>
+    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2></div></div>
     <div class="chart"><canvas id="reportChart"></canvas></div>
     <div class="legend"><span class="available">Available</span><span class="damage">Damage</span></div>
   </div>
@@ -1050,21 +1050,28 @@ function repairedCountsForRange(start,end){
     }
   }
 
-  // Deduplication rule requested by the user: Container Number only.
-  // The same container found in any of the four sources is counted once in
-  // the selected Daily / Weekly / Monthly report period.
-  const seenContainers=new Set();
+  // Repaired event deduplication:
+  // - Same Container Number + same Repair Date = count once, even when the
+  //   event appears in more than one Firebase source.
+  // - Same Container Number + different Repair Date = count separately.
+  const seenRepairEvents=new Set();
   for(const rows of sourceGroups){
     for(const row of rows){
       const container=repairContainerIdentity(row);
-      if(!container||seenContainers.has(container))continue;
+      if(!container)continue;
       const remarks=row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??fieldByPattern(row,[/^remarks?$/i,/remark/i]);
       const dates=repairedDatesFromRemarks(remarks,defaultYear);
-      if(!dates.some(date=>date>=start&&date<=end))continue;
+      if(!dates.length)continue;
       const line=recordLine(row)||lineByContainer.get(container)||'';
       if(!line)continue;
-      seenContainers.add(container);
-      counts[line]=(counts[line]||0)+1;
+
+      for(const repairDate of dates){
+        if(repairDate<start||repairDate>end)continue;
+        const eventKey=`${container}|${repairDate}`;
+        if(seenRepairEvents.has(eventKey))continue;
+        seenRepairEvents.add(eventKey);
+        counts[line]=(counts[line]||0)+1;
+      }
     }
   }
   return counts;
@@ -1074,7 +1081,7 @@ function lineInventoryStats(record,line){
 
   // Available, Damage, Volume, Approved, HOLD and FOR REPO come from Inventory.
   // The report's Repaired value is replaced later by the exact four-source,
-  // date-filtered and Container Number-deduplicated repaired counter.
+  // date-filtered and Container Number + Repair Date deduplicated counter.
   // Some saved daily records contain movement totals but omit detailed inventory rows.
   // In that case, use the detailed current Inventory snapshot instead of returning zero.
   let inventoryRows=inventoryRecords(record);
@@ -1153,7 +1160,7 @@ function renderReport(){
   // Container Number is counted once across all four sources.
   const repairedByLine=repairedCountsForRange(start,end);
   for(const row of rows)row.repaired=repairedByLine[row.line]||0;
-  // Overall Total Repaired is the sum of all unique repaired events across
+  // Overall Total Repaired is the sum of all unique Container + Repair Date events across
   // every shipping line for the selected Daily / Weekly / Monthly period.
   totals.repaired=Object.values(repairedByLine).reduce((sum,value)=>sum+num(value),0);
 
@@ -1229,7 +1236,7 @@ function renderReport(){
   const extras=reportExtras(snapshot);
   $('reportExtraSection').classList.toggle('hidden',!extras.length);
   $('reportExtraGrid').innerHTML=extras.map(x=>`<div class="extra-item ${/weather/i.test(x.label)?'weather':''}"><span>${x.label}</span><strong>${typeof x.value==='number'?fmt(x.value):String(x.value)}</strong></div>`).join('');
-  $('reportDataNote').textContent='Inventory values use the latest filtered snapshot within the selected period, matching Current Summary rules. Movement and repaired values remain period-based.';
+  $('reportDataNote').textContent='';
   // Report graph follows the same four-line selection as the dropdown.
   // Other shipping lines remain included in overall report calculations.
   const reportChartRows=REPORT_DROPDOWN_LINES
