@@ -45,7 +45,12 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
 @media(max-width:900px){.report-layout{grid-template-columns:1fr}.report-filter-bar{padding:10px}.report-line-field{width:100%;min-width:0}}
 @media print{body{background:#fff}.topbar,.tabs,.report-actions,.controls,.status{display:none!important}.app{max-width:none;padding:0}.panel{display:none!important}#reportPanel{display:block!important}.section{box-shadow:none;break-inside:avoid}.chart{height:260px}}
 
-.report-filter-bar{gap:12px;flex-wrap:wrap}.line-jpg-btn{margin-left:auto;white-space:nowrap}.overall-table th:nth-child(2),.overall-table td:nth-child(2),.overall-table th:nth-child(3),.overall-table td:nth-child(3){text-align:right}.overall-table .overall-percent{font-size:15px;font-weight:950;color:#146c2e;white-space:nowrap}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
+.report-filter-bar{gap:12px;flex-wrap:wrap}.line-jpg-btn{margin-left:auto;white-space:nowrap}.overall-table th:nth-child(2),.overall-table td:nth-child(2),.overall-table th:nth-child(3),.overall-table td:nth-child(3){text-align:right}.overall-table .overall-percent{font-size:15px;font-weight:950;color:#146c2e;white-space:nowrap}
+.overall-table .overall-percent.damage-threshold-red{
+  color:#b42318!important;
+  background:#fff1f0!important;
+  font-weight:950;
+}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
 @media(max-width:650px){.line-jpg-btn{width:100%;margin-left:0}}
 
 /* ==========================================================
@@ -66,7 +71,7 @@ body.mobile-app{
   max-width:460px;
   min-height:100vh;
   margin:0 auto;
-  padding:8px 8px calc(92px + env(safe-area-inset-bottom));
+  padding:8px 8px 8px 82px;
   background:linear-gradient(180deg,#f3f7fb 0%,#eef3f8 100%);
   box-shadow:0 0 45px rgba(15,47,95,.16);
 }
@@ -90,17 +95,17 @@ body.mobile-app{
 .mobile-app .badge{max-width:124px;padding:6px 8px;border-radius:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:9px}
 .mobile-app .btn{min-height:36px;padding:7px 9px;border-radius:9px;font-size:10px}
 
-/* Fixed bottom navigation */
+/* Fixed left-side navigation */
 .mobile-app .tabs{
   position:fixed;
   z-index:100;
-  left:50%;
-  bottom:max(8px,env(safe-area-inset-bottom));
-  transform:translateX(-50%);
+  left:max(8px,calc(50% - 222px));
+  top:50%;
+  transform:translateY(-50%);
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-  width:min(444px,calc(100vw - 16px));
+  grid-template-columns:1fr;
+  gap:6px;
+  width:66px;
   margin:0;
   padding:6px;
   border:1px solid rgba(203,216,231,.95);
@@ -112,15 +117,17 @@ body.mobile-app{
 }
 .mobile-app .tab{
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:7px;
-  min-height:48px;
-  padding:7px 10px;
+  gap:4px;
+  min-height:58px;
+  padding:7px 4px;
   border-radius:13px;
-  font-size:11px;
+  font-size:9px;
+  text-align:center;
 }
-.mobile-app .tab-icon{font-size:17px;line-height:1}
+.mobile-app .tab-icon{font-size:18px;line-height:1}
 .mobile-app .tab.active{background:#eaf1f9;color:#0f2f5f;box-shadow:none}
 
 /* Panels and sections */
@@ -159,12 +166,13 @@ body.mobile-app{
 .mobile-app .footnote{font-size:8px;line-height:1.4}
 
 /* Shipping line summary cards */
-.mobile-app .line-card{min-width:0;padding:11px;border-radius:13px}
-.mobile-app .line-card .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
-.mobile-app .line-card .count-row{gap:5px}
-.mobile-app .line-card .count{font-size:24px}
-.mobile-app .line-card .inventory-share{padding:3px 5px;font-size:8px}
-.mobile-app .line-card small{font-size:8px}
+.mobile-app .lines{gap:5px}
+.mobile-app .line-card{min-width:0;padding:8px 9px;border-radius:11px}
+.mobile-app .line-card .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.5px}
+.mobile-app .line-card .count-row{gap:4px;margin:5px 0 1px}
+.mobile-app .line-card .count{font-size:21px}
+.mobile-app .line-card .inventory-share{padding:2px 4px;font-size:7px}
+.mobile-app .line-card small{font-size:7px}
 
 /* Inventory distribution */
 .mobile-app .distribution-section{padding:13px}
@@ -232,7 +240,10 @@ body.mobile-app{
 .mobile-app .hidden{display:none!important}
 
 @media(max-width:350px){
-  .mobile-app .app{padding-left:6px;padding-right:6px}
+  .mobile-app .app{padding-left:62px;padding-right:6px}
+  .mobile-app .tabs{left:5px;width:50px;padding:4px;border-radius:14px}
+  .mobile-app .tab{min-height:50px;padding:5px 2px;font-size:7.5px}
+  .mobile-app .tab-icon{font-size:16px}
   .mobile-app .topbar{grid-template-columns:1fr}
   .mobile-app .top-actions{grid-template-columns:1fr 1fr;width:100%}
   .mobile-app .badge{max-width:none}
@@ -255,7 +266,7 @@ body.mobile-app{
 
 /* Empty activity cards: force all six cards into one compact mobile row */
 .mobile-app .empty-activity-row{
-  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:3px;
 }
 .mobile-app .empty-activity-row .metric{
@@ -310,6 +321,124 @@ body.mobile-app{
 .mobile-app .overall-jpg-actions{padding:8px}
 .mobile-app .overall-jpg-btn{min-height:40px;font-size:9px}
 
+
+/* Weekly Approved / Repaired performance */
+.weekly-repair-section{background:linear-gradient(180deg,#fff,#f8fbff)}
+.weekly-repair-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.weekly-repair-kpi{padding:14px 15px;border:1px solid #d8e3ef;border-radius:14px;background:#fff;box-shadow:0 6px 18px rgba(15,47,95,.06)}
+.weekly-repair-kpi span{display:block;color:#667085;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
+.weekly-repair-kpi strong{display:block;margin-top:6px;color:var(--navy);font-size:27px;line-height:1}
+.weekly-repair-kpi small{display:block;margin-top:6px;color:#667085;font-size:9px;line-height:1.35}
+.weekly-repair-chart{height:340px}
+.weekly-repair-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;color:#667085;font-size:10px;font-weight:800}
+.weekly-repair-legend span{display:inline-flex;align-items:center;gap:6px}
+.weekly-repair-legend i{width:10px;height:10px;border-radius:3px;background:#2855d9}
+.weekly-repair-legend .repaired i{background:#176b43}
+.weekly-daily-breakdown{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-top:13px}
+.weekly-day-card{min-width:0;padding:9px 6px;border:1px solid #dbe4ef;border-radius:11px;background:#fff;text-align:center}
+.weekly-day-card .day{color:#344054;font-size:9px;font-weight:950;text-transform:uppercase}
+.weekly-day-card .date{margin-top:2px;color:#98a2b3;font-size:8px}
+.weekly-day-card .formula{margin-top:7px;color:#667085;font-size:7px;line-height:1.35}
+.weekly-day-card .formula strong{color:var(--navy);font-size:11px}
+.weekly-day-card .repair-pct{display:inline-block;margin-top:8px;padding:6px 9px;border-radius:999px;background:#e6f4ec;color:#176b43;font-size:12px;font-weight:950}
+@media(max-width:650px){.weekly-repair-kpis{grid-template-columns:1fr 1fr;gap:7px}.weekly-repair-kpi{padding:10px}.weekly-repair-kpi strong{font-size:22px}.weekly-repair-chart{height:300px}.weekly-daily-breakdown{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.weekly-day-card{padding:7px 2px;border-radius:8px}.weekly-day-card .day{font-size:7px}.weekly-day-card .date{font-size:6px}.weekly-day-card .formula{font-size:5.5px}.weekly-day-card .formula strong{font-size:9px}.weekly-day-card .repair-pct{padding:5px 6px;font-size:9px}}
+
+
+/* Vertical letter-by-letter tab labels */
+.mobile-app .tabs{width:52px}
+.mobile-app .app{padding-left:66px}
+.mobile-app .tab{min-height:112px;padding:8px 3px;gap:6px}
+.mobile-app .tab-label{
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  letter-spacing:1px;
+  line-height:1;
+  font-size:9px;
+  font-weight:900;
+}
+@media(max-width:350px){
+  .mobile-app .tabs{width:46px}
+  .mobile-app .app{padding-left:58px}
+  .mobile-app .tab{min-height:104px}
+  .mobile-app .tab-label{font-size:8px}
+}
+
+
+.weekly-repair-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.weekly-repair-legend .cumulative i{background:#a15c00;border-radius:999px}
+@media(max-width:650px){
+  .weekly-repair-kpis{grid-template-columns:1fr}
+}
+
+
+.weekly-repair-legend .cumulative-bar i{background:#2855d9}
+.weekly-repair-legend .repaired i{background:#176b43}
+.weekly-repair-legend .cumulative-line i{
+  width:18px;
+  height:3px;
+  border-radius:999px;
+  background:#a15c00;
+}
+
+
+/* Simplified weekly report: Approved/Repaired + Movement only */
+.compact-report-head{display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:space-between;gap:10px}
+.compact-date-field{min-width:145px}
+.compact-date-field input{width:100%}
+.movement-report-section{background:linear-gradient(180deg,#fff,#f8fbff)}
+.movement-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.movement-kpi{padding:13px 12px;border:1px solid #d8e3ef;border-radius:13px;background:#fff;box-shadow:0 6px 18px rgba(15,47,95,.06);min-width:0}
+.movement-kpi span{display:block;color:#667085;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;line-height:1.25}
+.movement-kpi strong{display:block;margin-top:6px;color:var(--navy);font-size:24px;line-height:1;overflow-wrap:anywhere}
+.movement-chart{height:340px}
+.movement-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;color:#667085;font-size:9px;font-weight:800}
+.movement-legend span{display:inline-flex;align-items:center;gap:6px}
+.movement-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.movement-legend .received i{background:#2855d9}
+.movement-legend .release i{background:#176b43}
+.movement-legend .total i{background:#a15c00}
+.movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#7a3db8}
+.movement-daily-breakdown{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}
+.movement-day-card{min-width:0;padding:7px 2px;border:1px solid #dbe4ef;border-radius:8px;background:#fff;text-align:center}
+.movement-day-card .day{color:#344054;font-size:7px;font-weight:950;text-transform:uppercase}
+.movement-day-card .date{margin-top:2px;color:#98a2b3;font-size:6px}
+.movement-day-card .move-total{margin-top:6px;color:var(--navy);font-size:10px;font-weight:950}
+.movement-day-card .move-rate{display:inline-block;margin-top:4px;padding:3px 4px;border-radius:999px;background:#f1eafa;color:#6f36a8;font-size:7px;font-weight:950}
+@media(max-width:650px){
+  .compact-report-head{align-items:stretch!important;flex-direction:column!important}
+  .compact-date-field{width:100%;min-width:0}
+  .movement-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .movement-kpi{padding:10px}
+  .movement-kpi strong{font-size:21px}
+  .movement-chart{height:310px}
+}
+
+
+/* Report mode controls retained for Daily / Weekly / Monthly */
+.report-mode-section{padding:11px 12px}
+.report-mode-controls{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.report-mode-controls .report-switch{flex:1 1 220px}
+.report-mode-controls .compact-date-field{flex:0 0 155px}
+.report-mode-controls .compact-date-field input{width:100%}
+.mobile-app .report-mode-section{padding:10px}
+.mobile-app .report-mode-controls{display:grid;grid-template-columns:1fr;gap:8px}
+.mobile-app .report-mode-controls .report-switch{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
+.mobile-app .report-mode-controls .report-switch button{min-height:40px;padding:7px 3px;font-size:9px}
+.mobile-app .report-mode-controls .compact-date-field{width:100%}
+
+
+/* Report mode visibility: Daily table; Weekly graphs + table; Monthly graphs */
+.weekly-daily-breakdown.monthly-breakdown,
+.movement-daily-breakdown.monthly-breakdown{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:421px){
+  .weekly-daily-breakdown.monthly-breakdown,
+  .movement-daily-breakdown.monthly-breakdown{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.mobile-app #operationalTableSection{padding:11px}
+.mobile-app #operationalTableSection .report-section-title{margin-bottom:7px}
+.operational-table-layout.overall-hidden{grid-template-columns:1fr}
+.mobile-app .operational-table-layout{display:flex;flex-direction:column;gap:11px}
+.mobile-app #dailyOverallSummary{order:-1;width:100%}
 </style>
 </head>
 <body class="mobile-app">
@@ -319,8 +448,8 @@ body.mobile-app{
   <div class="top-actions"><div id="connectionBadge" class="badge">Connecting…</div><button type="button" class="btn" onclick="refreshAll()">Refresh Now</button></div>
 </header>
 <nav class="tabs" aria-label="Mobile navigation">
-  <button type="button" id="summaryTab" class="tab active" onclick="showPanel('summary')" aria-label="Current Summary"><span class="tab-icon">⌂</span><span>Summary</span></button>
-  <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Reports"><span class="tab-icon">▦</span><span>Reports</span></button>
+  <button type="button" id="summaryTab" class="tab active" onclick="showPanel('summary')" aria-label="Current Summary"><span class="tab-icon">⌂</span><span class="tab-label">Summary</span></button>
+  <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Reports"><span class="tab-icon">▦</span><span class="tab-label">Reports</span></button>
 </nav>
 
 <section id="summaryPanel" class="panel active">
@@ -332,7 +461,7 @@ body.mobile-app{
       <div class="metric"><span>Available</span><strong id="availableEmptyTotal">0</strong></div>
       <div class="metric"><span>Damage</span><strong id="damagedEmptyTotal">0</strong></div>
       <div class="metric"><span>Approved</span><strong id="approvedTotal">0</strong></div>
-      <div class="metric"><span>Empty Inventory</span><strong id="inventoryTotal">0</strong></div>
+      <div class="metric"><span>Total Empty Inventory</span><strong id="inventoryTotal">0</strong></div>
     </div>
     <div class="activity-group">
       <div class="metrics loaded-activity-row">
@@ -374,21 +503,55 @@ body.mobile-app{
 </section>
 
 <section id="reportPanel" class="panel">
-  <div class="section">
-    <div class="section-head">
-      <div><h2>Yard Operational Report</h2><small id="reportSubtitle">Dynamic report based only on fields available in Firebase</small></div>
-      <div class="report-actions"><button type="button" class="action-btn" onclick="exportReportCsv()">Export CSV</button><button type="button" class="action-btn" onclick="window.print()">Print / PDF</button></div>
+  <div class="section report-mode-section">
+    <div class="controls report-mode-controls">
+      <div class="report-switch">
+        <button type="button" id="dailyMode" class="active" onclick="setReportMode('daily')">Daily</button>
+        <button type="button" id="weeklyMode" onclick="setReportMode('weekly')">Weekly</button>
+        <button type="button" id="monthlyMode" onclick="setReportMode('monthly')">Monthly</button>
+      </div>
+      <div class="field compact-date-field"><label>Reference Date</label><input id="reportDate" type="date" onchange="renderReport()"></div>
     </div>
-    <div class="controls" style="justify-content:space-between;align-items:center">
-      <div class="report-switch"><button type="button" id="dailyMode" class="active" onclick="setReportMode('daily')">Daily</button><button type="button" id="weeklyMode" onclick="setReportMode('weekly')">Weekly</button><button type="button" id="monthlyMode" onclick="setReportMode('monthly')">Monthly</button></div>
-      <div class="field"><label>Reference Date</label><input id="reportDate" type="date" onchange="renderReport()"></div>
-    </div>
-    <div class="report-heading"><strong>Date:</strong><span id="reportPeriod" class="report-period">—</span><span id="reportGeneratedAt">—</span></div>
   </div>
 
+  <div id="weeklyRepairSection" class="section weekly-repair-section">
+    <div class="section-head compact-report-head">
+      <div><h2>Total Approved &amp; Repaired</h2></div>
+    </div>
+    <div class="weekly-repair-kpis">
+      <div class="weekly-repair-kpi"><span>Approved (Inv + Out)</span><strong id="weeklyTotalApproved">0</strong></div>
+      <div class="weekly-repair-kpi"><span id="weeklyRepairedLabel">Repaired Today</span><strong id="weeklyTotalRepaired">0</strong></div>
+      <div class="weekly-repair-kpi"><span>Total Approved</span><strong id="weeklyLatestApprovedBasis">0</strong><small id="weeklyLatestApprovedNote"></small></div>
+    </div>
+    <div class="chart weekly-repair-chart"><canvas id="weeklyRepairChart"></canvas></div>
+    <div class="weekly-repair-legend">
+      <span class="cumulative-bar"><i></i>Total Approved</span>
+      <span class="repaired"><i></i>Repaired</span>
+      <span class="cumulative-line"><i></i>Total Approved Line</span>
+    </div>
+    <div id="weeklyDailyBreakdown" class="weekly-daily-breakdown"></div>
+  </div>
 
-  <div class="section operational-sheet">
-    <div class="report-layout">
+  <div id="movementReportSection" class="section movement-report-section">
+    <div class="section-head">
+      <div><h2>Incoming &amp; Outgoing Movement</h2></div>
+    </div>
+    <div class="movement-kpis">
+      <div class="movement-kpi"><span>Received</span><strong id="movementReceivedTotal">0</strong></div>
+      <div class="movement-kpi"><span>Release</span><strong id="movementReleaseTotal">0</strong></div>
+      <div class="movement-kpi"><span>Total Movement</span><strong id="movementGrandTotal">0</strong></div>
+    </div>
+    <div class="chart movement-chart"><canvas id="movementChart"></canvas></div>
+    <div class="movement-legend">
+      <span class="received"><i></i>Received</span>
+      <span class="release"><i></i>Release</span>
+      <span class="per24"><i></i>Total ÷ 24</span>
+    </div>
+    <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
+  </div>
+
+  <div id="operationalTableSection" class="section operational-sheet hidden">
+    <div id="operationalTableLayout" class="report-layout operational-table-layout">
       <div>
         <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2></div></div>
         <div class="report-filter-bar">
@@ -397,7 +560,7 @@ body.mobile-app{
         </div>
         <div id="shippingLineReportTables" class="shipping-report-grid single-line-grid"></div>
       </div>
-      <aside>
+      <aside id="dailyOverallSummary" class="hidden">
         <div class="overall-card">
           <div id="overallCaptureArea" class="overall-capture-area">
             <div class="overall-title"><span>▥</span> Overall Summary</div>
@@ -409,20 +572,9 @@ body.mobile-app{
         </div>
       </aside>
     </div>
-    <div id="reportDataNote" class="footnote report-note"></div>
   </div>
 
-  <div id="reportExtraSection" class="section hidden">
-    <div class="section-head"><div><h2>Operational Information</h2><small>Only Firebase fields with saved values are shown</small></div></div>
-    <div id="reportExtraGrid" class="extra-grid"></div>
-  </div>
-
-  <div class="section report-availability-chart">
-    <div class="section-head"><div><h2>Available vs Damage by Shipping Line</h2></div></div>
-    <div class="chart"><canvas id="reportChart"></canvas></div>
-    <div class="legend"><span class="available">Available</span><span class="damage">Damage</span></div>
-  </div>
-  <div id="reportStatus" class="status">Open this tab to generate a report.</div>
+  <div id="reportStatus" class="status hidden"></div>
 </section>
 </div>
 <script>
@@ -439,6 +591,8 @@ const USER_LINE_LABELS={'ODD':'OTHERS'};
 // Only these lines are selectable in Report > Shipping Line Summary.
 // Other lines remain available to overall report calculations and charts.
 const REPORT_DROPDOWN_LINES=['CMA','ONE','MAERSK'];
+// Historical Approved calculations are limited to APL/CMA, ONE and MAERSK only.
+const APPROVED_REPORT_LINES=new Set(['CMA','ONE','MAERSK']);
 
 // Current Summary pie chart only. EVG is hidden but included in Grand Total.
 const SUMMARY_PIE_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD'];
@@ -794,12 +948,57 @@ function recordRemarks(row){
   // Count each inventory record once when its Remarks contains the word Approved.
   return valueByKey(row,['Remarks']);
 }
+function isApprovedInventoryRecord(row){
+  // Approved is counted ONLY from Inventory -> Records -> Remarks.
+  // A row that already has a completed REPAIRED remark is no longer part of
+  // the current Approved queue; Repaired is counted separately by repair date.
+  const rawRemarks=recordRemarks(row);
+  const remarks=normalizeRemarks(rawRemarks);
+  if(!/\bapproved\b/.test(remarks))return false;
+  const hasCompletedRepair=/\b(?:repaired|repair\s+(?:done|completed|complete)|completed\s+repair)\b/.test(remarks) && !isCancelledRepairRemark(rawRemarks);
+  return !hasCompletedRepair;
+}
 function getApprovedTotal(record){
   let approved=0;
   for(const row of inventoryRecords(record)){
     if(!includeInInventoryTotals(row))continue;
-    const remarks=normalizeRemarks(recordRemarks(row));
-    if(/\bapproved\b/.test(remarks))approved++;
+    if(isApprovedInventoryRecord(row))approved++;
+  }
+  return approved;
+}
+
+function approvedRecordIdentity(row){
+  const raw=row?.containerNumber??row?.ContainerNumber??row?.containerNo??row?.ContainerNo??
+    row?.equipmentNo??row?.EquipmentNo??row?.unitNo??row?.UnitNo??'';
+  return String(raw||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+
+// TEST LOGIC:
+// Weekly Approved = Approved rows still in Inventory + Approved rows already in Outgoing.
+// A container is counted only once per daily snapshot even if it appears in both sources.
+function getApprovedTotalInventoryPlusOutgoing(record){
+  const seen=new Set();
+  let approved=0;
+
+  const groups=[
+    {rows:inventoryRecords(record), inventory:true},
+    {rows:movementRows(record,'outgoing'), inventory:false}
+  ];
+
+  for(const group of groups){
+    for(const row of group.rows){
+      if(!row||typeof row!=='object')continue;
+      if(group.inventory && !includeInInventoryTotals(row))continue;
+      if(!group.inventory && !includeInInventoryTotals(row))continue;
+      if(!isApprovedInventoryRecord(row))continue;
+
+      const id=approvedRecordIdentity(row);
+      const fallback=`${recordLine(row)}|${recordRemarks(row)}|${row?.dateOut??row?.DateOut??row?.dateIn??row?.DateIn??''}`;
+      const key=id||fallback;
+      if(seen.has(key))continue;
+      seen.add(key);
+      approved++;
+    }
   }
   return approved;
 }
@@ -870,7 +1069,7 @@ for(const row of movementRows(record,type)){const line=normalizeLine(row?.Client
 function share(value,totalMovement){return totalMovement>0?value/totalMovement*100:0;}
 function isoLocal(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10);}
 function parseLocal(s){const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);}
-function reportRange(){const base=parseLocal($('reportDate').value||isoLocal(new Date()));let start=new Date(base),end=new Date(base);if(reportMode==='weekly'){const day=(base.getDay()+6)%7;start.setDate(base.getDate()-day);end=new Date(start);end.setDate(start.getDate()+6);}else if(reportMode==='monthly'){start=new Date(base.getFullYear(),base.getMonth(),1);end=new Date(base.getFullYear(),base.getMonth()+1,0);}return{start:isoLocal(start),end:isoLocal(end)};}
+function reportRange(){const base=parseLocal($('reportDate').value||isoLocal(new Date()));let start=new Date(base),end=new Date(base);if(reportMode==='weekly'){const day=base.getDay();start.setDate(base.getDate()-day);end=new Date(start);end.setDate(start.getDate()+6);}else if(reportMode==='monthly'){start=new Date(base.getFullYear(),0,1);end=new Date(base.getFullYear(),11,31);}return{start:isoLocal(start),end:isoLocal(end)};}
 function setReportMode(mode){reportMode=mode;for(const m of ['daily','weekly','monthly'])$(m+'Mode').classList.toggle('active',m===mode);renderReport();}
 function objectLines(obj){return obj&&typeof obj==='object'?Object.keys(obj).map(normalizeLine).filter(Boolean):[];}
 function discoverLines(records){const set=new Set();for(const {record} of records){const sources=[record?.inventory?.byShippingLine,record?.inventoryByShippingLine,record?.byShippingLine,record?.incoming?.byShippingLine,record?.outgoing?.byShippingLine,record?.incomingByShippingLine,record?.outgoingByShippingLine];sources.forEach(x=>objectLines(x).forEach(v=>set.add(v)));for(const row of inventoryRecords(record)){const v=recordLine(row);if(v)set.add(v);}for(const type of ['incoming','outgoing'])for(const row of movementRows(record,type)){const v=recordLine(row);if(v)set.add(v);}}return [...set].sort();}
@@ -987,6 +1186,29 @@ function repairedDatesFromRemarks(value,defaultYear=new Date().getFullYear()){
   }
   return [...new Set(dates)];
 }
+
+function approvedDatesFromRemarks(value,defaultYear=new Date().getFullYear()){
+  const raw=remarksText(value);
+  const approvedRx=/\bapproved\b/ig;
+  if(!approvedRx.test(raw))return[];
+  approvedRx.lastIndex=0;
+  const dates=[];
+  let match;
+  while((match=approvedRx.exec(raw))){
+    // Read the date written next to APPROVED. This preserves the historical
+    // approval event even if a later snapshot changes the record to Repaired.
+    const after=raw.slice(match.index+match[0].length,Math.min(raw.length,match.index+match[0].length+80));
+    const before=raw.slice(Math.max(0,match.index-55),match.index);
+    let parsed=parseRepairDateText(after,defaultYear);
+    if(!parsed){
+      const possible=[...before.matchAll(/(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)[\s.,/-]+\d{1,2}(?:[\s,./-]+\d{2,4})?|\d{1,2}[\s./-]+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:[\s,./-]+\d{2,4})?|(?:19|20)\d{2}\s*[\/. -]\s*\d{1,2}\s*[\/. -]\s*\d{1,2}|\d{1,2}\s*[\/. -]\s*\d{1,2}(?:\s*[\/. -]\s*\d{2,4})?/ig)];
+      if(possible.length)parsed=parseRepairDateText(possible[possible.length-1][0],defaultYear);
+    }
+    if(parsed)dates.push(parsed);
+  }
+  return [...new Set(dates)];
+}
+
 function repairContainerIdentity(row){
   // Strict repaired deduplication identity: Container Number (or an explicit
   // equipment/unit/box number used as the container identifier). Generic row
@@ -1089,6 +1311,399 @@ function repairedCountsForRange(start,end){
   }
   return counts;
 }
+
+
+function approvedEventLedger(){
+  const defaultYear=new Date().getFullYear();
+  const sourceGroups=[];
+
+  // Historical Approved sources:
+  // 1) Latest -> Inventory -> Records
+  // 2) Latest -> Outgoing -> Records
+  // 3) records -> [date] -> Inventory -> Records
+  // 4) records -> [date] -> Outgoing -> Records
+  sourceGroups.push(exactLatestRepairRows('inventory'));
+  sourceGroups.push(exactLatestRepairRows('outgoing'));
+  for(const record of Object.values(historyData||{})){
+    sourceGroups.push(exactHistoricalRepairRows(record,'inventory'));
+    sourceGroups.push(exactHistoricalRepairRows(record,'outgoing'));
+  }
+
+  // Preserve the line even when a later Outgoing row has incomplete metadata.
+  const lineByContainer=new Map();
+  for(const rows of sourceGroups){
+    for(const row of rows){
+      const container=repairContainerIdentity(row);
+      const line=recordLine(row);
+      if(container&&line&&!lineByContainer.has(container))lineByContainer.set(container,line);
+    }
+  }
+
+  // One historical approval event = Container Number + Approved Date.
+  // A later Repaired / Released / Outgoing state does not remove this event.
+  const seen=new Set();
+  const events=[];
+  for(const rows of sourceGroups){
+    for(const row of rows){
+      const container=repairContainerIdentity(row);
+      if(!container)continue;
+      const remarks=row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??fieldByPattern(row,[/^remarks?$/i,/remark/i]);
+      const dates=approvedDatesFromRemarks(remarks,defaultYear);
+      if(!dates.length)continue;
+      const line=recordLine(row)||lineByContainer.get(container)||'';
+      if(!line)continue;
+      // APL is normalized to CMA in the UI. Only APL/CMA, ONE and MAERSK
+      // are allowed to contribute to Approved totals and cumulative Approved.
+      if(!APPROVED_REPORT_LINES.has(line))continue;
+
+      for(const approvedDate of dates){
+        const key=`${container}|${approvedDate}`;
+        if(seen.has(key))continue;
+        seen.add(key);
+        events.push({container,date:approvedDate,line});
+      }
+    }
+  }
+  events.sort((a,b)=>a.date.localeCompare(b.date)||a.container.localeCompare(b.container));
+  return events;
+}
+function approvedCountsFromEvents(events,start,end){
+  const counts={};
+  for(const event of events||[]){
+    if(event.date<start||event.date>end)continue;
+    counts[event.line]=(counts[event.line]||0)+1;
+  }
+  return counts;
+}
+function approvedCountsForRange(start,end){
+  return approvedCountsFromEvents(approvedEventLedger(),start,end);
+}
+function sumApprovedCounts(counts){
+  return Object.values(counts||{}).reduce((sum,value)=>sum+num(value),0);
+}
+function cumulativeApprovedThrough(events,end){
+  let total=0;
+  for(const event of events||[])if(event.date<=end)total++;
+  return total;
+}
+
+function dateRangeDays(start,end){
+  const days=[];
+  let d=parseLocal(start),last=parseLocal(end);
+  while(d<=last){days.push(isoLocal(d));d.setDate(d.getDate()+1);}
+  return days;
+}
+function sumRepairCounts(counts){return Object.values(counts||{}).reduce((sum,value)=>sum+num(value),0);}
+function sumApprovedScopeRepairCounts(counts){
+  return ['CMA','ONE','MAERSK'].reduce((sum,line)=>sum+num((counts||{})[line]),0);
+}
+
+function approvedSnapshotMap(record){
+  const map=new Map();
+  if(!record)return map;
+
+  for(const row of inventoryRecords(record)){
+    const line=recordLine(row);
+    if(!APPROVED_REPORT_LINES.has(line))continue;
+    if(!includeInSummaryInventory(row))continue;
+    if(!isApprovedInventoryRecord(row))continue;
+
+    const id=recordContainerIdentity(row)||approvedRecordIdentity(row);
+    if(!id)continue;
+    map.set(id,line);
+  }
+  return map;
+}
+function weeklySnapshotForDate(date,byDate,today){
+  // For today, prefer Firebase Latest so the weekly report follows the
+  // current live Approved queue instead of an older saved daily snapshot.
+  if(date===today&&latestData&&inventoryRecords(latestData).length)return latestData;
+  return byDate.get(date)||null;
+}
+
+function approvedInventoryOutgoingCounts(record){
+  const counts={CMA:0,ONE:0,MAERSK:0};
+  const seen=new Set();
+  if(!record)return{counts,total:0};
+
+  const groups=[
+    {rows:inventoryRecords(record),inventory:true},
+    {rows:movementRows(record,'outgoing'),inventory:false}
+  ];
+
+  for(const group of groups){
+    for(const row of group.rows){
+      if(!row||typeof row!=='object')continue;
+      const line=recordLine(row);
+      if(!APPROVED_REPORT_LINES.has(line))continue;
+      if(group.inventory&&!includeInSummaryInventory(row))continue;
+      if(!isApprovedInventoryRecord(row))continue;
+
+      const id=recordContainerIdentity(row)||approvedRecordIdentity(row);
+      const fallback=`${line}|${recordRemarks(row)}|${row?.dateOut??row?.DateOut??row?.dateIn??row?.DateIn??''}`;
+      const key=id||fallback;
+      if(seen.has(key))continue;
+      seen.add(key);
+      counts[line]=(counts[line]||0)+1;
+    }
+  }
+
+  return{
+    counts,
+    total:['CMA','ONE','MAERSK'].reduce((sum,line)=>sum+num(counts[line]),0)
+  };
+}
+function weeklyRepairDailyRows(start,end,periodRows,approvedEvents){
+  const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
+  const today=isoLocal(new Date());
+  const dates=dateRangeDays(start,end);
+
+  return dates.map(date=>{
+    const source=weeklySnapshotForDate(date,byDate,today);
+    const approved=approvedInventoryOutgoingCounts(source);
+
+    // Temporary monitoring formula requested:
+    // Total Approved = Approved in Inventory + Approved in Outgoing + Repaired.
+    // Repaired is limited to the same APL/CMA, ONE and MAERSK scope.
+    const repairedByLine=repairedCountsForRange(date,date);
+    const repaired=sumApprovedScopeRepairCounts(repairedByLine);
+    const totalApproved=approved.total+repaired;
+
+    return{
+      date,
+      approvedBase:approved.total,
+      approvedByLine:approved.counts,
+      repaired,
+      totalApproved,
+      cumulativeApproved:totalApproved,
+      activityTotal:totalApproved,
+      pct:totalApproved>0?(repaired/totalApproved)*100:0,
+      hasSnapshot:!!source
+    };
+  });
+}
+function formatDayLabel(date){return parseLocal(date).toLocaleDateString('en-PH',{weekday:'short'});}
+function formatShortDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric'});}
+function formatMonthLabel(monthIndex){return new Date(2000,monthIndex,1).toLocaleDateString('en-PH',{month:'short'});}
+function monthBounds(year,monthIndex){
+  const start=isoLocal(new Date(year,monthIndex,1));
+  const end=isoLocal(new Date(year,monthIndex+1,0));
+  return{start,end};
+}
+function monthlyRepairRows(year,periodRows){
+  const today=isoLocal(new Date());
+  const currentYear=new Date().getFullYear();
+  const currentMonth=new Date().getMonth();
+  const rowsByMonth=Array.from({length:12},()=>[]);
+  for(const item of periodRows||[]){
+    const d=parseLocal(item.date);
+    if(d.getFullYear()===year)rowsByMonth[d.getMonth()].push(item);
+  }
+
+  return rowsByMonth.map((items,monthIndex)=>{
+    items.sort((a,b)=>a.date.localeCompare(b.date));
+    let source=items.length?items[items.length-1].record:null;
+
+    // For the current month, prefer the live Latest snapshot.
+    if(year===currentYear&&monthIndex===currentMonth&&latestData&&inventoryRecords(latestData).length){
+      source=latestData;
+    }
+
+    const approved=approvedInventoryOutgoingCounts(source);
+    const bounds=monthBounds(year,monthIndex);
+    const repairedByLine=repairedCountsForRange(bounds.start,bounds.end);
+    const repaired=sumApprovedScopeRepairCounts(repairedByLine);
+    const totalApproved=approved.total+repaired;
+
+    return{
+      monthIndex,
+      label:formatMonthLabel(monthIndex),
+      approvedBase:approved.total,
+      repaired,
+      totalApproved,
+      pct:totalApproved>0?(repaired/totalApproved)*100:0,
+      hasSnapshot:!!source,
+      hasData:!!source||repaired>0
+    };
+  });
+}
+function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
+  const section=$('weeklyRepairSection');
+  if(!section)return;
+  section.classList.remove('hidden');
+
+  const repairedLabel=$('weeklyRepairedLabel');
+  const breakdown=$('weeklyDailyBreakdown');
+
+  if(reportMode==='monthly'){
+    const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
+    const year=selectedDate.getFullYear();
+    const selectedMonth=selectedDate.getMonth();
+    const months=monthlyRepairRows(year,periodRows);
+    const selected=months[selectedMonth]||{approvedBase:0,repaired:0,totalApproved:0};
+
+    if(repairedLabel)repairedLabel.textContent='Repaired This Month';
+    $('weeklyTotalApproved').textContent=fmt(selected.approvedBase||0);
+    $('weeklyTotalRepaired').textContent=fmt(selected.repaired||0);
+    $('weeklyLatestApprovedBasis').textContent=fmt(selected.totalApproved||0);
+    $('weeklyLatestApprovedNote').textContent='';
+
+    if(breakdown){
+      breakdown.classList.add('monthly-breakdown');
+      breakdown.innerHTML=months.map(row=>{
+        const monthlyPercent=row.hasData?`${row.pct.toFixed(1)}%`:'—';
+        return `<div class="weekly-day-card"><div class="day">${row.label}</div><div class="repair-pct">${monthlyPercent}</div></div>`;
+      }).join('');
+    }
+
+    drawWeeklyRepairChart(
+      'weeklyRepairChart',
+      months.map(row=>row.label),
+      months.map(row=>row.approvedBase),
+      months.map(row=>row.repaired),
+      months.map(row=>row.totalApproved)
+    );
+    return;
+  }
+
+  if(repairedLabel){
+    repairedLabel.textContent=reportMode==='daily'?'Repaired Today':'Repaired This Week';
+  }
+
+  const events=approvedEvents||approvedEventLedger();
+  const days=weeklyRepairDailyRows(start,end,periodRows,events);
+  const availableDays=days.filter(row=>row.hasSnapshot);
+  const latest=availableDays.length?availableDays[availableDays.length-1]:null;
+  const totalRepaired=days.reduce((sum,row)=>sum+row.repaired,0);
+
+  $('weeklyTotalApproved').textContent=fmt(latest?.approvedBase||0);
+  $('weeklyTotalRepaired').textContent=fmt(totalRepaired);
+  $('weeklyLatestApprovedBasis').textContent=fmt(latest?.totalApproved||0);
+  $('weeklyLatestApprovedNote').textContent='';
+
+  if(breakdown){
+    breakdown.classList.remove('monthly-breakdown');
+    breakdown.innerHTML=days.map(row=>{
+      const dailyPercent=row.hasSnapshot?`${row.pct.toFixed(1)}%`:'—';
+      return `<div class="weekly-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="repair-pct">${dailyPercent}</div></div>`;
+    }).join('');
+  }
+
+  drawWeeklyRepairChart(
+    'weeklyRepairChart',
+    days.map(row=>formatDayLabel(row.date)),
+    days.map(row=>row.approvedBase),
+    days.map(row=>row.repaired),
+    days.map(row=>row.totalApproved)
+  );
+}
+function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
+  const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
+  const compact=w<420;
+  const m={l:compact?38:52,r:14,t:30,b:46};
+  const cw=w-m.l-m.r,ch=h-m.t-m.b;
+  const max=Math.max(1,...cumulative,...repaired);
+  const step=cw/Math.max(1,labels.length);
+  const bw=Math.min(compact?11:18,step*.24);
+
+  ctx.font=`${compact?'8':'9'}px Segoe UI`;
+  ctx.textBaseline='middle';
+
+  // Grid + Y axis.
+  for(let i=0;i<=4;i++){
+    const value=Math.round(max*i/4);
+    const y=h-m.b-ch*i/4;
+
+    ctx.strokeStyle=i===0?'#cfd8e5':'#e8edf4';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(m.l,y);
+    ctx.lineTo(w-m.r,y);
+    ctx.stroke();
+
+    ctx.fillStyle='#98a2b3';
+    ctx.textAlign='right';
+    ctx.fillText(fmt(value),m.l-6,y);
+  }
+
+  const points=[];
+
+  labels.forEach((label,i)=>{
+    const cx=m.l+step*i+step/2;
+    const cumulativeValue=num(cumulative[i]);
+    const repairedValue=num(repaired[i]);
+
+    const cumulativeHeight=ch*cumulativeValue/max;
+    const repairedHeight=ch*repairedValue/max;
+
+    const cumulativeX=cx-bw-2;
+    const repairedX=cx+2;
+
+    // Total Approved bar.
+    ctx.fillStyle='#2855d9';
+    ctx.fillRect(cumulativeX,h-m.b,bw,-cumulativeHeight);
+
+    // Repaired bar.
+    ctx.fillStyle='#176b43';
+    ctx.fillRect(repairedX,h-m.b,bw,-repairedHeight);
+
+    // Bar values.
+    if(cumulativeValue>0){
+      ctx.fillStyle='#173f73';
+      ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
+      ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+      ctx.fillText(fmt(cumulativeValue),cumulativeX+bw/2,h-m.b-cumulativeHeight-3);
+    }
+
+    if(repairedValue>0){
+      ctx.fillStyle='#176b43';
+      ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
+      ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+      ctx.fillText(fmt(repairedValue),repairedX+bw/2,h-m.b-repairedHeight-3);
+    }
+
+    // Total Approved line point.
+    const lineY=h-m.b-cumulativeHeight;
+    points.push([cx,lineY,cumulativeValue]);
+
+    // X label.
+    ctx.fillStyle='#475467';
+    ctx.font=`800 ${compact?'8':'9'}px Segoe UI`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(label,cx,h-m.b+17);
+  });
+
+  // Keep Total Approved line on top of the bars.
+  if(points.length){
+    ctx.save();
+    ctx.strokeStyle='#a15c00';
+    ctx.lineWidth=compact?2.5:3;
+    ctx.lineJoin='round';
+    ctx.lineCap='round';
+
+    ctx.beginPath();
+    points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    ctx.stroke();
+
+    for(const [x,y,value] of points){
+      ctx.fillStyle='#a15c00';
+      ctx.beginPath();
+      ctx.arc(x,y,compact?3:4,0,Math.PI*2);
+      ctx.fill();
+
+      // White center makes the line markers easy to see over the bars.
+      ctx.fillStyle='#fff';
+      ctx.beginPath();
+      ctx.arc(x,y,compact?1.2:1.6,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
 function lineInventoryStats(record,line){
   let available=0,damage=0,approved=0,repaired=0,hold=0,forRepo=0;
 
@@ -1111,7 +1726,7 @@ function lineInventoryStats(record,line){
       row?.remarks??row?.Remarks??row?.REMARKS??row?.remark??row?.Remark??
       fieldByPattern(row,[/remark/i,/comment/i,/note/i])
     );
-    if(/\bapproved\b/.test(remarks))approved++;
+    if(isApprovedInventoryRecord(row))approved++;
     if(/\bhold\b/.test(remarks))hold++;
     if(/\bfor\s+repo\b/.test(remarks))forRepo++;
 
@@ -1140,38 +1755,247 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved for Repair</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  const repairedRow=reportMode==='weekly'?`<tr class="movement-row"><td colspan="2" class="label">Total Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr>`:'';
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved in Period</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
-function renderReport(){
-  if(!$('reportPanel').classList.contains('active'))return;
-  const{start,end}=reportRange();
-  const all=Object.entries(historyData).map(([key,record])=>({date:normalizeDateKey(key,record),record})).filter(x=>x.date>=start&&x.date<=end).sort((a,b)=>a.date.localeCompare(b.date));
-  lastReportRows=all;
-  const snapshot=all.length?all[all.length-1].record:latestData||{};
-  const discoveredLines=discoverLines(all.length?all:[{record:snapshot}]);
-  const lines=[...new Set([...REQUIRED_LINES,...discoveredLines])];
-  INCLUDED_LINES=lines;
-  // Inventory is a snapshot, so never add multiple daily inventory snapshots.
-  // Use the latest inventory snapshot inside the selected period. For a missing
-  // historical snapshot, use the current Firebase Latest inventory as fallback.
+
+function movementRawValue(record,type){
+  if(!record)return null;
+  const raw=type==='incoming'
+    ?(record?.totals?.incoming??record?.incoming?.total??record?.incoming)
+    :(record?.totals?.outgoing??record?.outgoing?.total??record?.outgoing);
+  if(raw===undefined||raw===null||raw==='')return null;
+  if(typeof raw==='object'){
+    const aggregate=raw?.total??raw?.count??raw?.qty??raw?.quantity??raw?.value;
+    if(aggregate===undefined||aggregate===null||aggregate==='')return null;
+    return Math.max(0,numericValue(aggregate));
+  }
+  return Math.max(0,numericValue(raw));
+}
+function movementDetailTotal(record,type){
+  let total=0;
+  for(const row of movementRows(record,type)){
+    const raw=row?.quantity??row?.qty??row?.count??row?.total;
+    const q=raw===undefined||raw===null||raw===''?1:numericValue(raw);
+    total+=Math.max(0,q||1);
+  }
+  return Math.max(0,total);
+}
+function movementCount(record,type){
+  const direct=movementRawValue(record,type);
+  if(direct!==null)return Math.max(0,direct);
+  return movementDetailTotal(record,type);
+}
+function movementDailyRows(start,end,periodRows){
+  const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
+  const today=isoLocal(new Date());
+  return dateRangeDays(start,end).map(date=>{
+    const source=(date===today&&latestData)?latestData:(byDate.get(date)||null);
+    const received=source?movementCount(source,'incoming'):0;
+    const release=source?movementCount(source,'outgoing'):0;
+    const total=Math.max(0,received+release);
+    return{
+      date,
+      received:Math.max(0,received),
+      release:Math.max(0,release),
+      total,
+      per24:Math.max(0,total/24),
+      hasSnapshot:!!source
+    };
+  });
+}
+function monthlyMovementRows(year,periodRows){
+  const today=isoLocal(new Date());
+  const byDate=new Map();
+  for(const item of periodRows||[]){
+    const d=parseLocal(item.date);
+    if(d.getFullYear()===year)byDate.set(item.date,item.record);
+  }
+
+  // Use the live Latest record for today so the current month stays current.
+  if(new Date().getFullYear()===year&&latestData)byDate.set(today,latestData);
+
+  const months=Array.from({length:12},(_,monthIndex)=>({
+    monthIndex,
+    label:formatMonthLabel(monthIndex),
+    received:0,
+    release:0,
+    total:0,
+    per24:0,
+    hasSnapshot:false
+  }));
+
+  for(const [date,record] of byDate.entries()){
+    const d=parseLocal(date);
+    if(d.getFullYear()!==year)continue;
+    const row=months[d.getMonth()];
+    const received=Math.max(0,movementCount(record,'incoming'));
+    const release=Math.max(0,movementCount(record,'outgoing'));
+    row.received+=received;
+    row.release+=release;
+    row.hasSnapshot=true;
+  }
+
+  for(const row of months){
+    row.total=Math.max(0,row.received+row.release);
+    row.per24=Math.max(0,row.total/24);
+  }
+  return months;
+}
+function renderMovementSection(start,end,periodRows){
+  const breakdown=$('movementDailyBreakdown');
+
+  if(reportMode==='monthly'){
+    const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
+    const year=selectedDate.getFullYear();
+    const selectedMonth=selectedDate.getMonth();
+    const months=monthlyMovementRows(year,periodRows);
+    const selected=months[selectedMonth]||{received:0,release:0,total:0};
+
+    $('movementReceivedTotal').textContent=fmt(selected.received);
+    $('movementReleaseTotal').textContent=fmt(selected.release);
+    $('movementGrandTotal').textContent=fmt(selected.total);
+
+    if(breakdown){
+      breakdown.classList.add('monthly-breakdown');
+      breakdown.innerHTML=months.map(row=>{
+        const total=row.hasSnapshot?fmt(row.total):'—';
+        const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
+        return `<div class="movement-day-card"><div class="day">${row.label}</div><div class="move-total">${total}</div><div class="move-rate">${rate}</div></div>`;
+      }).join('');
+    }
+
+    drawMovementChart(
+      'movementChart',
+      months.map(row=>row.label),
+      months.map(row=>row.received),
+      months.map(row=>row.release),
+      months.map(row=>row.per24)
+    );
+    return;
+  }
+
+  const days=movementDailyRows(start,end,periodRows);
+  const totalReceived=days.reduce((sum,row)=>sum+row.received,0);
+  const totalRelease=days.reduce((sum,row)=>sum+row.release,0);
+  const totalMovement=Math.max(0,totalReceived+totalRelease);
+
+  $('movementReceivedTotal').textContent=fmt(totalReceived);
+  $('movementReleaseTotal').textContent=fmt(totalRelease);
+  $('movementGrandTotal').textContent=fmt(totalMovement);
+
+  if(breakdown){
+    breakdown.classList.remove('monthly-breakdown');
+    breakdown.innerHTML=days.map(row=>{
+      const total=row.hasSnapshot?fmt(row.total):'—';
+      const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
+      return `<div class="movement-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="move-total">${total}</div><div class="move-rate">${rate}</div></div>`;
+    }).join('');
+  }
+
+  drawMovementChart(
+    'movementChart',
+    days.map(row=>formatDayLabel(row.date)),
+    days.map(row=>row.received),
+    days.map(row=>row.release),
+    days.map(row=>row.per24)
+  );
+}
+function drawMovementChart(id,labels,received,release,per24){
+  const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
+  const compact=w<420;
+  const m={l:compact?38:52,r:14,t:34,b:48};
+  const cw=w-m.l-m.r,ch=h-m.t-m.b;
+  const safeReceived=received.map(v=>Math.max(0,num(v)));
+  const safeRelease=release.map(v=>Math.max(0,num(v)));
+  const safePer24=per24.map(v=>Math.max(0,num(v)));
+  const max=Math.max(1,...safeReceived,...safeRelease,...safePer24);
+  const step=cw/Math.max(1,labels.length);
+  const bw=Math.min(compact?8:14,step*.18);
+
+  ctx.font=`${compact?'8':'9'}px Segoe UI`;
+  ctx.textBaseline='middle';
+  for(let i=0;i<=4;i++){
+    const value=Math.round(max*i/4);
+    const y=h-m.b-ch*i/4;
+    ctx.strokeStyle=i===0?'#cfd8e5':'#e8edf4';
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke();
+    ctx.fillStyle='#98a2b3';ctx.textAlign='right';ctx.fillText(fmt(value),m.l-6,y);
+  }
+
+  const linePoints=[];
+  labels.forEach((label,i)=>{
+    const cx=m.l+step*i+step/2;
+    const values=[
+      [safeReceived[i],cx-bw-2,'#2855d9'],
+      [safeRelease[i],cx+2,'#176b43']
+    ];
+    values.forEach(([value,x,color])=>{
+      const bh=ch*value/max;
+      ctx.fillStyle=color;
+      ctx.fillRect(x,h-m.b,bw,-bh);
+    });
+
+
+    const py=h-m.b-ch*safePer24[i]/max;
+    linePoints.push([cx,py,safePer24[i]]);
+
+    ctx.fillStyle='#475467';
+    ctx.font=`800 ${compact?'8':'9'}px Segoe UI`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(label,cx,h-m.b+18);
+  });
+
+  if(linePoints.length){
+    ctx.save();
+    ctx.strokeStyle='#7a3db8';ctx.lineWidth=compact?2:2.5;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.beginPath();linePoints.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+    for(const [x,y,value] of linePoints){
+      ctx.fillStyle='#7a3db8';ctx.beginPath();ctx.arc(x,y,compact?2.5:3.5,0,Math.PI*2);ctx.fill();
+      if(value>0){
+        ctx.fillStyle='#6f36a8';ctx.font=`900 ${compact?'6.5':'8'}px Segoe UI`;ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(value.toFixed(1),x,y-5);
+      }
+    }
+    ctx.restore();
+  }
+}
+
+function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEvents){
+  const section=$('operationalTableSection');
+  if(!section)return;
+
+  // Inventory is a snapshot: use the latest saved snapshot in the selected
+  // period, with Firebase Latest as a compatibility fallback.
   const inventorySnapshot=inventoryRecords(snapshot).length?snapshot:(latestData||snapshot);
   const rows=[];
-  let totals={available:0,damage:0,volume:0,approved:0,inn:0,out:0};
+  let approvedByLine=approvedCountsFromEvents(approvedEvents,start,end);
+  const repairedByLine=repairedCountsForRange(start,end);
+
+  // Keep the original weekly Approved logic for the restored weekly table.
+  if(reportMode==='weekly'){
+    approvedByLine={CMA:0,ONE:0,MAERSK:0};
+    const transitionDays=weeklyRepairDailyRows(start,end,all,approvedEvents);
+    for(const day of transitionDays){
+      for(const line of ['CMA','ONE','MAERSK']){
+        approvedByLine[line]=(approvedByLine[line]||0)+num(day.approvedByLine?.[line]);
+      }
+    }
+  }
+
   for(const line of lines){
     const stats=lineInventoryStats(inventorySnapshot,line);
+    stats.approved=num(approvedByLine[line]);
+    stats.repaired=num(repairedByLine[line]);
     let inn=0,out=0;
     for(const x of all){
       inn+=getMovementByLine(x.record,'incoming').values[line]||0;
       out+=getMovementByLine(x.record,'outgoing').values[line]||0;
     }
     rows.push({line,...stats,inn,out});
-    Object.keys(stats).forEach(k=>totals[k]+=stats[k]);
-    totals.inn+=inn;totals.out+=out;
   }
-  // Utilization is an overall yard snapshot, not a per-shipping-line total.
-  // Use the latest snapshot inside the selected report period. If that saved
-  // record has no Inventory rows or Loaded totals, use the current Firebase
-  // latest snapshot as a compatibility fallback.
+
   const snapshotHasInventory=inventoryRecords(snapshot).length>0;
   const utilizationSource=snapshotHasInventory?snapshot:(latestData||snapshot);
   const overallYards=yardCounts(utilizationSource);
@@ -1180,8 +2004,8 @@ function renderReport(){
   const loadedForOverall=snapshotLoadedRaw!==undefined&&snapshotLoadedRaw!==null&&snapshotLoadedRaw!==''
     ?numericValue(snapshotLoadedRaw)
     :getLoadedActivity(latestData||snapshot).inventory;
-  const bacaoOccupied=overallYards.cez1+loadedForOverall;
-  const enlinOccupied=overallYards.cez2;
+  const bacaoOccupied=Math.max(0,overallYards.cez1+loadedForOverall);
+  const enlinOccupied=Math.max(0,overallYards.cez2);
   reportOverallUtilization={
     bacaoOccupied,
     enlinOccupied,
@@ -1189,13 +2013,10 @@ function renderReport(){
     enlinPct:(enlinOccupied/1100)*100
   };
 
-  // Match the Shipping Line % shown in Current Summary exactly.
-  // Current Summary uses the latest current Empty inventory per line divided
-  // by TOTAL INVENTORY (all Empty + HRD EXPORT Loaded Inventory).
-  const currentShareSource=inventorySnapshot;
-  const currentByLine=getSummaryByLine(currentShareSource);
-  const currentEmptyInventory=selectedSummaryInventory(currentShareSource);
-  const currentLoadedInventory=getLoadedActivity(currentShareSource).inventory;
+  // Use the same Current Summary inventory-share basis for the table percentage.
+  const currentByLine=getSummaryByLine(inventorySnapshot);
+  const currentEmptyInventory=selectedSummaryInventory(inventorySnapshot);
+  const currentLoadedInventory=getLoadedActivity(inventorySnapshot).inventory;
   const currentGrandInventory=currentEmptyInventory+currentLoadedInventory;
   for(const row of rows){
     row.shippingPct=currentGrandInventory>0
@@ -1203,57 +2024,123 @@ function renderReport(){
       :0;
   }
 
-  const period=start===end?start:`${start} to ${end}`;
-  const extrasForCards=reportExtras(snapshot);
-  const extraRows=extrasForCards.map(x=>`<tr class="compact"><td colspan="3" class="label">${x.label}</td><td class="value ${/weather/i.test(x.label)?'good':''}">${typeof x.value==='number'?fmt(x.value):String(x.value)}</td></tr>`).join('');
+  // Overall Summary is shown in Daily and Weekly.
+  const overallAside=$('dailyOverallSummary');
+  const overallLayout=$('operationalTableLayout');
+  const showOverall=reportMode==='daily'||reportMode==='weekly';
+  if(overallAside)overallAside.classList.toggle('hidden',!showOverall);
+  if(overallLayout)overallLayout.classList.toggle('overall-hidden',!showOverall);
+  if(showOverall&&$('overallReportBody')){
+    // Recreated Daily Overall Summary.
+    // HRD = CMA + MAERSK + ONE. Damage uses the existing statusCategory(),
+    // where For Box R.E. / For Repair R.E. are classified as Damage.
+    const hrdLines=new Set(['CMA','MAERSK','ONE']);
+    const inventoryRowsForOverall=inventoryRecords(inventorySnapshot);
+    let hrdAvailable=0,hrdDamage=0,hrdEmpty=0,otherEmpty=0;
+
+    if(inventoryRowsForOverall.length){
+      for(const row of inventoryRowsForOverall){
+        if(!includeInSummaryInventory(row))continue;
+        const category=statusCategory(row);
+        if(category!=='available'&&category!=='damage')continue;
+        const line=recordLine(row);
+        if(hrdLines.has(line)){
+          hrdEmpty++;
+          if(category==='available')hrdAvailable++;
+          else if(category==='damage')hrdDamage++;
+        }else{
+          otherEmpty++;
+        }
+      }
+    }else{
+      // Compatibility fallback for older snapshots that only have line totals.
+      const byLine=getSummaryByLine(inventorySnapshot);
+      hrdEmpty=['CMA','MAERSK','ONE'].reduce((sum,line)=>sum+num(byLine[line]),0);
+      const reportEmptyInventory=Object.values(byLine).reduce((sum,value)=>sum+num(value),0);
+      otherEmpty=Math.max(0,reportEmptyInventory-hrdEmpty);
+      // Available/Damage require detailed Inventory Records; use detailed current
+      // snapshot if available so these two HRD rows stay status-based.
+      for(const line of ['CMA','MAERSK','ONE']){
+        const stats=lineInventoryStats(inventorySnapshot,line);
+        hrdAvailable+=num(stats.available);
+        hrdDamage+=num(stats.damage);
+      }
+    }
+
+    const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
+    const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
+    const pctOfTotal=value=>reportTotalInventory>0?(num(value)/reportTotalInventory)*100:0;
+    const hrdDamagePct=pctOfTotal(hrdDamage);
+    const weeklyDamagePctClass=(reportMode==='weekly'&&hrdDamagePct<=25)?' damage-threshold-red':'';
+
+    $('overallReportBody').innerHTML=`
+      <tr><td>Total Available for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td><td class="overall-percent">${pctOfTotal(hrdAvailable).toFixed(2)}%</td></tr>
+      <tr><td>Total Damage for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td><td class="overall-percent${weeklyDamagePctClass}">${hrdDamagePct.toFixed(2)}%</td></tr>
+      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td class="overall-percent">${pctOfTotal(hrdEmpty).toFixed(2)}%</td></tr>
+      <tr><td>Total Empty Containers for OTHERS</td><td class="overall-value">${fmt(otherEmpty)}</td><td class="overall-percent">${pctOfTotal(otherEmpty).toFixed(2)}%</td></tr>
+      <tr class="loaded-row"><td>Total Loaded Containers</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
+      <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td><td class="overall-percent">${reportTotalInventory>0?'100.00%':'0.00%'}</td></tr>`;
+  }
+
   preparedReportRows=rows;
-  reportPeriodLabel=period;
   const lineFilter=$('reportLineFilter');
-  const previousLine=lineFilter.value;
+  const previousLine=lineFilter?.value;
   const dropdownRows=REPORT_DROPDOWN_LINES
     .map(line=>rows.find(r=>r.line===line))
     .filter(Boolean);
-  lineFilter.innerHTML=dropdownRows
-    .map(r=>`<option value="${r.line}">${displayLineName(r.line)}</option>`)
-    .join('');
-  if(dropdownRows.some(r=>r.line===previousLine))lineFilter.value=previousLine;
-  else if(dropdownRows.length)lineFilter.value=dropdownRows[0].line;
+  if(lineFilter){
+    lineFilter.innerHTML=dropdownRows
+      .map(r=>`<option value="${r.line}">${displayLineName(r.line)}</option>`)
+      .join('');
+    if(dropdownRows.some(r=>r.line===previousLine))lineFilter.value=previousLine;
+    else if(dropdownRows.length)lineFilter.value=dropdownRows[0].line;
+  }
   renderSelectedShippingLine();
-
-  const reportEmptyStatus=getEmptyStatusTotals(inventorySnapshot);
-  const reportEmptyInventory=selectedSummaryInventory(inventorySnapshot);
-  const reportLoadedInventory=getLoadedActivity(inventorySnapshot).inventory;
-  const reportTotalInventory=reportEmptyInventory+reportLoadedInventory;
-  const pctOfTotal=value=>reportTotalInventory>0?(num(value)/reportTotalInventory)*100:0;
-  $('overallReportBody').innerHTML=`
-    <tr><td>Total Available</td><td class="overall-value">${fmt(reportEmptyStatus.available)}</td><td class="overall-percent">${pctOfTotal(reportEmptyStatus.available).toFixed(2)}%</td></tr>
-    <tr><td>Total Damage</td><td class="overall-value overall-danger">${fmt(reportEmptyStatus.damage)}</td><td class="overall-percent">${pctOfTotal(reportEmptyStatus.damage).toFixed(2)}%</td></tr>
-    <tr class="overall-total-row"><td>Total Empty Containers</td><td class="overall-value">${fmt(reportEmptyInventory)}</td><td class="overall-percent">${pctOfTotal(reportEmptyInventory).toFixed(2)}%</td></tr>
-    <tr class="loaded-row"><td>Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
-    <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td><td class="overall-percent">${reportTotalInventory>0?'100.00%':'0.00%'}</td></tr>
-    <tr class="overall-approved-row"><td>Total Approved</td><td class="overall-value">${fmt(totals.approved)}</td><td>—</td></tr>
-    `;
-
-  $('reportPeriod').textContent=period;
-  $('reportGeneratedAt').textContent=new Date().toLocaleString('en-PH',{dateStyle:'short',timeStyle:'short'});
-  $('reportSubtitle').textContent=`${reportMode[0].toUpperCase()+reportMode.slice(1)} yard report • ${all.length} saved day(s)`;
-  const extras=reportExtras(snapshot);
-  $('reportExtraSection').classList.toggle('hidden',!extras.length);
-  $('reportExtraGrid').innerHTML=extras.map(x=>`<div class="extra-item ${/weather/i.test(x.label)?'weather':''}"><span>${x.label}</span><strong>${typeof x.value==='number'?fmt(x.value):String(x.value)}</strong></div>`).join('');
-  $('reportDataNote').textContent='';
-  // Report graph follows the same four-line selection as the dropdown.
-  // Other shipping lines remain included in overall report calculations.
-  const reportChartRows=REPORT_DROPDOWN_LINES
-    .map(line=>rows.find(row=>row.line===line))
-    .filter(Boolean);
-  drawGroupedBarChart(
-    'reportChart',
-    reportChartRows.map(row=>displayLineName(row.line)),
-    reportChartRows.map(row=>row.available),
-    reportChartRows.map(row=>row.damage)
-  );
-  setStatus('reportStatus',all.length?`Report generated from ${all.length} saved record(s).`:'No records found for the selected period.',!all.length);
 }
+
+function renderReport(){
+  if(!$('reportPanel').classList.contains('active'))return;
+  const{start,end}=reportRange();
+  const all=Object.entries(historyData)
+    .map(([key,record])=>({date:normalizeDateKey(key,record),record}))
+    .filter(x=>x.date>=start&&x.date<=end)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  lastReportRows=all;
+  const snapshot=all.length?all[all.length-1].record:(latestData||{});
+  const discoveredLines=discoverLines(all.length?all:[{record:snapshot}]);
+  const lines=[...new Set([...REQUIRED_LINES,...discoveredLines])];
+  INCLUDED_LINES=lines;
+
+  const approvedEvents=approvedEventLedger();
+  reportPeriodLabel=reportMode==='monthly'
+    ?String(parseLocal($('reportDate').value||isoLocal(new Date())).getFullYear())
+    :(start===end?start:`${start} to ${end}`);
+
+  // Mode layout:
+  // Daily   = restored Shipping Line table only.
+  // Weekly  = graphs + restored Shipping Line table.
+  // Monthly = graphs only.
+  const showGraphs=reportMode==='weekly'||reportMode==='monthly';
+  const showTable=reportMode==='daily'||reportMode==='weekly';
+
+  const approvedSection=$('weeklyRepairSection');
+  const movementSection=$('movementReportSection');
+  const tableSection=$('operationalTableSection');
+  if(approvedSection)approvedSection.classList.toggle('hidden',!showGraphs);
+  if(movementSection)movementSection.classList.toggle('hidden',!showGraphs);
+  if(tableSection)tableSection.classList.toggle('hidden',!showTable);
+
+  if(showGraphs){
+    renderWeeklyRepairSection(start,end,all,approvedEvents);
+    renderMovementSection(start,end,all);
+  }
+
+  if(showTable){
+    renderOperationalTableSection(start,end,all,snapshot,lines,approvedEvents);
+  }
+}
+
 function drawGroupedBarChart(id,labels,a,b){const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);const compact=w<720,m={l:compact?42:54,r:18,t:30,b:compact?72:58},cw=w-m.l-m.r,ch=h-m.t-m.b,max=Math.max(1,...a,...b),step=cw/Math.max(1,labels.length),bw=Math.min(compact?18:28,step*.28);ctx.font='10px Segoe UI';ctx.textBaseline='middle';for(let i=0;i<=4;i++){const value=Math.round(max*i/4),y=h-m.b-ch*i/4;ctx.strokeStyle=i===0?'#cfd8e5':'#e8edf4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke();ctx.fillStyle='#98a2b3';ctx.textAlign='right';ctx.fillText(fmt(value),m.l-8,y);}labels.forEach((label,i)=>{const cx=m.l+step*i+step/2;[[num(a[i]),-bw-2,'#2855d9'],[num(b[i]),2,'#dc3545']].forEach(([v,off,color])=>{const bh=ch*v/max,x=cx+off;ctx.fillStyle=color;ctx.fillRect(x,h-m.b,bw,-bh);if(v>0){ctx.fillStyle='#344054';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(fmt(v),x+bw/2,h-m.b-bh-4);}});ctx.save();ctx.translate(cx,h-m.b+18);ctx.fillStyle='#475467';ctx.font=`${compact?'800 9px':'800 10px'} Segoe UI`;ctx.textAlign=compact?'right':'center';ctx.textBaseline='middle';if(compact)ctx.rotate(-Math.PI/4);ctx.fillText(label,0,0);ctx.restore();});if(!labels.length){ctx.fillStyle='#667085';ctx.textAlign='center';ctx.font='13px Segoe UI';ctx.fillText('No shipping-line data available',w/2,h/2);}}
 function collectPageCss(){
   let css='';
@@ -1418,7 +2305,10 @@ function exportReportCsv(){
   const totalEmpty=selectedSummaryInventory(currentSource);
   const loadedInventory=getLoadedActivity(currentSource).inventory;
   const currentGrandInventory=totalEmpty+loadedInventory;
+  const repairedByLine=repairedCountsForRange(start,end);
+  for(const row of lineRows)row.repaired=num(repairedByLine[row.line]);
   const totalApproved=lineRows.reduce((sum,row)=>sum+row.approved,0);
+  const totalRepaired=lineRows.reduce((sum,row)=>sum+row.repaired,0);
   const rows=[
     ['Report Type',reportMode],
     ['Period',start===end?start:start+' to '+end],
@@ -1429,13 +2319,14 @@ function exportReportCsv(){
     ['Total Empty Containers',totalEmpty,currentGrandInventory>0?(totalEmpty/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Loaded Inventory',loadedInventory,currentGrandInventory>0?(loadedInventory/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Total Inventory',currentGrandInventory,currentGrandInventory>0?'100.00%':'0.00%'],
-    ['Total Approved',totalApproved,''],
+    ['Approved in Period',totalApproved,''],
+    ...(reportMode==='weekly'?[['Total Repaired',totalRepaired,'']]:[]),
     [],
-    ['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','HOLD','FOR REPO']
+    reportMode==='weekly'?['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','Repaired','HOLD','FOR REPO']:['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','HOLD','FOR REPO']
   ];
   for(const r of lineRows){
     const share=currentGrandInventory>0?(num(currentByLine[r.line])/currentGrandInventory)*100:0;
-    rows.push([displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.hold,r.forRepo]);
+    rows.push(reportMode==='weekly'?[displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.repaired,r.hold,r.forRepo]:[displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.hold,r.forRepo]);
   }
   const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');
@@ -1453,18 +2344,18 @@ function renderLatest(){
   renderUtilization(latestData);
   $('incomingTotal').textContent=fmt(incoming);
   $('outgoingTotal').textContent=fmt(outgoing);
-  $('inventoryTotal').textContent=fmt(emptyInventory);
   $('damagedEmptyTotal').textContent=fmt(emptyStatus.damage);
   $('availableEmptyTotal').textContent=fmt(emptyStatus.available);
   $('loadedIncomingTotal').textContent=fmt(loaded.incoming);
   $('loadedOutgoingTotal').textContent=fmt(loaded.outgoing);
   $('loadedInventoryTotal').textContent=fmt(loadedInventory);
   $('approvedTotal').textContent=fmt(repair.approved);
+  $('inventoryTotal').textContent=fmt(emptyInventory);
   $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
   $('shippingLineAsOf').textContent=`As of ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}`;
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
-  const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div><small>empty inventory</small></div>`).join('');
+  const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div></div>`).join('');
   const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
   const totalCard=`<div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">${fmt(grandInventory)}</div><span class="inventory-share">100.0%</span></div><small>${fmt(emptyInventory)} empty + ${fmt(loadedInventory)} loaded</small></div>`;
   $('shippingLineCards').innerHTML=emptyCards+loadedCard+totalCard;
