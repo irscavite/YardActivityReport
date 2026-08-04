@@ -480,9 +480,9 @@ body.mobile-app{
 .movement-legend .release i{background:#0891b2}
 .movement-legend .total i{background:#a15c00}
 .movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#7a3db8}
-.movement-daily-breakdown{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}
+.movement-daily-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
 .movement-day-card{min-width:0;padding:9px 6px;border:1px solid #dbe4ef;border-radius:11px;background:#fff;text-align:center}
-.movement-day-card .day{color:#344054;font-size:9px;font-weight:950;text-transform:uppercase}
+.movement-day-card .day{color:#344054;font-size:10px;font-weight:950;text-transform:uppercase}
 .movement-day-card .date{margin-top:2px;color:#98a2b3;font-size:8px}
 .movement-day-card .move-values{display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:8px}
 .movement-day-card .move-pill{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:6px 5px;border-radius:999px;font-size:9px;font-weight:950;line-height:1}
@@ -500,20 +500,28 @@ body.mobile-app{
 }
 .movement-summary-item{
   display:flex;
+  flex-direction:column;
   align-items:center;
-  justify-content:space-between;
-  gap:4px;
-  padding:5px 6px;
+  justify-content:center;
+  gap:2px;
+  min-height:34px;
+  padding:5px 3px;
   border-radius:8px;
   font-weight:950;
+  text-align:center;
 }
 .movement-summary-item span{
-  font-size:6px;
+  display:block;
+  width:100%;
+  font-size:7px;
   text-transform:uppercase;
-  letter-spacing:.03em;
+  letter-spacing:0;
+  line-height:1.05;
+  white-space:nowrap;
 }
 .movement-summary-item strong{
-  font-size:10px;
+  display:block;
+  font-size:11px;
   line-height:1;
 }
 .movement-summary-item.total{
@@ -608,6 +616,16 @@ body.mobile-app{
 }
 
 
+
+
+@media(max-width:650px){
+  .movement-daily-breakdown{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .movement-day-card{padding:7px 4px}
+  .movement-day-card .day{font-size:8px}
+  .movement-day-card .date{font-size:7px}
+  .movement-summary-item span{font-size:6.5px}
+  .movement-summary-item strong{font-size:10px}
+}
 
 </style>
 </head>
@@ -721,7 +739,7 @@ body.mobile-app{
     <div class="movement-legend">
       <span class="received"><i></i>Received</span>
       <span class="release"><i></i>Release</span>
-      <span class="per24"><i></i>Total Avarage Movement</span>
+      <span class="per24"><i></i>Total ÷ 24</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
