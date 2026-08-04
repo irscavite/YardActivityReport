@@ -470,14 +470,21 @@ body.mobile-app{
 .movement-kpi:nth-child(1) strong{color:#b45309}
 .movement-kpi:nth-child(2){border-color:#a8dde5;background:#f3fcfd}
 .movement-kpi:nth-child(2) strong{color:#08758a}
-.movement-kpi:nth-child(3){border-color:#d9c7ed;background:#faf7fd}
-.movement-kpi:nth-child(3) strong{color:#6f36a8}
+.movement-kpi:nth-child(3){border-color:#bfd7ff;background:#f5f9ff}
+.movement-kpi:nth-child(3) strong{color:#2563b8}
+.movement-kpi:nth-child(4){border-color:#b9e5c9;background:#f4fbf6}
+.movement-kpi:nth-child(4) strong{color:#15803d}
+.movement-kpi:nth-child(5){border-color:#d9c7ed;background:#faf7fd}
+.movement-kpi:nth-child(5) strong{color:#6f36a8}
+.movement-total-kpi{grid-column:1/-1}
 .movement-chart{height:340px}
 .movement-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;color:#667085;font-size:9px;font-weight:800}
 .movement-legend span{display:inline-flex;align-items:center;gap:6px}
 .movement-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .movement-legend .received i{background:#e67e22}
 .movement-legend .release i{background:#0891b2}
+.movement-legend .loaded-in i{background:#3b82f6}
+.movement-legend .loaded-out i{background:#16a34a}
 .movement-legend .total i{background:#a15c00}
 .movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#7a3db8}
 .movement-daily-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
@@ -545,9 +552,12 @@ body.mobile-app{
   .compact-report-head{align-items:stretch!important;flex-direction:column!important}
   .compact-date-field{width:100%;min-width:0}
   .movement-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-  .movement-kpi{padding:10px}
-  .movement-kpi strong{font-size:21px}
-  .movement-chart{height:310px}
+  .movement-kpi{padding:9px 8px}
+  .movement-kpi span{font-size:7px;letter-spacing:.03em}
+  .movement-kpi strong{font-size:20px}
+  .movement-total-kpi{grid-column:1/-1}
+  .movement-chart{height:330px}
+  .movement-legend{gap:8px;font-size:7px}
 }
 
 
@@ -728,18 +738,22 @@ body.mobile-app{
 
   <div id="movementReportSection" class="section movement-report-section">
     <div class="section-head">
-      <div><h2>Incoming &amp; Outgoing Movement</h2></div>
+      <div><h2>Incoming &amp; Outgoing Movement of Empty &amp; Loaded Containers</h2></div>
     </div>
     <div class="movement-kpis">
-      <div class="movement-kpi"><span>Received</span><strong id="movementReceivedTotal">0</strong></div>
-      <div class="movement-kpi"><span>Release</span><strong id="movementReleaseTotal">0</strong></div>
-      <div class="movement-kpi"><span>Total Movement</span><strong id="movementGrandTotal">0</strong></div>
+      <div class="movement-kpi"><span>Empty Received</span><strong id="movementReceivedTotal">0</strong></div>
+      <div class="movement-kpi"><span>Empty Release</span><strong id="movementReleaseTotal">0</strong></div>
+      <div class="movement-kpi"><span>Loaded Incoming</span><strong id="movementLoadedIncomingTotal">0</strong></div>
+      <div class="movement-kpi"><span>Loaded Outgoing</span><strong id="movementLoadedOutgoingTotal">0</strong></div>
+      <div class="movement-kpi movement-total-kpi"><span>Total Movement</span><strong id="movementGrandTotal">0</strong></div>
     </div>
     <div class="chart movement-chart"><canvas id="movementChart"></canvas></div>
     <div class="movement-legend">
-      <span class="received"><i></i>Received</span>
-      <span class="release"><i></i>Release</span>
-      <span class="per24"><i></i>Total Movement Avarage Daily</span>
+      <span class="received"><i></i>Empty Received</span>
+      <span class="release"><i></i>Empty Release</span>
+      <span class="loaded-in"><i></i>Loaded Incoming</span>
+      <span class="loaded-out"><i></i>Loaded Outgoing</span>
+      <span class="per24"><i></i>Total ÷ 24</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -1858,7 +1872,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     // Bar values.
     if(cumulativeValue>0){
       ctx.fillStyle='#173f73';
-      ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
+      ctx.font=`900 ${compact?'5.5':'8'}px Segoe UI`;
       ctx.textAlign='center';
       ctx.textBaseline='bottom';
       ctx.fillText(fmt(cumulativeValue),cumulativeX+bw/2,h-m.b-cumulativeHeight-3);
@@ -2000,11 +2014,16 @@ function movementDailyRows(start,end,periodRows){
     const source=(date===today&&latestData)?latestData:(byDate.get(date)||null);
     const received=source?movementCount(source,'incoming'):0;
     const release=source?movementCount(source,'outgoing'):0;
-    const total=Math.max(0,received+release);
+    const loaded=source?getLoadedActivity(source):{incoming:0,outgoing:0};
+    const loadedIncoming=Math.max(0,num(loaded.incoming));
+    const loadedOutgoing=Math.max(0,num(loaded.outgoing));
+    const total=Math.max(0,received+release+loadedIncoming+loadedOutgoing);
     return{
       date,
       received:Math.max(0,received),
       release:Math.max(0,release),
+      loadedIncoming,
+      loadedOutgoing,
       total,
       per24:Math.max(0,total/24),
       hasSnapshot:!!source
@@ -2027,6 +2046,8 @@ function monthlyMovementRows(year,periodRows){
     label:formatMonthLabel(monthIndex),
     received:0,
     release:0,
+    loadedIncoming:0,
+    loadedOutgoing:0,
     total:0,
     per24:0,
     hasSnapshot:false
@@ -2038,13 +2059,16 @@ function monthlyMovementRows(year,periodRows){
     const row=months[d.getMonth()];
     const received=Math.max(0,movementCount(record,'incoming'));
     const release=Math.max(0,movementCount(record,'outgoing'));
+    const loaded=getLoadedActivity(record);
     row.received+=received;
     row.release+=release;
+    row.loadedIncoming+=Math.max(0,num(loaded.incoming));
+    row.loadedOutgoing+=Math.max(0,num(loaded.outgoing));
     row.hasSnapshot=true;
   }
 
   for(const row of months){
-    row.total=Math.max(0,row.received+row.release);
+    row.total=Math.max(0,row.received+row.release+row.loadedIncoming+row.loadedOutgoing);
     row.per24=Math.max(0,row.total/24);
   }
   return months;
@@ -2057,10 +2081,12 @@ function renderMovementSection(start,end,periodRows){
     const year=selectedDate.getFullYear();
     const selectedMonth=selectedDate.getMonth();
     const months=monthlyMovementRows(year,periodRows);
-    const selected=months[selectedMonth]||{received:0,release:0,total:0};
+    const selected=months[selectedMonth]||{received:0,release:0,loadedIncoming:0,loadedOutgoing:0,total:0};
 
     $('movementReceivedTotal').textContent=fmt(selected.received);
     $('movementReleaseTotal').textContent=fmt(selected.release);
+    $('movementLoadedIncomingTotal').textContent=fmt(selected.loadedIncoming);
+    $('movementLoadedOutgoingTotal').textContent=fmt(selected.loadedOutgoing);
     $('movementGrandTotal').textContent=fmt(selected.total);
 
     if(breakdown){
@@ -2077,6 +2103,8 @@ function renderMovementSection(start,end,periodRows){
       months.map(row=>row.label),
       months.map(row=>row.received),
       months.map(row=>row.release),
+      months.map(row=>row.loadedIncoming),
+      months.map(row=>row.loadedOutgoing),
       months.map(row=>row.per24)
     );
     return;
@@ -2085,10 +2113,14 @@ function renderMovementSection(start,end,periodRows){
   const days=movementDailyRows(start,end,periodRows);
   const totalReceived=days.reduce((sum,row)=>sum+row.received,0);
   const totalRelease=days.reduce((sum,row)=>sum+row.release,0);
-  const totalMovement=Math.max(0,totalReceived+totalRelease);
+  const totalLoadedIncoming=days.reduce((sum,row)=>sum+row.loadedIncoming,0);
+  const totalLoadedOutgoing=days.reduce((sum,row)=>sum+row.loadedOutgoing,0);
+  const totalMovement=Math.max(0,totalReceived+totalRelease+totalLoadedIncoming+totalLoadedOutgoing);
 
   $('movementReceivedTotal').textContent=fmt(totalReceived);
   $('movementReleaseTotal').textContent=fmt(totalRelease);
+  $('movementLoadedIncomingTotal').textContent=fmt(totalLoadedIncoming);
+  $('movementLoadedOutgoingTotal').textContent=fmt(totalLoadedOutgoing);
   $('movementGrandTotal').textContent=fmt(totalMovement);
 
   if(breakdown){
@@ -2105,20 +2137,25 @@ function renderMovementSection(start,end,periodRows){
     days.map(row=>formatDayLabel(row.date)),
     days.map(row=>row.received),
     days.map(row=>row.release),
+    days.map(row=>row.loadedIncoming),
+    days.map(row=>row.loadedOutgoing),
     days.map(row=>row.per24)
   );
 }
-function drawMovementChart(id,labels,received,release,per24){
+function drawMovementChart(id,labels,received,release,loadedIncoming,loadedOutgoing,per24){
   const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
   const compact=w<420;
   const m={l:compact?38:52,r:14,t:46,b:48};
   const cw=w-m.l-m.r,ch=h-m.t-m.b;
   const safeReceived=received.map(v=>Math.max(0,num(v)));
   const safeRelease=release.map(v=>Math.max(0,num(v)));
+  const safeLoadedIncoming=loadedIncoming.map(v=>Math.max(0,num(v)));
+  const safeLoadedOutgoing=loadedOutgoing.map(v=>Math.max(0,num(v)));
   const safePer24=per24.map(v=>Math.max(0,num(v)));
-  const max=Math.max(1,...safeReceived,...safeRelease,...safePer24);
+  const max=Math.max(1,...safeReceived,...safeRelease,...safeLoadedIncoming,...safeLoadedOutgoing,...safePer24);
   const step=cw/Math.max(1,labels.length);
-  const bw=Math.min(compact?8:14,step*.18);
+  const bw=Math.min(compact?5:10,step*.13);
+  const barGap=compact?1:2;
 
   ctx.font=`${compact?'8':'9'}px Segoe UI`;
   ctx.textBaseline='middle';
@@ -2134,9 +2171,13 @@ function drawMovementChart(id,labels,received,release,per24){
   const linePoints=[];
   labels.forEach((label,i)=>{
     const cx=m.l+step*i+step/2;
+    const groupW=4*bw+3*barGap;
+    const startX=cx-groupW/2;
     const values=[
-      [safeReceived[i],cx-bw-2,'#e67e22','#a94f08'],
-      [safeRelease[i],cx+2,'#0891b2','#066678']
+      [safeReceived[i],startX,'#e67e22','#a94f08'],
+      [safeRelease[i],startX+(bw+barGap),'#0891b2','#066678'],
+      [safeLoadedIncoming[i],startX+2*(bw+barGap),'#3b82f6','#1d4f91'],
+      [safeLoadedOutgoing[i],startX+3*(bw+barGap),'#16a34a','#11632f']
     ];
     values.forEach(([value,x,color,labelColor])=>{
       const bh=ch*value/max;
