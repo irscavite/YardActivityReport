@@ -50,7 +50,35 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
   color:#b42318!important;
   background:#fff1f0!important;
   font-weight:950;
-}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
+}
+.overall-yard21-row{
+  display:grid;
+  grid-template-columns:50% 25% 25%;
+  align-items:center;
+  padding:11px 13px;
+  border-top:1px solid #dbe4ef;
+  background:#f8fafc;
+}
+.overall-yard21-label{
+  color:#344054;
+  font-size:11px;
+  font-weight:900;
+  text-align:left;
+}
+.overall-yard21-value{
+  color:var(--navy);
+  font-size:16px;
+  font-weight:950;
+  text-align:right;
+}
+.overall-yard21-percent{text-align:right}
+.line-report-table .main-summary-value{
+  font-weight:950;
+  color:var(--navy);
+}
+.mobile-app .overall-yard21-row{padding:9px 6px}
+.mobile-app .overall-yard21-label{font-size:9px}
+.mobile-app .overall-yard21-value{font-size:13px}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
 @media(max-width:650px){.line-jpg-btn{width:100%;margin-left:0}}
 
 /* ==========================================================
@@ -173,6 +201,43 @@ body.mobile-app{
 .mobile-app .line-card .count{font-size:21px}
 .mobile-app .line-card .inventory-share{padding:2px 4px;font-size:7px}
 .mobile-app .line-card small{font-size:7px}
+.yard21-summary-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:9px;
+  padding:10px 12px;
+  border:1px solid #d8e3ef;
+  border-radius:12px;
+  background:linear-gradient(180deg,#fff,#f6f9fd);
+}
+.yard21-summary-card span{
+  display:block;
+  color:#344054;
+  font-size:10px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.yard21-summary-card small{
+  display:block;
+  margin-top:3px;
+  color:#667085;
+  font-size:8px;
+  line-height:1.3;
+}
+.yard21-summary-card strong{
+  flex:0 0 auto;
+  color:var(--navy);
+  font-size:25px;
+  line-height:1;
+  font-weight:950;
+}
+.mobile-app .yard21-summary-card{padding:9px 10px;margin-top:7px}
+.mobile-app .yard21-summary-card span{font-size:8px}
+.mobile-app .yard21-summary-card small{font-size:7px}
+.mobile-app .yard21-summary-card strong{font-size:22px}
 
 /* Inventory distribution */
 .mobile-app .distribution-section{padding:13px}
@@ -439,6 +504,45 @@ body.mobile-app{
 .operational-table-layout.overall-hidden{grid-template-columns:1fr}
 .mobile-app .operational-table-layout{display:flex;flex-direction:column;gap:11px}
 .mobile-app #dailyOverallSummary{order:-1;width:100%}
+
+/* Easier-to-read Shipping Line Summary table */
+.mobile-app .line-report-date{
+  font-size:14px;
+  line-height:1.35;
+}
+.mobile-app .line-report-date .stamp{
+  font-size:10px;
+  line-height:1.3;
+}
+.mobile-app .line-report-table th{
+  font-size:10px;
+  line-height:1.35;
+  font-weight:950;
+  padding:9px 5px;
+}
+.mobile-app .line-report-table td{
+  font-size:10px;
+  line-height:1.4;
+  padding:9px 5px;
+}
+.mobile-app .line-report-table .line-name{
+  font-size:13px;
+  line-height:1.3;
+}
+.mobile-app .line-report-table .label{
+  font-size:10px;
+  font-weight:900;
+}
+.mobile-app .line-report-table .value{
+  font-size:11px;
+  font-weight:950;
+}
+.mobile-app .line-report-table .rate-pill{
+  min-width:64px;
+  padding:5px 7px;
+  font-size:10px;
+}
+
 </style>
 </head>
 <body class="mobile-app">
@@ -472,7 +576,7 @@ body.mobile-app{
     </div>
   </div>
   <div class="section">
-    <div class="section-head"><div><h2>Yard Utilization</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small></div></div>
+    <div class="section-head"><div><h2>Yard Utilization for BACAO and ENLIN</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small></div></div>
     <div class="util-grid">
       <div class="util-card">
         <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 750</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
@@ -488,12 +592,18 @@ body.mobile-app{
     <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
   </div>
   <div class="section">
-    <div class="section-head"><div><h2>Inventory by Shipping Line</h2><small id="shippingLineAsOf">As of —</small></div></div>
+    <div class="section-head"><div><h2>Inventory by Shipping Line for BACAO and ENLIN</h2><small id="shippingLineAsOf">As of —</small></div></div>
     <div id="shippingLineCards" class="lines"></div>
+    <div class="yard21-summary-card">
+      <div>
+        <span>Yard 2.1 Containers</span>
+      </div>
+      <strong id="yard21ContainerCount">0</strong>
+    </div>
   </div>
   <div class="section distribution-section">
     <div class="section-head distribution-head">
-      <div class="section-head-copy"><h2>Inventory Distribution</h2></div>
+      <div class="section-head-copy"><h2>Inventory Distribution BACAO and ENLIN</h2></div>
       <div class="distribution-total"><span>Grand Total</span><strong id="distributionGrandTotal">0</strong></div>
     </div>
     <div class="chart distribution-chart"><canvas id="distributionChart"></canvas></div>
@@ -565,6 +675,11 @@ body.mobile-app{
           <div id="overallCaptureArea" class="overall-capture-area">
             <div class="overall-title"><span>▥</span> Overall Summary</div>
             <table class="overall-table"><thead><tr><th>Item</th><th>Value</th><th>%</th></tr></thead><tbody id="overallReportBody"></tbody></table>
+            <div class="overall-yard21-row">
+              <span class="overall-yard21-label">Yard 2.1 Containers</span>
+              <strong id="overallYard21Value" class="overall-yard21-value">0</strong>
+              <span class="overall-yard21-percent"></span>
+            </div>
           </div>
           <div class="overall-jpg-actions">
             <button type="button" class="action-btn primary overall-jpg-btn" onclick="downloadOverallJpg()">Download Overall JPG</button>
@@ -911,6 +1026,15 @@ function isExcludedSummaryInventoryLocation(row){
 }
 function includeInSummaryInventory(row){
   return includeInInventoryTotals(row)&&!isExcludedSummaryInventoryLocation(row);
+}
+
+function yard21ContainerCount(record){
+  let count=0;
+  for(const row of inventoryRecords(record)){
+    const loc=inventoryRowLocation(row);
+    if(loc==='YARD-2.1'||loc.startsWith('YARD-2.1-'))count++;
+  }
+  return count;
 }
 
 function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
@@ -1756,7 +1880,7 @@ function renderSelectedShippingLine(){
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
   const repairedRow=reportMode==='weekly'?`<tr class="movement-row"><td colspan="2" class="label">Total Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr>`:'';
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -2068,6 +2192,7 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
     }
 
     const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
+    const reportYard21Inventory=Math.max(0,yard21ContainerCount(inventorySnapshot));
     const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
     const pctOfTotal=value=>reportTotalInventory>0?(num(value)/reportTotalInventory)*100:0;
 
@@ -2080,10 +2205,11 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
     $('overallReportBody').innerHTML=`
       <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td><td class="overall-percent">${hrdAvailablePct.toFixed(2)}%</td></tr>
       <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td><td class="overall-percent${weeklyDamagePctClass}">${hrdDamagePct.toFixed(2)}%</td></tr>
-      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td class="overall-percent">${hrdEmpty>0?'100.00%':'0.00%'}</td></tr>
+      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td></td></tr>
       <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td><td class="overall-percent">${pctOfTotal(otherEmpty).toFixed(2)}%</td></tr>
       <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
       <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td><td class="overall-percent">${reportTotalInventory>0?'100.00%':'0.00%'}</td></tr>`;
+    if($('overallYard21Value'))$('overallYard21Value').textContent=fmt(reportYard21Inventory);
   }
 
   preparedReportRows=rows;
@@ -2356,6 +2482,7 @@ function renderLatest(){
   $('inventoryTotal').textContent=fmt(emptyInventory);
   $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
   $('shippingLineAsOf').textContent=`As of ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}`;
+  $('yard21ContainerCount').textContent=fmt(yard21ContainerCount(latestData));
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
   const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div></div>`).join('');
