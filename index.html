@@ -1756,7 +1756,7 @@ function renderSelectedShippingLine(){
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
   const repairedRow=reportMode==='weekly'?`<tr class="movement-row"><td colspan="2" class="label">Total Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr>`:'';
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr><tr><td colspan="2" class="label">Approved in Period</td><td colspan="2" class="value">${fmt(r.approved)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td>${fmt(r.available)}</td><td>${fmt(r.damage)}</td><td>${fmt(r.volume)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -2070,15 +2070,19 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
     const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
     const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
     const pctOfTotal=value=>reportTotalInventory>0?(num(value)/reportTotalInventory)*100:0;
-    const hrdDamagePct=pctOfTotal(hrdDamage);
+
+    // HRD Available and Damage percentages use Total Empty Containers for HRD as 100%.
+    const pctOfHrdEmpty=value=>hrdEmpty>0?(num(value)/hrdEmpty)*100:0;
+    const hrdAvailablePct=pctOfHrdEmpty(hrdAvailable);
+    const hrdDamagePct=pctOfHrdEmpty(hrdDamage);
     const weeklyDamagePctClass=(reportMode==='weekly'&&hrdDamagePct<=25)?' damage-threshold-red':'';
 
     $('overallReportBody').innerHTML=`
-      <tr><td>Total Available for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td><td class="overall-percent">${pctOfTotal(hrdAvailable).toFixed(2)}%</td></tr>
-      <tr><td>Total Damage for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td><td class="overall-percent${weeklyDamagePctClass}">${hrdDamagePct.toFixed(2)}%</td></tr>
-      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td class="overall-percent">${pctOfTotal(hrdEmpty).toFixed(2)}%</td></tr>
-      <tr><td>Total Empty Containers for OTHERS</td><td class="overall-value">${fmt(otherEmpty)}</td><td class="overall-percent">${pctOfTotal(otherEmpty).toFixed(2)}%</td></tr>
-      <tr class="loaded-row"><td>Total Loaded Containers</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
+      <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td><td class="overall-percent">${hrdAvailablePct.toFixed(2)}%</td></tr>
+      <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td><td class="overall-percent${weeklyDamagePctClass}">${hrdDamagePct.toFixed(2)}%</td></tr>
+      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td class="overall-percent">${hrdEmpty>0?'100.00%':'0.00%'}</td></tr>
+      <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td><td class="overall-percent">${pctOfTotal(otherEmpty).toFixed(2)}%</td></tr>
+      <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
       <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td><td class="overall-percent">${reportTotalInventory>0?'100.00%':'0.00%'}</td></tr>`;
   }
 
@@ -2319,7 +2323,6 @@ function exportReportCsv(){
     ['Total Empty Containers',totalEmpty,currentGrandInventory>0?(totalEmpty/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Loaded Inventory',loadedInventory,currentGrandInventory>0?(loadedInventory/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Total Inventory',currentGrandInventory,currentGrandInventory>0?'100.00%':'0.00%'],
-    ['Approved in Period',totalApproved,''],
     ...(reportMode==='weekly'?[['Total Repaired',totalRepaired,'']]:[]),
     [],
     reportMode==='weekly'?['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','Repaired','HOLD','FOR REPO']:['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','HOLD','FOR REPO']
