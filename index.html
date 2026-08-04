@@ -76,6 +76,17 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
   font-weight:950;
   color:var(--navy);
 }
+.line-report-table .approved-repair-row td{
+  background:#eef5ff;
+}
+.line-report-table .approved-repair-row .label{
+  font-weight:950;
+  color:#17365f;
+}
+.line-report-table .approved-repair-row .value{
+  font-weight:950;
+  color:var(--navy);
+}
 .mobile-app .overall-yard21-row{padding:9px 6px}
 .mobile-app .overall-yard21-label{font-size:9px}
 .mobile-app .overall-yard21-value{font-size:13px}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
@@ -450,25 +461,78 @@ body.mobile-app{
 .compact-report-head{display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:space-between;gap:10px}
 .compact-date-field{min-width:145px}
 .compact-date-field input{width:100%}
-.movement-report-section{background:linear-gradient(180deg,#fff,#f8fbff)}
+.movement-report-section{background:linear-gradient(180deg,#fffaf5,#f3fbfc);border-color:#d7e8e8}
 .movement-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
 .movement-kpi{padding:13px 12px;border:1px solid #d8e3ef;border-radius:13px;background:#fff;box-shadow:0 6px 18px rgba(15,47,95,.06);min-width:0}
 .movement-kpi span{display:block;color:#667085;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;line-height:1.25}
 .movement-kpi strong{display:block;margin-top:6px;color:var(--navy);font-size:24px;line-height:1;overflow-wrap:anywhere}
+.movement-kpi:nth-child(1){border-color:#f3c99f;background:#fffaf5}
+.movement-kpi:nth-child(1) strong{color:#b45309}
+.movement-kpi:nth-child(2){border-color:#a8dde5;background:#f3fcfd}
+.movement-kpi:nth-child(2) strong{color:#08758a}
+.movement-kpi:nth-child(3){border-color:#d9c7ed;background:#faf7fd}
+.movement-kpi:nth-child(3) strong{color:#6f36a8}
 .movement-chart{height:340px}
 .movement-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;color:#667085;font-size:9px;font-weight:800}
 .movement-legend span{display:inline-flex;align-items:center;gap:6px}
 .movement-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.movement-legend .received i{background:#2855d9}
-.movement-legend .release i{background:#176b43}
+.movement-legend .received i{background:#e67e22}
+.movement-legend .release i{background:#0891b2}
 .movement-legend .total i{background:#a15c00}
 .movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#7a3db8}
 .movement-daily-breakdown{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}
-.movement-day-card{min-width:0;padding:7px 2px;border:1px solid #dbe4ef;border-radius:8px;background:#fff;text-align:center}
-.movement-day-card .day{color:#344054;font-size:7px;font-weight:950;text-transform:uppercase}
-.movement-day-card .date{margin-top:2px;color:#98a2b3;font-size:6px}
-.movement-day-card .move-total{margin-top:6px;color:var(--navy);font-size:10px;font-weight:950}
-.movement-day-card .move-rate{display:inline-block;margin-top:4px;padding:3px 4px;border-radius:999px;background:#f1eafa;color:#6f36a8;font-size:7px;font-weight:950}
+.movement-day-card{min-width:0;padding:9px 6px;border:1px solid #dbe4ef;border-radius:11px;background:#fff;text-align:center}
+.movement-day-card .day{color:#344054;font-size:9px;font-weight:950;text-transform:uppercase}
+.movement-day-card .date{margin-top:2px;color:#98a2b3;font-size:8px}
+.movement-day-card .move-values{display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:8px}
+.movement-day-card .move-pill{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:6px 5px;border-radius:999px;font-size:9px;font-weight:950;line-height:1}
+.movement-day-card .move-pill span{font-size:7px;font-weight:900;text-transform:uppercase}
+.movement-day-card .move-pill strong{font-size:11px;font-weight:950}
+.movement-day-card .move-pill.received{background:#fff0e1;color:#b45309}
+.movement-day-card .move-pill.release{background:#e6f8fb;color:#08758a}
+.movement-day-card .move-total{margin-top:6px;color:var(--navy);font-size:9px;font-weight:950}
+.movement-day-card .move-rate{display:inline-block;margin-top:4px;padding:3px 5px;border-radius:999px;background:#f1eafa;color:#6f36a8;font-size:7px;font-weight:950}
+.movement-summary-values{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:4px;
+  margin-top:7px;
+}
+.movement-summary-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:4px;
+  padding:5px 6px;
+  border-radius:8px;
+  font-weight:950;
+}
+.movement-summary-item span{
+  font-size:6px;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.movement-summary-item strong{
+  font-size:10px;
+  line-height:1;
+}
+.movement-summary-item.total{
+  background:#fff3e8;
+  color:#a94f08;
+}
+.movement-summary-item.average{
+  background:#f1eafa;
+  color:#6f36a8;
+}
+@media(max-width:650px){
+  .movement-day-card{padding:7px 2px;border-radius:8px}
+  .movement-day-card .day{font-size:7px}
+  .movement-day-card .date{font-size:6px}
+  .movement-day-card .move-values{gap:3px;margin-top:6px}
+  .movement-day-card .move-pill{padding:5px 2px;font-size:7px}
+  .movement-day-card .move-pill span{font-size:5px}
+  .movement-day-card .move-pill strong{font-size:9px}
+}
 @media(max-width:650px){
   .compact-report-head{align-items:stretch!important;flex-direction:column!important}
   .compact-date-field{width:100%;min-width:0}
@@ -542,6 +606,8 @@ body.mobile-app{
   padding:5px 7px;
   font-size:10px;
 }
+
+
 
 </style>
 </head>
@@ -655,7 +721,7 @@ body.mobile-app{
     <div class="movement-legend">
       <span class="received"><i></i>Received</span>
       <span class="release"><i></i>Release</span>
-      <span class="per24"><i></i>Total ÷ 24</span>
+      <span class="per24"><i></i>Total Avarage Movement</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -1879,8 +1945,7 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  const repairedRow=reportMode==='weekly'?`<tr class="movement-row"><td colspan="2" class="label">Total Repaired</td><td colspan="2" class="value">${fmt(r.repaired)}</td></tr>`:'';
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr>${repairedRow}<tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -1985,7 +2050,7 @@ function renderMovementSection(start,end,periodRows){
       breakdown.innerHTML=months.map(row=>{
         const total=row.hasSnapshot?fmt(row.total):'—';
         const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
-        return `<div class="movement-day-card"><div class="day">${row.label}</div><div class="move-total">${total}</div><div class="move-rate">${rate}</div></div>`;
+        return `<div class="movement-day-card"><div class="day">${row.label}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
       }).join('');
     }
 
@@ -2013,7 +2078,7 @@ function renderMovementSection(start,end,periodRows){
     breakdown.innerHTML=days.map(row=>{
       const total=row.hasSnapshot?fmt(row.total):'—';
       const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
-      return `<div class="movement-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="move-total">${total}</div><div class="move-rate">${rate}</div></div>`;
+      return `<div class="movement-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
     }).join('');
   }
 
@@ -2028,7 +2093,7 @@ function renderMovementSection(start,end,periodRows){
 function drawMovementChart(id,labels,received,release,per24){
   const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
   const compact=w<420;
-  const m={l:compact?38:52,r:14,t:34,b:48};
+  const m={l:compact?38:52,r:14,t:46,b:48};
   const cw=w-m.l-m.r,ch=h-m.t-m.b;
   const safeReceived=received.map(v=>Math.max(0,num(v)));
   const safeRelease=release.map(v=>Math.max(0,num(v)));
@@ -2052,13 +2117,21 @@ function drawMovementChart(id,labels,received,release,per24){
   labels.forEach((label,i)=>{
     const cx=m.l+step*i+step/2;
     const values=[
-      [safeReceived[i],cx-bw-2,'#2855d9'],
-      [safeRelease[i],cx+2,'#176b43']
+      [safeReceived[i],cx-bw-2,'#e67e22','#a94f08'],
+      [safeRelease[i],cx+2,'#0891b2','#066678']
     ];
-    values.forEach(([value,x,color])=>{
+    values.forEach(([value,x,color,labelColor])=>{
       const bh=ch*value/max;
+      const topY=h-m.b-bh;
       ctx.fillStyle=color;
       ctx.fillRect(x,h-m.b,bw,-bh);
+
+      // Show the exact Received / Release number above every bar.
+      ctx.fillStyle=labelColor;
+      ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
+      ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+      ctx.fillText(fmt(value),x+bw/2,Math.max(m.t-2,topY-4));
     });
 
 
@@ -2110,6 +2183,7 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
 
   for(const line of lines){
     const stats=lineInventoryStats(inventorySnapshot,line);
+    stats.approvedForRepair=num(stats.approved);
     stats.approved=num(approvedByLine[line]);
     stats.repaired=num(repairedByLine[line]);
     let inn=0,out=0;
@@ -2449,7 +2523,6 @@ function exportReportCsv(){
     ['Total Empty Containers',totalEmpty,currentGrandInventory>0?(totalEmpty/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Loaded Inventory',loadedInventory,currentGrandInventory>0?(loadedInventory/currentGrandInventory*100).toFixed(2)+'%':'0.00%'],
     ['Total Inventory',currentGrandInventory,currentGrandInventory>0?'100.00%':'0.00%'],
-    ...(reportMode==='weekly'?[['Total Repaired',totalRepaired,'']]:[]),
     [],
     reportMode==='weekly'?['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','Repaired','HOLD','FOR REPO']:['Shipping Line','Available','Damage','Volume','Shipping Line %','Approved','HOLD','FOR REPO']
   ];
