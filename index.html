@@ -668,6 +668,9 @@ body.mobile-app{
 .weather-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid #d9e6f2;font-size:20px}
 .weather-summary{min-width:0}.weather-summary-top{display:flex;align-items:baseline;gap:7px;min-width:0}.weather-temp{font-size:27px;line-height:1;font-weight:950;color:var(--navy);letter-spacing:-.04em}.weather-condition{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17365f;font-size:11px;font-weight:950}.weather-meta{margin-top:3px;color:#667085;font-size:7.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .weather-quick{display:grid;grid-template-columns:repeat(3,auto);gap:6px;align-items:center}.weather-quick span{padding:5px 6px;border:1px solid #dbe5f0;border-radius:8px;background:rgba(255,255,255,.8);color:#475467;font-size:7px;font-weight:900;white-space:nowrap}.weather-quick strong{color:#173f73;font-size:8px}.weather-error{padding:7px 8px;border:1px solid #efd99e;border-radius:8px;background:#fff8e6;color:#7a4d00;font-size:8px;font-weight:800}
+.line-report-table tr.report-weather-row td{background:linear-gradient(90deg,#eef6ff,#f8fbff);border-color:#cfdeef}
+.line-report-table .report-weather-value{color:#173f73;font-weight:900;text-align:center;line-height:1.45}
+.mobile-app .line-report-table .report-weather-value{font-size:9px}
 @media(max-width:370px){.weather-compact{grid-template-columns:auto minmax(0,1fr)}.weather-quick{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.weather-quick span{text-align:center}}
 </style>
 </head>
@@ -2293,7 +2296,7 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr><tr class="report-weather-row"><td colspan="2" class="label">CURRENT WEATHER (GENERAL TRIAS, CAVITE)</td><td colspan="2" class="report-weather-value">${reportWeatherText()}</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -2917,6 +2920,16 @@ function exportReportCsv(){
 }
 
 const WEATHER_ENDPOINT='https://api.open-meteo.com/v1/forecast?latitude=14.3214&longitude=120.9073&current=temperature_2m,relative_humidity_2m,precipitation,rain,weather_code,wind_speed_10m&timezone=Asia%2FManila&forecast_days=1';
+let currentWeather=null;
+function reportWeatherText(){
+  if(!currentWeather)return 'Weather unavailable';
+  const w=currentWeather;
+  const temp=Number.isFinite(w.temp)?`${Math.round(w.temp)}°C`:'--°';
+  const humidity=Number.isFinite(w.humidity)?`${Math.round(w.humidity)}%`:'--%';
+  const rain=Number.isFinite(w.rain)?`${w.rain.toFixed(1)} mm`:'-- mm';
+  const wind=Number.isFinite(w.wind)?`${Math.round(w.wind)} km/h`:'-- km/h';
+  return `${w.icon||'🌤️'} ${temp} • ${w.condition||'Current weather'} • Humidity ${humidity} • Rain ${rain} • Wind ${wind}`;
+}
 function weatherDescription(code){
   const c=Number(code);
   if(c===0)return['Clear sky','☀️'];
@@ -2945,6 +2958,7 @@ async function loadWeather(){
     const humidity=Number(current.relative_humidity_2m);
     const rain=Number(current.rain ?? current.precipitation);
     const wind=Number(current.wind_speed_10m);
+    currentWeather={condition,icon,temp,humidity,rain,wind,updatedAt:new Date()};
     if($('weatherIcon'))$('weatherIcon').textContent=icon;
     if($('weatherTemp'))$('weatherTemp').textContent=Number.isFinite(temp)?`${Math.round(temp)}°C`:'--°';
     if($('weatherCondition'))$('weatherCondition').textContent=condition;
@@ -2953,10 +2967,13 @@ async function loadWeather(){
     if($('weatherWind'))$('weatherWind').textContent=Number.isFinite(wind)?`${Math.round(wind)} km/h`:'-- km/h';
     if($('weatherUpdated'))$('weatherUpdated').textContent=`Updated ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',hour12:true})}`;
     if(content)content.classList.remove('hidden');
+    if($('reportPanel')?.classList.contains('active')&&preparedReportRows.length)renderSelectedShippingLine();
   }catch(err){
+    currentWeather=null;
     if(content)content.classList.add('hidden');
     if(error){error.textContent='Weather unavailable right now.';error.classList.remove('hidden');}
     if($('weatherUpdated'))$('weatherUpdated').textContent='Weather unavailable';
+    if($('reportPanel')?.classList.contains('active')&&preparedReportRows.length)renderSelectedShippingLine();
   }
 }
 
