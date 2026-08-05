@@ -46,6 +46,8 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
 @media print{body{background:#fff}.topbar,.tabs,.report-actions,.controls,.status{display:none!important}.app{max-width:none;padding:0}.panel{display:none!important}#reportPanel{display:block!important}.section{box-shadow:none;break-inside:avoid}.chart{height:260px}}
 
 .report-filter-bar{gap:12px;flex-wrap:wrap}.line-jpg-btn{margin-left:auto;white-space:nowrap}.overall-table th:nth-child(2),.overall-table td:nth-child(2),.overall-table th:nth-child(3),.overall-table td:nth-child(3){text-align:right}.overall-table .overall-percent{font-size:15px;font-weight:950;color:#146c2e;white-space:nowrap}
+.overall-table .overall-ratio-row td{background:#edf5ef;font-weight:900}
+.overall-table .overall-ratio-row .overall-value{color:#176b43;white-space:nowrap}
 .overall-table .overall-percent.damage-threshold-red{
   color:#b42318!important;
   background:#fff1f0!important;
@@ -53,7 +55,7 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
 }
 .overall-yard21-row{
   display:grid;
-  grid-template-columns:50% 25% 25%;
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   padding:11px 13px;
   border-top:1px solid #dbe4ef;
@@ -71,7 +73,6 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
   font-weight:950;
   text-align:right;
 }
-.overall-yard21-percent{text-align:right}
 .line-report-table .main-summary-value{
   font-weight:950;
   color:var(--navy);
@@ -212,16 +213,24 @@ body.mobile-app{
 .mobile-app .line-card .count{font-size:21px}
 .mobile-app .line-card .inventory-share{padding:2px 4px;font-size:7px}
 .mobile-app .line-card small{font-size:7px}
+.yard21-box{
+  margin-top:9px;
+  border:1px solid #cbd8e7;
+  border-radius:13px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 5px 14px rgba(15,47,95,.05);
+}
 .yard21-summary-card{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-top:9px;
+  margin:0;
   padding:10px 12px;
-  border:1px solid #d8e3ef;
-  border-radius:12px;
-  background:linear-gradient(180deg,#fff,#f6f9fd);
+  border:0;
+  border-radius:0;
+  background:linear-gradient(180deg,#f8fbff,#eef4fb);
 }
 .yard21-summary-card span{
   display:block;
@@ -245,10 +254,24 @@ body.mobile-app{
   line-height:1;
   font-weight:950;
 }
-.mobile-app .yard21-summary-card{padding:9px 10px;margin-top:7px}
+.mobile-app .yard21-box{margin-top:7px}
+.mobile-app .yard21-summary-card{padding:9px 10px;margin:0}
 .mobile-app .yard21-summary-card span{font-size:8px}
 .mobile-app .yard21-summary-card small{font-size:7px}
 .mobile-app .yard21-summary-card strong{font-size:22px}
+
+/* Yard 2.1 size breakdown */
+.yard21-breakdown-wrap{margin:0;border:0;border-top:1px solid #d8e3ef;border-radius:0;overflow:hidden;background:#fff}
+.yard21-breakdown-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse}
+.yard21-breakdown-table th,.yard21-breakdown-table td{padding:8px 7px;border-bottom:1px solid #e5eaf1;text-align:right}
+.yard21-breakdown-table th{background:#eef4fb;color:#344054;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.04em}
+.yard21-breakdown-table th:first-child,.yard21-breakdown-table td:first-child{text-align:left;width:30%}
+.yard21-breakdown-table td{color:#344054;font-size:10px;font-weight:800}
+.yard21-breakdown-table td:not(:first-child){color:var(--navy);font-weight:950}
+.yard21-breakdown-table tbody tr:last-child td{border-bottom:0}
+.yard21-breakdown-table .yard21-total-row td{background:#f1f6fc;font-weight:950}
+.mobile-app .yard21-breakdown-table th{font-size:7px;padding:7px 5px}
+.mobile-app .yard21-breakdown-table td{font-size:9px;padding:7px 5px}
 
 /* Inventory distribution */
 .mobile-app .distribution-section{padding:13px}
@@ -637,6 +660,15 @@ body.mobile-app{
   .movement-summary-item strong{font-size:10px}
 }
 
+
+
+/* Compact Cavite weather card */
+.weather-card{padding:10px 12px!important;overflow:hidden;background:linear-gradient(135deg,#eef6ff,#f7fbff);border-color:#cfdeef}
+.weather-compact{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px}
+.weather-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid #d9e6f2;font-size:20px}
+.weather-summary{min-width:0}.weather-summary-top{display:flex;align-items:baseline;gap:7px;min-width:0}.weather-temp{font-size:27px;line-height:1;font-weight:950;color:var(--navy);letter-spacing:-.04em}.weather-condition{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17365f;font-size:11px;font-weight:950}.weather-meta{margin-top:3px;color:#667085;font-size:7.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weather-quick{display:grid;grid-template-columns:repeat(3,auto);gap:6px;align-items:center}.weather-quick span{padding:5px 6px;border:1px solid #dbe5f0;border-radius:8px;background:rgba(255,255,255,.8);color:#475467;font-size:7px;font-weight:900;white-space:nowrap}.weather-quick strong{color:#173f73;font-size:8px}.weather-error{padding:7px 8px;border:1px solid #efd99e;border-radius:8px;background:#fff8e6;color:#7a4d00;font-size:8px;font-weight:800}
+@media(max-width:370px){.weather-compact{grid-template-columns:auto minmax(0,1fr)}.weather-quick{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.weather-quick span{text-align:center}}
 </style>
 </head>
 <body class="mobile-app">
@@ -651,6 +683,21 @@ body.mobile-app{
 </nav>
 
 <section id="summaryPanel" class="panel active">
+  <div class="section weather-card" id="weatherSection">
+    <div id="weatherContent" class="weather-compact">
+      <div id="weatherIcon" class="weather-icon">☁️</div>
+      <div class="weather-summary">
+        <div class="weather-summary-top"><div id="weatherTemp" class="weather-temp">--°</div><div id="weatherCondition" class="weather-condition">Loading…</div></div>
+        <div class="weather-meta">General Trias, Cavite · <span id="weatherUpdated">Updating…</span></div>
+      </div>
+      <div class="weather-quick">
+        <span>Humidity <strong id="weatherHumidity">--%</strong></span>
+        <span>Rain <strong id="weatherRain">-- mm</strong></span>
+        <span>Wind <strong id="weatherWind">-- km/h</strong></span>
+      </div>
+    </div>
+    <div id="weatherError" class="weather-error hidden">Weather unavailable.</div>
+  </div>
   <div class="section">
     <div class="section-head"><div><h2>Latest Yard Activity</h2><small id="lastUpdated">Connecting…</small></div></div>
     <div class="metrics empty-activity-row">
@@ -688,11 +735,19 @@ body.mobile-app{
   <div class="section">
     <div class="section-head"><div><h2>Inventory by Shipping Line for BACAO and ENLIN</h2><small id="shippingLineAsOf">As of —</small></div></div>
     <div id="shippingLineCards" class="lines"></div>
-    <div class="yard21-summary-card">
-      <div>
-        <span>Yard 2.1 Containers</span>
+    <div class="yard21-box" aria-label="Yard 2.1 container summary and size breakdown">
+      <div class="yard21-summary-card">
+        <div>
+          <span>Yard 2.1 Containers</span>
+        </div>
+        <strong id="yard21ContainerCount">0</strong>
       </div>
-      <strong id="yard21ContainerCount">0</strong>
+      <div class="yard21-breakdown-wrap">
+        <table class="yard21-breakdown-table">
+          <thead><tr><th>Shipping Line</th><th>20ST</th><th>20OT</th><th>40ST</th><th>40HC</th><th>Total</th></tr></thead>
+          <tbody id="yard21BreakdownBody"><tr><td colspan="6" class="empty">Waiting for data…</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div class="section distribution-section">
@@ -772,11 +827,10 @@ body.mobile-app{
         <div class="overall-card">
           <div id="overallCaptureArea" class="overall-capture-area">
             <div class="overall-title"><span>▥</span> Overall Summary</div>
-            <table class="overall-table"><thead><tr><th>Item</th><th>Value</th><th>%</th></tr></thead><tbody id="overallReportBody"></tbody></table>
+            <table class="overall-table"><thead><tr><th>Item</th><th>Volume</th></tr></thead><tbody id="overallReportBody"></tbody></table>
             <div class="overall-yard21-row">
               <span class="overall-yard21-label">Yard 2.1 Containers</span>
               <strong id="overallYard21Value" class="overall-yard21-value">0</strong>
-              <span class="overall-yard21-percent"></span>
             </div>
           </div>
           <div class="overall-jpg-actions">
@@ -1132,6 +1186,58 @@ function yard21ContainerCount(record){
     if(loc==='YARD-2.1'||loc.startsWith('YARD-2.1-'))count++;
   }
   return count;
+}
+
+function containerSizeType(row){
+  return String(
+    row?.sizeType??row?.SizeType??row?.SIZE_TYPE??row?.size_type??
+    row?.containerSizeType??row?.ContainerSizeType??
+    fieldByPattern(row,[/^size.?type$/i,/container.*size/i,/^size$/i,/equipment.*type/i])
+  ).trim().toUpperCase().replace(/\s+/g,'');
+}
+
+function yard21SizeBreakdown(record){
+  const byLine={};
+  for(const row of inventoryRecords(record)){
+    const loc=inventoryRowLocation(row);
+    if(!(loc==='YARD-2.1'||loc.startsWith('YARD-2.1-')))continue;
+    const line=recordLine(row)||'UNASSIGNED';
+    if(!byLine[line])byLine[line]={size20ST:0,size20OT:0,size40ST:0,size40HC:0};
+    const size=containerSizeType(row);
+    if(size==='20ST')byLine[line].size20ST++;
+    if(size==='20OT')byLine[line].size20OT++;
+    if(size==='40ST')byLine[line].size40ST++;
+    if(size==='40HC')byLine[line].size40HC++;
+  }
+  const preferred=inventoryCardLines();
+  const order=new Map(preferred.map((line,index)=>[line,index]));
+  return Object.entries(byLine)
+    .map(([line,stats])=>({line,...stats}))
+    .sort((a,b)=>{
+      const ai=order.has(a.line)?order.get(a.line):999;
+      const bi=order.has(b.line)?order.get(b.line):999;
+      return ai-bi||displayLineName(a.line).localeCompare(displayLineName(b.line));
+    });
+}
+
+function renderYard21Breakdown(record){
+  const body=$('yard21BreakdownBody');
+  if(!body)return;
+  const rows=yard21SizeBreakdown(record);
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="6" class="empty">No Yard 2.1 containers found.</td></tr>';
+    return;
+  }
+  const totals=rows.reduce((acc,row)=>{
+    acc.size20ST+=row.size20ST;
+    acc.size20OT+=row.size20OT;
+    acc.size40ST+=row.size40ST;
+    acc.size40HC+=row.size40HC;
+    return acc;
+  },{size20ST:0,size20OT:0,size40ST:0,size40HC:0});
+  const grandTotal=totals.size20ST+totals.size20OT+totals.size40ST+totals.size40HC;
+  body.innerHTML=rows.map(row=>{const rowTotal=row.size20ST+row.size20OT+row.size40ST+row.size40HC;return `<tr><td>${row.line==='UNASSIGNED'?'Unassigned':displayLineName(row.line)}</td><td>${fmt(row.size20ST)}</td><td>${fmt(row.size20OT)}</td><td>${fmt(row.size40ST)}</td><td>${fmt(row.size40HC)}</td><td>${fmt(rowTotal)}</td></tr>`;}).join('')+
+    `<tr class="yard21-total-row"><td>TOTAL</td><td>${fmt(totals.size20ST)}</td><td>${fmt(totals.size20OT)}</td><td>${fmt(totals.size40ST)}</td><td>${fmt(totals.size40HC)}</td><td>${fmt(grandTotal)}</td></tr>`;
 }
 
 function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
@@ -2532,21 +2638,20 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
     const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
     const reportYard21Inventory=Math.max(0,yard21ContainerCount(inventorySnapshot));
     const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
-    const pctOfTotal=value=>reportTotalInventory>0?(num(value)/reportTotalInventory)*100:0;
 
-    // HRD Available and Damage percentages use Total Empty Containers for HRD as 100%.
+    // HRD Available/Damage ratio uses Total Empty Containers for HRD as 100%.
     const pctOfHrdEmpty=value=>hrdEmpty>0?(num(value)/hrdEmpty)*100:0;
     const hrdAvailablePct=pctOfHrdEmpty(hrdAvailable);
     const hrdDamagePct=pctOfHrdEmpty(hrdDamage);
-    const weeklyDamagePctClass=(reportMode==='weekly'&&hrdDamagePct<=25)?' damage-threshold-red':'';
 
     $('overallReportBody').innerHTML=`
-      <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td><td class="overall-percent">${hrdAvailablePct.toFixed(2)}%</td></tr>
-      <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td><td class="overall-percent${weeklyDamagePctClass}">${hrdDamagePct.toFixed(2)}%</td></tr>
-      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td><td></td></tr>
-      <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td><td class="overall-percent">${pctOfTotal(otherEmpty).toFixed(2)}%</td></tr>
-      <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td><td class="overall-percent">${pctOfTotal(reportLoadedInventory).toFixed(2)}%</td></tr>
-      <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td><td class="overall-percent">${reportTotalInventory>0?'100.00%':'0.00%'}</td></tr>`;
+      <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td></tr>
+      <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td></tr>
+      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td></tr>
+      <tr class="overall-ratio-row"><td>HRD Containers Available/Damage Ratio</td><td class="overall-value">${hrdAvailablePct.toFixed(2)}% / ${hrdDamagePct.toFixed(2)}%</td></tr>
+      <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td></tr>
+      <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td></tr>
+      <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td></tr>`;
     if($('overallYard21Value'))$('overallYard21Value').textContent=fmt(reportYard21Inventory);
   }
 
@@ -2810,13 +2915,58 @@ function exportReportCsv(){
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
+const WEATHER_ENDPOINT='https://api.open-meteo.com/v1/forecast?latitude=14.3214&longitude=120.9073&current=temperature_2m,relative_humidity_2m,precipitation,rain,weather_code,wind_speed_10m&timezone=Asia%2FManila&forecast_days=1';
+function weatherDescription(code){
+  const c=Number(code);
+  if(c===0)return['Clear sky','☀️'];
+  if(c===1)return['Mainly clear','🌤️'];
+  if(c===2)return['Partly cloudy','⛅'];
+  if(c===3)return['Overcast','☁️'];
+  if(c===45||c===48)return['Foggy','🌫️'];
+  if([51,53,55,56,57].includes(c))return['Drizzle','🌦️'];
+  if([61,63,65,66,67].includes(c))return['Rain','🌧️'];
+  if([71,73,75,77].includes(c))return['Snow','🌨️'];
+  if([80,81,82].includes(c))return['Rain showers','🌦️'];
+  if([85,86].includes(c))return['Snow showers','🌨️'];
+  if([95,96,99].includes(c))return['Thunderstorm','⛈️'];
+  return['Current weather','🌤️'];
+}
+async function loadWeather(){
+  const error=$('weatherError'),content=$('weatherContent');
+  try{
+    if(error)error.classList.add('hidden');
+    const response=await fetch(WEATHER_ENDPOINT,{cache:'no-store'});
+    if(!response.ok)throw new Error(`Weather service ${response.status}`);
+    const data=await response.json();
+    const current=data?.current||{};
+    const [condition,icon]=weatherDescription(current.weather_code);
+    const temp=Number(current.temperature_2m);
+    const humidity=Number(current.relative_humidity_2m);
+    const rain=Number(current.rain ?? current.precipitation);
+    const wind=Number(current.wind_speed_10m);
+    if($('weatherIcon'))$('weatherIcon').textContent=icon;
+    if($('weatherTemp'))$('weatherTemp').textContent=Number.isFinite(temp)?`${Math.round(temp)}°C`:'--°';
+    if($('weatherCondition'))$('weatherCondition').textContent=condition;
+    if($('weatherHumidity'))$('weatherHumidity').textContent=Number.isFinite(humidity)?`${Math.round(humidity)}%`:'--%';
+    if($('weatherRain'))$('weatherRain').textContent=Number.isFinite(rain)?`${rain.toFixed(1)} mm`:'-- mm';
+    if($('weatherWind'))$('weatherWind').textContent=Number.isFinite(wind)?`${Math.round(wind)} km/h`:'-- km/h';
+    if($('weatherUpdated'))$('weatherUpdated').textContent=`Updated ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',hour12:true})}`;
+    if(content)content.classList.remove('hidden');
+  }catch(err){
+    if(content)content.classList.add('hidden');
+    if(error){error.textContent='Weather unavailable right now.';error.classList.remove('hidden');}
+    if($('weatherUpdated'))$('weatherUpdated').textContent='Weather unavailable';
+  }
+}
+
 function stamp(record){const raw=record?.fetchedAt||record?.lastUpdated||record?.generatedAt;return raw?new Date(raw).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'No timestamp available';}
 async function loadLatest(){try{const [data,loadedTotals,inventoryRecordsData,outgoingRecordsData]=await Promise.all([readLatestData(),readLoadedTotals(),readLatestInventoryRecords(),readLatestOutgoingRecords()]);if(!data&&!inventoryRecordsData&&!outgoingRecordsData)throw new Error('No data found in Firebase Latest');latestData={...(data||{})};if(loadedTotals)latestData.__loadedTotals=loadedTotals;if(inventoryRecordsData)latestData.__inventoryRecords=inventoryRecordsData;if(outgoingRecordsData)latestData.__outgoingRecords=outgoingRecordsData;renderLatest();setConnection(true,'Connected');const emptyMessage=inventoryRecordsData?'':'';const loadedMessage=loadedTotals?'':'';const repairedMessage=outgoingRecordsData?'':'';setStatus('summaryStatus',emptyMessage+loadedMessage+repairedMessage,!inventoryRecordsData||!loadedTotals);}catch(e){setConnection(false,'Connection Error');setStatus('summaryStatus',e.message,true);}}
 async function refreshAll(){
   const btn=$('refreshBtn');
   if(btn){btn.disabled=true;btn.textContent='Refreshing…';}
   try{
-    await loadLatest();
+    await Promise.allSettled([loadLatest(),loadWeather()]);
     if($('reportPanel').classList.contains('active'))await loadHistory();
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Refresh Now';}
@@ -2839,6 +2989,7 @@ function renderLatest(){
   $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
   $('shippingLineAsOf').textContent=`As of ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}`;
   $('yard21ContainerCount').textContent=fmt(yard21ContainerCount(latestData));
+  renderYard21Breakdown(latestData);
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
   const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div></div>`).join('');
@@ -3036,7 +3187,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(right,1);
 }
 const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
