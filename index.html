@@ -2925,10 +2925,7 @@ function reportWeatherText(){
   if(!currentWeather)return 'Weather unavailable';
   const w=currentWeather;
   const temp=Number.isFinite(w.temp)?`${Math.round(w.temp)}°C`:'--°';
-  const humidity=Number.isFinite(w.humidity)?`${Math.round(w.humidity)}%`:'--%';
-  const rain=Number.isFinite(w.rain)?`${w.rain.toFixed(1)} mm`:'-- mm';
-  const wind=Number.isFinite(w.wind)?`${Math.round(w.wind)} km/h`:'-- km/h';
-  return `${w.icon||'🌤️'} ${temp} • ${w.condition||'Current weather'} • Humidity ${humidity} • Rain ${rain} • Wind ${wind}`;
+  return `${w.icon||'🌤️'} ${temp} • ${w.condition||'Current weather'}`;
 }
 function weatherDescription(code){
   const c=Number(code);
