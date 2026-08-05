@@ -753,7 +753,7 @@ body.mobile-app{
       <span class="release"><i></i>Empty Release</span>
       <span class="loaded-in"><i></i>Loaded Incoming</span>
       <span class="loaded-out"><i></i>Loaded Outgoing</span>
-      <span class="per24"><i></i>Total ÷ 24</span>
+      <span class="per24"><i></i>Total Average Movement</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -3035,7 +3035,8 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(left,-1);
   drawCalloutGroup(right,1);
 }
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
