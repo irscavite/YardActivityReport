@@ -1290,8 +1290,60 @@ for(const row of movementRows(record,type)){const line=normalizeLine(row?.Client
 function share(value,totalMovement){return totalMovement>0?value/totalMovement*100:0;}
 function isoLocal(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10);}
 function parseLocal(s){const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);}
-function reportRange(){const base=parseLocal($('reportDate').value||isoLocal(new Date()));let start=new Date(base),end=new Date(base);if(reportMode==='weekly'){const day=base.getDay();start.setDate(base.getDate()-day);end=new Date(start);end.setDate(start.getDate()+6);}else if(reportMode==='monthly'){start=new Date(base.getFullYear(),0,1);end=new Date(base.getFullYear(),11,31);}return{start:isoLocal(start),end:isoLocal(end)};}
-function setReportMode(mode){reportMode=mode;for(const m of ['daily','weekly','monthly'])$(m+'Mode').classList.toggle('active',m===mode);renderReport();}
+function startOfSundayWeek(date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
+function endOfSundayWeek(date){const d=startOfSundayWeek(date);d.setDate(d.getDate()+6);return d;}
+function lastCompletedWeekReference(){const d=startOfSundayWeek(new Date());d.setDate(d.getDate()-1);return d;}
+function lastCompletedMonthReference(){const now=new Date();return new Date(now.getFullYear(),now.getMonth(),0);}
+function sundayWeekNumber(date){
+  const d=new Date(date);
+  const firstWeekStart=startOfSundayWeek(new Date(d.getFullYear(),0,1));
+  const thisWeekStart=startOfSundayWeek(d);
+  return Math.floor((thisWeekStart-firstWeekStart)/604800000)+1;
+}
+function monthWeekBuckets(baseDate){
+  const year=baseDate.getFullYear(),month=baseDate.getMonth();
+  const monthStart=new Date(year,month,1);
+  const monthEnd=new Date(year,month+1,0);
+  const firstWeek=startOfSundayWeek(monthStart);
+  const lastWeek=endOfSundayWeek(monthEnd);
+  const buckets=[];
+  for(let cursor=new Date(firstWeek);cursor<=lastWeek;cursor.setDate(cursor.getDate()+7)){
+    const weekStart=new Date(cursor);
+    const weekEnd=endOfSundayWeek(weekStart);
+    const weekNo=sundayWeekNumber(weekStart);
+    buckets.push({
+      weekNo,
+      label:`Week ${weekNo}`,
+      shortLabel:`W${weekNo}`,
+      start:isoLocal(weekStart),
+      end:isoLocal(weekEnd)
+    });
+  }
+  return buckets;
+}
+function reportRange(){
+  const base=parseLocal($('reportDate').value||isoLocal(new Date()));
+  let start=new Date(base),end=new Date(base);
+  if(reportMode==='weekly'){
+    start=startOfSundayWeek(base);
+    end=endOfSundayWeek(base);
+  }else if(reportMode==='monthly'){
+    const buckets=monthWeekBuckets(base);
+    if(buckets.length){
+      start=parseLocal(buckets[0].start);
+      end=parseLocal(buckets[buckets.length-1].end);
+    }
+  }
+  return{start:isoLocal(start),end:isoLocal(end)};
+}
+function setReportMode(mode){
+  reportMode=mode;
+  for(const m of ['daily','weekly','monthly'])$(m+'Mode').classList.toggle('active',m===mode);
+  if(mode==='weekly')$('reportDate').value=isoLocal(lastCompletedWeekReference());
+  else if(mode==='monthly')$('reportDate').value=isoLocal(lastCompletedMonthReference());
+  else if(mode==='daily')$('reportDate').value=isoLocal(new Date());
+  renderReport();
+}
 function objectLines(obj){return obj&&typeof obj==='object'?Object.keys(obj).map(normalizeLine).filter(Boolean):[];}
 function discoverLines(records){const set=new Set();for(const {record} of records){const sources=[record?.inventory?.byShippingLine,record?.inventoryByShippingLine,record?.byShippingLine,record?.incoming?.byShippingLine,record?.outgoing?.byShippingLine,record?.incomingByShippingLine,record?.outgoingByShippingLine];sources.forEach(x=>objectLines(x).forEach(v=>set.add(v)));for(const row of inventoryRecords(record)){const v=recordLine(row);if(v)set.add(v);}for(const type of ['incoming','outgoing'])for(const row of movementRows(record,type)){const v=recordLine(row);if(v)set.add(v);}}return [...set].sort();}
 function recordStatus(row){
@@ -1446,6 +1498,151 @@ function repairContainerIdentity(row){
   ]);
   return String(direct??fallback??'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
 }
+function normalizeLifecycleDateIn(value){
+  // Lifecycle identity uses Container Number + DATE IN.
+  // Ignore the time portion so "08/04/2026" and "08/04/2026 11:15"
+  // refer to the same container stay.
+  const raw=String(value??'').trim();
+  if(!raw)return'';
+  const first=raw.split(/[T\s]+/)[0];
+
+  let match=first.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+  if(match)return repairIsoDate(match[1],match[2],match[3]);
+
+  match=first.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/);
+  if(match)return repairIsoDate(match[3],match[1],match[2]);
+
+  // Keep a normalized fallback instead of dropping a usable DATE IN.
+  return first.toUpperCase();
+}
+function lifecycleDateIn(row){
+  const direct=row?.dateIn??row?.DateIn??row?.DATEIN??row?.DATE_IN??
+    row?.date_in??row?.gateInDate??row?.GateInDate??row?.inDate??row?.InDate;
+  const fallback=fieldByPattern(row,[/^date\s*in$/i,/^date[_-]?in$/i,/gate.*in.*date/i,/^in.*date$/i]);
+  return normalizeLifecycleDateIn(direct??fallback??'');
+}
+function lifecycleSourceGroups(){
+  const groups=[];
+  const today=isoLocal(new Date());
+  const latestSnapshot=normalizeDateKey('',latestData)||latestData?.recordDate||today;
+
+  if(latestData&&typeof latestData==='object'){
+    // Incoming is used only to resolve DATE IN for same-day containers that
+    // were already repaired/released before the end-of-day Inventory snapshot.
+    groups.push({rows:movementRows(latestData,'incoming'),snapshotDate:latestSnapshot,type:'incoming'});
+    groups.push({rows:exactLatestRepairRows('inventory'),snapshotDate:latestSnapshot,type:'inventory'});
+    groups.push({rows:exactLatestRepairRows('outgoing'),snapshotDate:latestSnapshot,type:'outgoing'});
+  }
+
+  for(const [key,record] of Object.entries(historyData||{})){
+    const snapshotDate=normalizeDateKey(key,record)||key;
+    groups.push({rows:movementRows(record,'incoming'),snapshotDate,type:'incoming'});
+    groups.push({rows:exactHistoricalRepairRows(record,'inventory'),snapshotDate,type:'inventory'});
+    groups.push({rows:exactHistoricalRepairRows(record,'outgoing'),snapshotDate,type:'outgoing'});
+  }
+  return groups;
+}
+function buildLifecycleDateInLookup(groups=lifecycleSourceGroups()){
+  const lookup=new Map();
+  for(const group of groups){
+    for(const row of group.rows||[]){
+      const container=repairContainerIdentity(row);
+      const dateIn=lifecycleDateIn(row);
+      if(!container||!dateIn)continue;
+      const line=recordLine(row);
+      if(!lookup.has(container))lookup.set(container,[]);
+      lookup.get(container).push({
+        snapshotDate:group.snapshotDate||'',
+        dateIn,
+        line
+      });
+    }
+  }
+  for(const items of lookup.values()){
+    items.sort((a,b)=>String(a.snapshotDate).localeCompare(String(b.snapshotDate)));
+  }
+  return lookup;
+}
+function lifecycleCandidate(container,asOfDate,lookup){
+  const items=lookup?.get?.(container)||[];
+  if(!items.length)return null;
+  const target=String(asOfDate||'');
+  if(target){
+    let selected=null;
+    for(const item of items){
+      if(String(item.snapshotDate||'')<=target)selected=item;
+      else break;
+    }
+    if(selected)return selected;
+  }
+  return items[items.length-1]||items[0]||null;
+}
+function resolvedLifecycleDateIn(row,asOfDate,lookup){
+  const direct=lifecycleDateIn(row);
+  if(direct)return direct;
+  const container=repairContainerIdentity(row);
+  return lifecycleCandidate(container,asOfDate,lookup)?.dateIn||'';
+}
+function resolvedLifecycleLine(row,asOfDate,lookup){
+  const direct=recordLine(row);
+  if(direct)return direct;
+  const container=repairContainerIdentity(row);
+  return lifecycleCandidate(container,asOfDate,lookup)?.line||'';
+}
+function lifecycleIdentity(row,asOfDate,lookup){
+  const container=repairContainerIdentity(row);
+  if(!container)return'';
+  const dateIn=resolvedLifecycleDateIn(row,asOfDate,lookup);
+  if(!dateIn)return'';
+  return `${container}|${dateIn}`;
+}
+function repairedLifecycleEvents(){
+  const groups=lifecycleSourceGroups();
+  const lookup=buildLifecycleDateInLookup(groups);
+  const defaultYear=new Date().getFullYear();
+  const byLifecycle=new Map();
+
+  for(const group of groups){
+    // Repair events themselves still come only from Inventory/Outgoing.
+    // Incoming is lookup-only so a same-day DATE IN can be recovered.
+    if(group.type==='incoming')continue;
+    for(const row of group.rows||[]){
+      const container=repairContainerIdentity(row);
+      if(!container)continue;
+      const rawRemarks=row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??
+        fieldByPattern(row,[/^remarks?$/i,/remark/i]);
+      const dates=repairedDatesFromRemarks(rawRemarks,defaultYear);
+      if(!dates.length)continue;
+
+      for(const repairDate of dates){
+        // Same Container Number + same DATE IN = one repaired lifecycle.
+        // The same Container Number with a new DATE IN is a new count.
+        const dateIn=resolvedLifecycleDateIn(row,repairDate||group.snapshotDate,lookup);
+        if(!dateIn)continue;
+        const key=`${container}|${dateIn}`;
+        const line=resolvedLifecycleLine(row,repairDate||group.snapshotDate,lookup);
+        if(!line)continue;
+
+        const existing=byLifecycle.get(key);
+        if(!existing||repairDate<existing.repairDate){
+          byLifecycle.set(key,{key,container,dateIn,repairDate,line});
+        }
+      }
+    }
+  }
+  return [...byLifecycle.values()].sort((a,b)=>
+    a.repairDate.localeCompare(b.repairDate)||a.key.localeCompare(b.key)
+  );
+}
+function repairedCountsFromLifecycleEvents(events,start,end){
+  const counts={};
+  for(const event of events||[]){
+    if(event.repairDate<start||event.repairDate>end)continue;
+    counts[event.line]=(counts[event.line]||0)+1;
+  }
+  return counts;
+}
+
 function recordCollection(node){
   if(Array.isArray(node))return node.filter(row=>row&&typeof row==='object'&&!Array.isArray(row));
   if(node&&typeof node==='object')return Object.values(node).filter(row=>row&&typeof row==='object'&&!Array.isArray(row));
@@ -1478,59 +1675,9 @@ function exactHistoricalRepairRows(record,type){
   // Exact Firebase source: records -> [date] -> Inventory/Outgoing -> Records.
   return recordCollection(block?.Records??block?.records);
 }
-function repairedCountsForRange(start,end){
-  const counts={};
-  const defaultYear=new Date().getFullYear();
-  const sourceGroups=[];
-
-  // The repaired count is intentionally limited to these four Firebase sources:
-  // 1) Latest -> Outgoing -> records -> Remarks
-  // 2) Latest -> Inventory -> records -> Remarks
-  // 3) records -> [date] -> Outgoing -> Records -> Remarks
-  // 4) records -> [date] -> Inventory -> Records -> Remarks
-  sourceGroups.push(exactLatestRepairRows('outgoing'));
-  sourceGroups.push(exactLatestRepairRows('inventory'));
-  for(const record of Object.values(historyData||{})){
-    sourceGroups.push(exactHistoricalRepairRows(record,'outgoing'));
-    sourceGroups.push(exactHistoricalRepairRows(record,'inventory'));
-  }
-
-  // Build a shipping-line lookup first because Outgoing rows may no longer
-  // contain Client/Shipping Line after the container leaves Inventory.
-  const lineByContainer=new Map();
-  for(const rows of sourceGroups){
-    for(const row of rows){
-      const container=repairContainerIdentity(row);
-      const line=recordLine(row);
-      if(container&&line&&!lineByContainer.has(container))lineByContainer.set(container,line);
-    }
-  }
-
-  // Repaired event deduplication:
-  // - Same Container Number + same Repair Date = count once, even when the
-  //   event appears in more than one Firebase source.
-  // - Same Container Number + different Repair Date = count separately.
-  const seenRepairEvents=new Set();
-  for(const rows of sourceGroups){
-    for(const row of rows){
-      const container=repairContainerIdentity(row);
-      if(!container)continue;
-      const remarks=row?.Remarks??row?.remarks??row?.REMARKS??row?.Remark??row?.remark??fieldByPattern(row,[/^remarks?$/i,/remark/i]);
-      const dates=repairedDatesFromRemarks(remarks,defaultYear);
-      if(!dates.length)continue;
-      const line=recordLine(row)||lineByContainer.get(container)||'';
-      if(!line)continue;
-
-      for(const repairDate of dates){
-        if(repairDate<start||repairDate>end)continue;
-        const eventKey=`${container}|${repairDate}`;
-        if(seenRepairEvents.has(eventKey))continue;
-        seenRepairEvents.add(eventKey);
-        counts[line]=(counts[line]||0)+1;
-      }
-    }
-  }
-  return counts;
+function repairedCountsForRange(start,end,repairEvents){
+  const events=repairEvents||repairedLifecycleEvents();
+  return repairedCountsFromLifecycleEvents(events,start,end);
 }
 
 
@@ -1642,11 +1789,13 @@ function weeklySnapshotForDate(date,byDate,today){
   return byDate.get(date)||null;
 }
 
-function approvedInventoryOutgoingCounts(record){
+function approvedInventoryOutgoingCounts(record,asOfDate){
   const counts={CMA:0,ONE:0,MAERSK:0};
   const seen=new Set();
   if(!record)return{counts,total:0};
 
+  const lookup=buildLifecycleDateInLookup();
+  const snapshotDate=asOfDate||normalizeDateKey('',record)||record?.recordDate||'';
   const groups=[
     {rows:inventoryRecords(record),inventory:true},
     {rows:movementRows(record,'outgoing'),inventory:false}
@@ -1655,14 +1804,15 @@ function approvedInventoryOutgoingCounts(record){
   for(const group of groups){
     for(const row of group.rows){
       if(!row||typeof row!=='object')continue;
-      const line=recordLine(row);
+      const line=recordLine(row)||resolvedLifecycleLine(row,snapshotDate,lookup);
       if(!APPROVED_REPORT_LINES.has(line))continue;
       if(group.inventory&&!includeInSummaryInventory(row))continue;
       if(!isApprovedInventoryRecord(row))continue;
 
-      const id=recordContainerIdentity(row)||approvedRecordIdentity(row);
-      const fallback=`${line}|${recordRemarks(row)}|${row?.dateOut??row?.DateOut??row?.dateIn??row?.DateIn??''}`;
-      const key=id||fallback;
+      // Current Approved deduplication follows the lifecycle:
+      // same Container + same DATE IN = 1; new DATE IN = a new count.
+      const key=lifecycleIdentity(row,snapshotDate,lookup);
+      if(!key)continue;
       if(seen.has(key))continue;
       seen.add(key);
       counts[line]=(counts[line]||0)+1;
@@ -1674,32 +1824,65 @@ function approvedInventoryOutgoingCounts(record){
     total:['CMA','ONE','MAERSK'].reduce((sum,line)=>sum+num(counts[line]),0)
   };
 }
-function weeklyRepairDailyRows(start,end,periodRows,approvedEvents){
+function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents){
   const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
   const today=isoLocal(new Date());
   const dates=dateRangeDays(start,end);
+  const repairs=repairEvents||repairedLifecycleEvents();
+  let previousTotalApproved=0;
 
   return dates.map(date=>{
-    const source=weeklySnapshotForDate(date,byDate,today);
-    const approved=approvedInventoryOutgoingCounts(source);
+    // In the current weekly view, future dates stay visually empty until
+    // that calendar day actually arrives. Keep the day/date label, but do
+    // not fabricate a zero, repeat yesterday's Total Approved, or draw a
+    // future line point/bar.
+    const hasArrived=date<=today;
+    if(!hasArrived){
+      return{
+        date,
+        approvedBase:null,
+        approvedByLine:{CMA:0,ONE:0,MAERSK:0},
+        repaired:null,
+        cumulativeRepaired:null,
+        totalApproved:null,
+        cumulativeApproved:null,
+        activityTotal:null,
+        pct:0,
+        hasSnapshot:false,
+        isFuture:true
+      };
+    }
 
-    // Temporary monitoring formula requested:
-    // Total Approved = Approved in Inventory + Approved in Outgoing + Repaired.
-    // Repaired is limited to the same APL/CMA, ONE and MAERSK scope.
-    const repairedByLine=repairedCountsForRange(date,date);
+    const source=weeklySnapshotForDate(date,byDate,today);
+    const approved=approvedInventoryOutgoingCounts(source,date);
+
+    // Repaired bar = repaired on this date only.
+    const repairedByLine=repairedCountsForRange(date,date,repairs);
     const repaired=sumApprovedScopeRepairCounts(repairedByLine);
-    const totalApproved=approved.total+repaired;
+
+    // Total Approved = Current Approved + ALL repaired accumulated from the
+    // first day of the selected period through this date.
+    const cumulativeRepairedByLine=repairedCountsForRange(start,date,repairs);
+    const cumulativeRepaired=sumApprovedScopeRepairCounts(cumulativeRepairedByLine);
+    const calculatedTotal=approved.total+cumulativeRepaired;
+
+    // Total Approved is cumulative monitoring. A later date must never erase
+    // an Approved lifecycle already represented by the previous date.
+    const totalApproved=Math.max(previousTotalApproved,calculatedTotal);
+    previousTotalApproved=totalApproved;
 
     return{
       date,
       approvedBase:approved.total,
       approvedByLine:approved.counts,
       repaired,
+      cumulativeRepaired,
       totalApproved,
       cumulativeApproved:totalApproved,
       activityTotal:totalApproved,
       pct:totalApproved>0?(repaired/totalApproved)*100:0,
-      hasSnapshot:!!source
+      hasSnapshot:!!source,
+      isFuture:false
     };
   });
 }
@@ -1711,36 +1894,45 @@ function monthBounds(year,monthIndex){
   const end=isoLocal(new Date(year,monthIndex+1,0));
   return{start,end};
 }
-function monthlyRepairRows(year,periodRows){
+function monthlyRepairRows(selectedDate,periodRows){
   const today=isoLocal(new Date());
-  const currentYear=new Date().getFullYear();
-  const currentMonth=new Date().getMonth();
-  const rowsByMonth=Array.from({length:12},()=>[]);
-  for(const item of periodRows||[]){
-    const d=parseLocal(item.date);
-    if(d.getFullYear()===year)rowsByMonth[d.getMonth()].push(item);
-  }
+  const buckets=monthWeekBuckets(selectedDate);
+  const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
+  const repairs=repairedLifecycleEvents();
+  const periodStart=buckets.length?buckets[0].start:isoLocal(new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1));
+  let previousTotalApproved=0;
 
-  return rowsByMonth.map((items,monthIndex)=>{
-    items.sort((a,b)=>a.date.localeCompare(b.date));
-    let source=items.length?items[items.length-1].record:null;
+  // Keep the live current-day snapshot available when the user manually
+  // selects the current month.
+  if(latestData)byDate.set(today,latestData);
 
-    // For the current month, prefer the live Latest snapshot.
-    if(year===currentYear&&monthIndex===currentMonth&&latestData&&inventoryRecords(latestData).length){
-      source=latestData;
+  return buckets.map(bucket=>{
+    const items=[];
+    for(const [date,record] of byDate.entries()){
+      if(date>=bucket.start&&date<=bucket.end)items.push({date,record});
     }
+    items.sort((a,b)=>a.date.localeCompare(b.date));
+    const source=items.length?items[items.length-1].record:null;
+    const sourceDate=items.length?items[items.length-1].date:'';
+    const approved=approvedInventoryOutgoingCounts(source,sourceDate);
 
-    const approved=approvedInventoryOutgoingCounts(source);
-    const bounds=monthBounds(year,monthIndex);
-    const repairedByLine=repairedCountsForRange(bounds.start,bounds.end);
+    // Green bar = repairs made inside this week bucket only.
+    const repairedByLine=repairedCountsForRange(bucket.start,bucket.end,repairs);
     const repaired=sumApprovedScopeRepairCounts(repairedByLine);
-    const totalApproved=approved.total+repaired;
+
+    // Blue Total Approved carries every repaired lifecycle forward from the
+    // start of the displayed monthly period. It must never go down.
+    const cumulativeRepairedByLine=repairedCountsForRange(periodStart,bucket.end,repairs);
+    const cumulativeRepaired=sumApprovedScopeRepairCounts(cumulativeRepairedByLine);
+    const calculatedTotal=approved.total+cumulativeRepaired;
+    const totalApproved=Math.max(previousTotalApproved,calculatedTotal);
+    previousTotalApproved=totalApproved;
 
     return{
-      monthIndex,
-      label:formatMonthLabel(monthIndex),
+      ...bucket,
       approvedBase:approved.total,
       repaired,
+      cumulativeRepaired,
       totalApproved,
       pct:totalApproved>0?(repaired/totalApproved)*100:0,
       hasSnapshot:!!source,
@@ -1758,31 +1950,33 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
 
   if(reportMode==='monthly'){
     const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
-    const year=selectedDate.getFullYear();
-    const selectedMonth=selectedDate.getMonth();
-    const months=monthlyRepairRows(year,periodRows);
-    const selected=months[selectedMonth]||{approvedBase:0,repaired:0,totalApproved:0};
+    const weeks=monthlyRepairRows(selectedDate,periodRows);
+    const availableWeeks=weeks.filter(row=>row.hasData);
+    const latestWeek=availableWeeks.length?availableWeeks[availableWeeks.length-1]:null;
+    const totalRepaired=weeks.reduce((sum,row)=>sum+row.repaired,0);
+    const approvedBase=latestWeek?.approvedBase||0;
+    const totalApproved=latestWeek?.totalApproved||0;
 
     if(repairedLabel)repairedLabel.textContent='Repaired This Month';
-    $('weeklyTotalApproved').textContent=fmt(selected.approvedBase||0);
-    $('weeklyTotalRepaired').textContent=fmt(selected.repaired||0);
-    $('weeklyLatestApprovedBasis').textContent=fmt(selected.totalApproved||0);
-    $('weeklyLatestApprovedNote').textContent='';
+    $('weeklyTotalApproved').textContent=fmt(approvedBase);
+    $('weeklyTotalRepaired').textContent=fmt(totalRepaired);
+    $('weeklyLatestApprovedBasis').textContent=fmt(totalApproved);
+    $('weeklyLatestApprovedNote').textContent=latestWeek?`${latestWeek.label}: ${formatShortDate(latestWeek.start)} - ${formatShortDate(latestWeek.end)}`:'';
 
     if(breakdown){
       breakdown.classList.add('monthly-breakdown');
-      breakdown.innerHTML=months.map(row=>{
-        const monthlyPercent=row.hasData?`${row.pct.toFixed(1)}%`:'—';
-        return `<div class="weekly-day-card"><div class="day">${row.label}</div><div class="repair-pct">${monthlyPercent}</div></div>`;
+      breakdown.innerHTML=weeks.map(row=>{
+        const weeklyPercent=row.hasData?`${row.pct.toFixed(1)}%`:'—';
+        return `<div class="weekly-day-card"><div class="day">${row.label}</div><div class="date">${formatShortDate(row.start)} - ${formatShortDate(row.end)}</div><div class="repair-pct">${weeklyPercent}</div></div>`;
       }).join('');
     }
 
     drawWeeklyRepairChart(
       'weeklyRepairChart',
-      months.map(row=>row.label),
-      months.map(row=>row.approvedBase),
-      months.map(row=>row.repaired),
-      months.map(row=>row.totalApproved)
+      weeks.map(row=>row.shortLabel),
+      weeks.map(row=>row.approvedBase),
+      weeks.map(row=>row.repaired),
+      weeks.map(row=>row.totalApproved)
     );
     return;
   }
@@ -1792,15 +1986,18 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
   }
 
   const events=approvedEvents||approvedEventLedger();
-  const days=weeklyRepairDailyRows(start,end,periodRows,events);
+  const repairEvents=repairedLifecycleEvents();
+  const days=weeklyRepairDailyRows(start,end,periodRows,events,repairEvents);
   const availableDays=days.filter(row=>row.hasSnapshot);
   const latest=availableDays.length?availableDays[availableDays.length-1]:null;
-  const totalRepaired=days.reduce((sum,row)=>sum+row.repaired,0);
+  const totalRepaired=days.reduce((sum,row)=>sum+num(row.repaired),0);
 
   $('weeklyTotalApproved').textContent=fmt(latest?.approvedBase||0);
   $('weeklyTotalRepaired').textContent=fmt(totalRepaired);
   $('weeklyLatestApprovedBasis').textContent=fmt(latest?.totalApproved||0);
-  $('weeklyLatestApprovedNote').textContent='';
+  $('weeklyLatestApprovedNote').textContent=reportMode==='weekly'
+    ?`Week ${sundayWeekNumber(parseLocal(start))}: ${formatShortDate(start)} - ${formatShortDate(end)}`
+    :'';
 
   if(breakdown){
     breakdown.classList.remove('monthly-breakdown');
@@ -1823,7 +2020,12 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
   const compact=w<420;
   const m={l:compact?38:52,r:14,t:30,b:46};
   const cw=w-m.l-m.r,ch=h-m.t-m.b;
-  const max=Math.max(1,...cumulative,...repaired);
+  // Null means "not yet available". Future weekly dates use null so they
+  // do not affect the scale and do not render as artificial zero values.
+  const plottedValues=[...cumulative,...repaired]
+    .filter(value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value)))
+    .map(Number);
+  const max=Math.max(1,...plottedValues);
   const step=cw/Math.max(1,labels.length);
   const bw=Math.min(compact?11:18,step*.24);
 
@@ -1851,8 +2053,10 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
 
   labels.forEach((label,i)=>{
     const cx=m.l+step*i+step/2;
-    const cumulativeValue=num(cumulative[i]);
-    const repairedValue=num(repaired[i]);
+    const hasCumulative=cumulative[i]!==null&&cumulative[i]!==undefined&&cumulative[i]!=='';
+    const hasRepaired=repaired[i]!==null&&repaired[i]!==undefined&&repaired[i]!=='';
+    const cumulativeValue=hasCumulative?num(cumulative[i]):0;
+    const repairedValue=hasRepaired?num(repaired[i]):0;
 
     const cumulativeHeight=ch*cumulativeValue/max;
     const repairedHeight=ch*repairedValue/max;
@@ -1860,16 +2064,20 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     const cumulativeX=cx-bw-2;
     const repairedX=cx+2;
 
-    // Total Approved bar.
-    ctx.fillStyle='#2855d9';
-    ctx.fillRect(cumulativeX,h-m.b,bw,-cumulativeHeight);
+    // Total Approved bar. Future dates are null, so no bar is drawn yet.
+    if(hasCumulative){
+      ctx.fillStyle='#2855d9';
+      ctx.fillRect(cumulativeX,h-m.b,bw,-cumulativeHeight);
+    }
 
-    // Repaired bar.
-    ctx.fillStyle='#176b43';
-    ctx.fillRect(repairedX,h-m.b,bw,-repairedHeight);
+    // Repaired bar. Future dates are null, so no bar is drawn yet.
+    if(hasRepaired){
+      ctx.fillStyle='#176b43';
+      ctx.fillRect(repairedX,h-m.b,bw,-repairedHeight);
+    }
 
     // Bar values.
-    if(cumulativeValue>0){
+    if(hasCumulative&&cumulativeValue>0){
       ctx.fillStyle='#173f73';
       ctx.font=`900 ${compact?'5.5':'8'}px Segoe UI`;
       ctx.textAlign='center';
@@ -1877,7 +2085,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
       ctx.fillText(fmt(cumulativeValue),cumulativeX+bw/2,h-m.b-cumulativeHeight-3);
     }
 
-    if(repairedValue>0){
+    if(hasRepaired&&repairedValue>0){
       ctx.fillStyle='#176b43';
       ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
       ctx.textAlign='center';
@@ -1885,9 +2093,12 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
       ctx.fillText(fmt(repairedValue),repairedX+bw/2,h-m.b-repairedHeight-3);
     }
 
-    // Total Approved line point.
-    const lineY=h-m.b-cumulativeHeight;
-    points.push([cx,lineY,cumulativeValue]);
+    // Total Approved line point. No point is added for future dates, so the
+    // line naturally stops at the latest arrived date instead of falling to 0.
+    if(hasCumulative){
+      const lineY=h-m.b-cumulativeHeight;
+      points.push([cx,lineY,cumulativeValue]);
+    }
 
     // X label.
     ctx.fillStyle='#475467';
@@ -2029,58 +2240,53 @@ function movementDailyRows(start,end,periodRows){
     };
   });
 }
-function monthlyMovementRows(year,periodRows){
+function monthlyMovementRows(selectedDate,periodRows){
   const today=isoLocal(new Date());
-  const byDate=new Map();
-  for(const item of periodRows||[]){
-    const d=parseLocal(item.date);
-    if(d.getFullYear()===year)byDate.set(item.date,item.record);
-  }
+  const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
+  if(latestData)byDate.set(today,latestData);
 
-  // Use the live Latest record for today so the current month stays current.
-  if(new Date().getFullYear()===year&&latestData)byDate.set(today,latestData);
+  return monthWeekBuckets(selectedDate).map(bucket=>{
+    const row={
+      ...bucket,
+      received:0,
+      release:0,
+      loadedIncoming:0,
+      loadedOutgoing:0,
+      total:0,
+      per24:0,
+      hasSnapshot:false
+    };
 
-  const months=Array.from({length:12},(_,monthIndex)=>({
-    monthIndex,
-    label:formatMonthLabel(monthIndex),
-    received:0,
-    release:0,
-    loadedIncoming:0,
-    loadedOutgoing:0,
-    total:0,
-    per24:0,
-    hasSnapshot:false
-  }));
+    for(const [date,record] of byDate.entries()){
+      if(date<bucket.start||date>bucket.end)continue;
+      const received=Math.max(0,movementCount(record,'incoming'));
+      const release=Math.max(0,movementCount(record,'outgoing'));
+      const loaded=getLoadedActivity(record);
+      row.received+=received;
+      row.release+=release;
+      row.loadedIncoming+=Math.max(0,num(loaded.incoming));
+      row.loadedOutgoing+=Math.max(0,num(loaded.outgoing));
+      row.hasSnapshot=true;
+    }
 
-  for(const [date,record] of byDate.entries()){
-    const d=parseLocal(date);
-    if(d.getFullYear()!==year)continue;
-    const row=months[d.getMonth()];
-    const received=Math.max(0,movementCount(record,'incoming'));
-    const release=Math.max(0,movementCount(record,'outgoing'));
-    const loaded=getLoadedActivity(record);
-    row.received+=received;
-    row.release+=release;
-    row.loadedIncoming+=Math.max(0,num(loaded.incoming));
-    row.loadedOutgoing+=Math.max(0,num(loaded.outgoing));
-    row.hasSnapshot=true;
-  }
-
-  for(const row of months){
     row.total=Math.max(0,row.received+row.release+row.loadedIncoming+row.loadedOutgoing);
     row.per24=Math.max(0,row.total/24);
-  }
-  return months;
+    return row;
+  });
 }
 function renderMovementSection(start,end,periodRows){
   const breakdown=$('movementDailyBreakdown');
 
   if(reportMode==='monthly'){
     const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
-    const year=selectedDate.getFullYear();
-    const selectedMonth=selectedDate.getMonth();
-    const months=monthlyMovementRows(year,periodRows);
-    const selected=months[selectedMonth]||{received:0,release:0,loadedIncoming:0,loadedOutgoing:0,total:0};
+    const weeks=monthlyMovementRows(selectedDate,periodRows);
+    const selected={
+      received:weeks.reduce((sum,row)=>sum+row.received,0),
+      release:weeks.reduce((sum,row)=>sum+row.release,0),
+      loadedIncoming:weeks.reduce((sum,row)=>sum+row.loadedIncoming,0),
+      loadedOutgoing:weeks.reduce((sum,row)=>sum+row.loadedOutgoing,0)
+    };
+    selected.total=Math.max(0,selected.received+selected.release+selected.loadedIncoming+selected.loadedOutgoing);
 
     $('movementReceivedTotal').textContent=fmt(selected.received);
     $('movementReleaseTotal').textContent=fmt(selected.release);
@@ -2090,21 +2296,21 @@ function renderMovementSection(start,end,periodRows){
 
     if(breakdown){
       breakdown.classList.add('monthly-breakdown');
-      breakdown.innerHTML=months.map(row=>{
+      breakdown.innerHTML=weeks.map(row=>{
         const total=row.hasSnapshot?fmt(row.total):'—';
         const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
-        return `<div class="movement-day-card"><div class="day">${row.label}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
+        return `<div class="movement-day-card"><div class="day">${row.label}</div><div class="date">${formatShortDate(row.start)} - ${formatShortDate(row.end)}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
       }).join('');
     }
 
     drawMovementChart(
       'movementChart',
-      months.map(row=>row.label),
-      months.map(row=>row.received),
-      months.map(row=>row.release),
-      months.map(row=>row.loadedIncoming),
-      months.map(row=>row.loadedOutgoing),
-      months.map(row=>row.per24)
+      weeks.map(row=>row.shortLabel),
+      weeks.map(row=>row.received),
+      weeks.map(row=>row.release),
+      weeks.map(row=>row.loadedIncoming),
+      weeks.map(row=>row.loadedOutgoing),
+      weeks.map(row=>row.per24)
     );
     return;
   }
@@ -2375,9 +2581,18 @@ function renderReport(){
   INCLUDED_LINES=lines;
 
   const approvedEvents=approvedEventLedger();
-  reportPeriodLabel=reportMode==='monthly'
-    ?String(parseLocal($('reportDate').value||isoLocal(new Date())).getFullYear())
-    :(start===end?start:`${start} to ${end}`);
+  if(reportMode==='monthly'){
+    const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
+    const buckets=monthWeekBuckets(selectedDate);
+    const monthName=selectedDate.toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+    reportPeriodLabel=buckets.length
+      ?`${monthName} • ${buckets[0].label} to ${buckets[buckets.length-1].label}`
+      :monthName;
+  }else if(reportMode==='weekly'){
+    reportPeriodLabel=`Week ${sundayWeekNumber(parseLocal(start))} • ${start} to ${end}`;
+  }else{
+    reportPeriodLabel=start;
+  }
 
   // Mode layout:
   // Daily   = restored Shipping Line table only.
@@ -2822,6 +3037,8 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
 }
 function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
+
+<!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
 </script>
 </body>
 </html>
