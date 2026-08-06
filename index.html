@@ -36,7 +36,7 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
 .report-line-field{width:300px;min-width:240px}.report-line-field select{width:100%;min-height:44px;border:1px solid #bfcddd;border-radius:10px;padding:9px 38px 9px 12px;background:#fff;color:var(--navy);font-weight:850;box-shadow:none}
 .report-line-field select:focus{outline:3px solid rgba(23,74,131,.14);border-color:#557da7}
 .single-line-grid{display:block}.single-line-grid .line-report-card{max-width:none;margin:0;border:1px solid #cbd8e7;border-radius:14px;box-shadow:0 9px 24px rgba(15,47,95,.08)}
-.line-report-date{background:var(--navy);color:#fff;border-bottom:0;padding:13px 16px}.line-report-date .stamp{color:#dbeafe;font-size:13px}
+.line-report-date{background:var(--navy);color:#fff;border-bottom:0;padding:13px 16px}.line-report-date .stamp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;color:#dbeafe;font-size:13px;text-align:right}.line-report-date .stamp-time{font-size:11px;font-weight:800;opacity:.92}
 .line-report-table th{background:#eaf1f9;color:#17365f;border-color:#cbd8e7}.line-report-table td{border-color:#dbe4ef}.line-report-table tbody tr:nth-child(even):not(.rate-row):not(.movement-row){background:#f8fafc}
 .line-report-table .line-name{color:var(--navy)}.line-report-table .value{color:var(--navy)}.line-report-table .good{color:#176b43}
 .line-report-table .rate-row,.line-report-table .movement-row{background:#edf5ef}.rate-pill,.percent-pill{background:#dcefe3!important;color:#176b43!important;border:1px solid #bad9c6}
@@ -318,7 +318,7 @@ body.mobile-app{
 .mobile-app .shipping-report-grid{grid-template-columns:1fr;gap:9px}
 .mobile-app .single-line-grid .line-report-card{width:100%;max-width:none;border-radius:13px}
 .mobile-app .line-report-date{padding:9px 10px;font-size:12px}
-.mobile-app .line-report-date .stamp{max-width:58%;font-size:8px;text-align:right}
+.mobile-app .line-report-date .stamp{max-width:58%;font-size:8px;text-align:right}.mobile-app .line-report-date .stamp-time{font-size:7px}
 .mobile-app .line-report-table{width:100%;min-width:0;table-layout:fixed}
 .mobile-app .line-report-table th,.mobile-app .line-report-table td{padding:7px 3px;font-size:8px;line-height:1.25;overflow-wrap:anywhere}
 .mobile-app .line-report-table th{font-size:7px}
@@ -672,6 +672,8 @@ body.mobile-app{
 .line-report-table .report-weather-value{color:#173f73;font-weight:900;text-align:center;line-height:1.45}
 .mobile-app .line-report-table .report-weather-value{font-size:9px}
 @media(max-width:370px){.weather-compact{grid-template-columns:auto minmax(0,1fr)}.weather-quick{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.weather-quick span{text-align:center}}
+
+.utilization-as-of{margin-top:5px!important;color:#2855d9!important;font-weight:850}
 </style>
 </head>
 <body class="mobile-app">
@@ -720,7 +722,7 @@ body.mobile-app{
     </div>
   </div>
   <div class="section">
-    <div class="section-head"><div><h2>Yard Utilization for BACAO and ENLIN</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small></div></div>
+    <div class="section-head"><div><h2>Yard Utilization for BACAO and ENLIN</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small><small id="utilizationAsOf" class="utilization-as-of">As of —</small></div></div>
     <div class="util-grid">
       <div class="util-card">
         <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 750</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
@@ -2296,7 +2298,8 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp">${reportPeriodLabel}</span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr><tr class="report-weather-row"><td colspan="2" class="label">CURRENT WEATHER (GENERAL TRIAS, CAVITE)</td><td colspan="2" class="report-weather-value">${reportWeatherText()}</td></tr></tbody></table></article>`;
+  const reportAsOfTime=latestActivityTime(latestData);
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="stamp"><span class="stamp-date">${reportPeriodLabel}</span><span class="stamp-time">As of ${reportAsOfTime}</span></span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label">% Empty Share</td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Bacao Utilization (Overall Including Laden Imports)</td><td colspan="2" class="utilization-value"><strong>${overall.bacaoPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.bacaoOccupied)} / 750</td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr><tr class="report-weather-row"><td colspan="2" class="label">CURRENT WEATHER (GENERAL TRIAS, CAVITE)</td><td colspan="2" class="report-weather-value">${reportWeatherText()}</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -2974,7 +2977,16 @@ async function loadWeather(){
   }
 }
 
-function stamp(record){const raw=record?.fetchedAt||record?.lastUpdated||record?.generatedAt;return raw?new Date(raw).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'No timestamp available';}
+function latestActivityDate(record=latestData){
+  const raw=record?.fetchedAt||record?.lastUpdated||record?.generatedAt;
+  if(!raw)return null;
+  const value=(typeof raw==='object'&&raw!==null&&'seconds' in raw)?raw.seconds*1000:raw;
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?null:date;
+}
+function stamp(record){const date=latestActivityDate(record);return date?date.toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'No timestamp available';}
+function latestActivityTime(record=latestData){const date=latestActivityDate(record);return date?date.toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',hour12:true}):'—';}
+function latestActivityDateTime(record=latestData){const date=latestActivityDate(record);return date?date.toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}):'—';}
 async function loadLatest(){try{const [data,loadedTotals,inventoryRecordsData,outgoingRecordsData]=await Promise.all([readLatestData(),readLoadedTotals(),readLatestInventoryRecords(),readLatestOutgoingRecords()]);if(!data&&!inventoryRecordsData&&!outgoingRecordsData)throw new Error('No data found in Firebase Latest');latestData={...(data||{})};if(loadedTotals)latestData.__loadedTotals=loadedTotals;if(inventoryRecordsData)latestData.__inventoryRecords=inventoryRecordsData;if(outgoingRecordsData)latestData.__outgoingRecords=outgoingRecordsData;renderLatest();setConnection(true,'Connected');const emptyMessage=inventoryRecordsData?'':'';const loadedMessage=loadedTotals?'':'';const repairedMessage=outgoingRecordsData?'':'';setStatus('summaryStatus',emptyMessage+loadedMessage+repairedMessage,!inventoryRecordsData||!loadedTotals);}catch(e){setConnection(false,'Connection Error');setStatus('summaryStatus',e.message,true);}}
 async function refreshAll(){
   const btn=$('refreshBtn');
@@ -3001,7 +3013,8 @@ function renderLatest(){
   $('approvedTotal').textContent=fmt(repair.approved);
   $('inventoryTotal').textContent=fmt(emptyInventory);
   $('lastUpdated').textContent=`Last updated: ${stamp(latestData)}`;
-  $('shippingLineAsOf').textContent=`As of ${new Date().toLocaleTimeString('en-PH',{hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})}`;
+  $('utilizationAsOf').textContent=`As of ${latestActivityDateTime(latestData)}`;
+  $('shippingLineAsOf').textContent=`As of ${latestActivityTime(latestData)}`;
   $('yard21ContainerCount').textContent=fmt(yard21ContainerCount(latestData));
   renderYard21Breakdown(latestData);
 
@@ -3200,8 +3213,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(left,-1);
   drawCalloutGroup(right,1);
 }
-const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
