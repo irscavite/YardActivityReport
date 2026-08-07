@@ -703,6 +703,22 @@ body.mobile-app{
     <div id="weatherError" class="weather-error hidden">Weather unavailable.</div>
   </div>
   <div class="section">
+    <div class="section-head"><div><h2>Yard Utilization for Enlin and Bacao</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small><small id="utilizationAsOf" style="display:block;margin-top:3px;color:var(--success);font-weight:900">As of —</small></div></div>
+    <div class="util-grid">
+      <div class="util-card">
+        <div class="util-top"><div><div class="util-title">Enlin</div><div id="cez2Count" class="util-count">0 / 1,100</div></div><div id="cez2Percent" class="util-percent">0.00%</div></div>
+        <div class="progress"><div id="cez2Bar"></div></div>
+        <div class="util-note"><span>Occupied empty-container slots</span><span>Capacity: 1,100</span></div>
+      </div>
+      <div class="util-card">
+        <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 750</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
+        <div class="progress"><div id="cez1Bar"></div></div>
+        <div class="util-note"><span>Occupied empty + loaded slots</span><span>Capacity: 750</span></div>
+      </div>
+    </div>
+    <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
+  </div>
+  <div class="section">
     <div class="section-head"><div><h2>Latest Yard Activity</h2><small id="lastUpdated">Connecting…</small></div></div>
     <div class="metrics empty-activity-row">
       <div class="metric"><span>Empty In</span><strong id="incomingTotal">0</strong></div>
@@ -719,22 +735,6 @@ body.mobile-app{
         <div class="metric"><span>Loaded Inventory</span><strong id="loadedInventoryTotal">0</strong></div>
       </div>
     </div>
-  </div>
-  <div class="section">
-    <div class="section-head"><div><h2>Yard Utilization for BACAO and ENLIN</h2><small>Bacao includes empty containers plus Total Loaded Inventory</small><small id="utilizationAsOf" style="display:block;margin-top:3px;color:var(--success);font-weight:900">As of —</small></div></div>
-    <div class="util-grid">
-      <div class="util-card">
-        <div class="util-top"><div><div class="util-title">Bacao</div><div id="cez1Count" class="util-count">0 / 750</div></div><div id="cez1Percent" class="util-percent">0.00%</div></div>
-        <div class="progress"><div id="cez1Bar"></div></div>
-        <div class="util-note"><span>Occupied empty + loaded slots</span><span>Capacity: 750</span></div>
-      </div>
-      <div class="util-card">
-        <div class="util-top"><div><div class="util-title">Enlin</div><div id="cez2Count" class="util-count">0 / 1,100</div></div><div id="cez2Percent" class="util-percent">0.00%</div></div>
-        <div class="progress"><div id="cez2Bar"></div></div>
-        <div class="util-note"><span>Occupied empty-container slots</span><span>Capacity: 1,100</span></div>
-      </div>
-    </div>
-    <div id="utilizationNote" class="footnote">Waiting for inventory location records…</div>
   </div>
   <div class="section">
     <div class="section-head"><div><h2>Inventory by Shipping Line for BACAO and ENLIN</h2><small id="shippingLineAsOf" style="display:block;margin-top:3px;color:var(--success);font-weight:900">As of —</small></div></div>
@@ -1246,7 +1246,7 @@ function renderYard21Breakdown(record){
 
 function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
 function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation??fieldByPattern(row,[/location/i,/yard/i,/site/i]));if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
-function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/750*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 750`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s). Enlin: ${fmt(cez2)} empty container slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
+function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/750*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 750`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Enlin: ${fmt(cez2)} empty container slot(s). Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
 function getIncoming(record){return num(record?.totals?.incoming??record?.incoming?.total??record?.incoming);}
 function getOutgoing(record){return num(record?.totals?.outgoing??record?.outgoing?.total??record?.outgoing);}
 function normalizeLine(value){
