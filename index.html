@@ -421,6 +421,9 @@ body.mobile-app{
 .mobile-app .overall-jpg-btn{min-height:40px;font-size:9px}
 
 
+/* MnR Productivity Report: dashboard KPI cards removed from view */
+.weekly-repair-kpis{display:none!important}
+
 /* Weekly Approved / Repaired performance */
 .weekly-repair-section{background:linear-gradient(180deg,#fff,#f8fbff)}
 .weekly-repair-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
@@ -797,7 +800,7 @@ body.mobile-app{
     <div class="weekly-repair-legend">
       <span class="cumulative-bar"><i></i>Total Approved</span>
       <span class="repaired"><i></i>Repaired</span>
-      <span class="cumulative-line"><i></i>Total Approved Line</span>
+      <span class="cumulative-line"><i></i>Approved/Repaired %</span>
     </div>
     <div id="weeklyDailyBreakdown" class="weekly-daily-breakdown"></div>
   </div>
@@ -819,7 +822,7 @@ body.mobile-app{
       <span class="release"><i></i>Empty Release</span>
       <span class="loaded-in"><i></i>Loaded Incoming</span>
       <span class="loaded-out"><i></i>Loaded Outgoing</span>
-      <span class="per24"><i></i>Total Average Movement</span>
+      <span class="per24"><i></i>Productivity per hour</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -2020,7 +2023,7 @@ function updateProductivityReportHeadings(start,end){
   const operationTitle=$('operationProductivityTitle');
   if(reportMode==='weekly'){
     const weekNo=sundayWeekNumber(parseLocal(start));
-    if(mnrTitle)mnrTitle.textContent=`MnR Productivity Report Week ${weekNo}`;
+    if(mnrTitle)mnrTitle.textContent=`MnR Productivity Report for Week ${weekNo}`;
     if(operationTitle)operationTitle.textContent=`Operation Productivity Report for Week ${weekNo}`;
   }else{
     if(mnrTitle)mnrTitle.textContent='Total Approved & Repaired';
@@ -2115,7 +2118,8 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
       weeks.map(row=>row.shortLabel),
       weeks.map(row=>row.approvedBase),
       weeks.map(row=>row.repaired),
-      weeks.map(row=>row.totalApproved)
+      weeks.map(row=>row.totalApproved),
+      weeks.map(row=>row.hasData?row.pct:null)
     );
     return;
   }
@@ -2151,13 +2155,16 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     days.map(row=>formatDayLabel(row.date)),
     days.map(row=>row.approvedBase),
     days.map(row=>row.repaired),
-    days.map(row=>row.totalApproved)
+    days.map(row=>row.totalApproved),
+    days.map(row=>row.isFuture?null:row.pct)
   );
 }
-function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
+function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative,repairPercentages){
   const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
   const compact=w<420;
-  const m={l:compact?38:52,r:14,t:30,b:46};
+  // Left axis = quantities (Total Approved / Repaired).
+  // Right axis = Approved/Repaired percentage used by the red line.
+  const m={l:compact?38:52,r:compact?34:46,t:30,b:46};
   const cw=w-m.l-m.r,ch=h-m.t-m.b;
   // Null means "not yet available". Future weekly dates use null so they
   // do not affect the scale and do not render as artificial zero values.
@@ -2165,6 +2172,11 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     .filter(value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value)))
     .map(Number);
   const max=Math.max(1,...plottedValues);
+  const percentValues=(repairPercentages||[])
+    .filter(value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value)))
+    .map(Number);
+  const maxPercentValue=Math.max(0,...percentValues);
+  const percentMax=Math.max(100,Math.ceil(maxPercentValue/25)*25||100);
   const step=cw/Math.max(1,labels.length);
   const bw=Math.min(compact?11:18,step*.24);
 
@@ -2186,6 +2198,17 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     ctx.fillStyle='#98a2b3';
     ctx.textAlign='right';
     ctx.fillText(fmt(value),m.l-6,y);
+  }
+
+  // Right-side percentage axis for the red Approved/Repaired % line.
+  ctx.font=`${compact?'7':'8'}px Segoe UI`;
+  ctx.textBaseline='middle';
+  for(let i=0;i<=4;i++){
+    const pct=percentMax*i/4;
+    const y=h-m.b-ch*i/4;
+    ctx.fillStyle='#dc2626';
+    ctx.textAlign='left';
+    ctx.fillText(`${Math.round(pct)}%`,w-m.r+5,y);
   }
 
   const points=[];
@@ -2232,11 +2255,13 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
       ctx.fillText(fmt(repairedValue),repairedX+bw/2,h-m.b-repairedHeight-3);
     }
 
-    // Total Approved line point. No point is added for future dates, so the
-    // line naturally stops at the latest arrived date instead of falling to 0.
-    if(hasCumulative){
-      const lineY=h-m.b-cumulativeHeight;
-      points.push([cx,lineY,cumulativeValue]);
+    // Red line = Repaired / Total Approved percentage. It uses the right
+    // percentage axis, so its position is independent of the quantity bars.
+    const hasPercent=repairPercentages&&repairPercentages[i]!==null&&repairPercentages[i]!==undefined&&repairPercentages[i]!==''&&Number.isFinite(Number(repairPercentages[i]));
+    if(hasPercent){
+      const pct=Math.max(0,num(repairPercentages[i]));
+      const lineY=h-m.b-ch*Math.min(pct,percentMax)/percentMax;
+      points.push([cx,lineY,pct]);
     }
 
     // X label.
@@ -2247,7 +2272,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     ctx.fillText(label,cx,h-m.b+17);
   });
 
-  // Keep Total Approved line on top of the bars.
+  // Keep Approved/Repaired % line on top of the bars.
   if(points.length){
     ctx.save();
     ctx.strokeStyle='#dc2626';
