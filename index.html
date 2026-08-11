@@ -463,10 +463,10 @@ body.mobile-app{
 }
 
 
-.weekly-repair-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.weekly-repair-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 .weekly-repair-legend .cumulative i{background:#a15c00;border-radius:999px}
 @media(max-width:650px){
-  .weekly-repair-kpis{grid-template-columns:1fr}
+  .weekly-repair-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 
@@ -595,13 +595,16 @@ body.mobile-app{
 .report-mode-section{padding:11px 12px}
 .report-mode-controls{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
 .report-mode-controls .report-switch{flex:1 1 220px}
+.report-mode-controls .mnr-line-field{flex:0 0 190px}
+.report-mode-controls .mnr-line-field select{width:100%}
 .report-mode-controls .compact-date-field{flex:0 0 155px}
 .report-mode-controls .compact-date-field input{width:100%}
 .mobile-app .report-mode-section{padding:10px}
 .mobile-app .report-mode-controls{display:grid;grid-template-columns:1fr;gap:8px}
 .mobile-app .report-mode-controls .report-switch{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
 .mobile-app .report-mode-controls .report-switch button{min-height:40px;padding:7px 3px;font-size:9px}
-.mobile-app .report-mode-controls .compact-date-field{width:100%}
+.mobile-app .report-mode-controls .mnr-line-field,.mobile-app .report-mode-controls .compact-date-field{width:100%;min-width:0}
+.mobile-app .report-mode-controls .mnr-line-field select{width:100%}
 
 
 /* Report mode visibility: Daily table; Weekly graphs + table; Monthly graphs */
@@ -780,6 +783,7 @@ body.mobile-app{
         <button type="button" id="weeklyMode" onclick="setReportMode('weekly')">Weekly</button>
         <button type="button" id="monthlyMode" onclick="setReportMode('monthly')">Monthly</button>
       </div>
+      <div class="field mnr-line-field"><label>MnR Shipping Line</label><select id="mnrShippingLine" onchange="renderReport()"><option value="ALL">All Shipping Lines</option><option value="CMA">CMA</option><option value="ONE">ONE</option><option value="MAERSK">MAERSK</option></select></div>
       <div class="field compact-date-field"><label>Reference Date</label><input id="reportDate" type="date" onchange="renderReport()"></div>
     </div>
   </div>
@@ -789,7 +793,6 @@ body.mobile-app{
       <div><h2 id="mnrProductivityTitle">Total Approved &amp; Repaired</h2></div>
     </div>
     <div class="weekly-repair-kpis">
-      <div class="weekly-repair-kpi"><span>Approved</span><strong id="weeklyTotalApproved">0</strong></div>
       <div class="weekly-repair-kpi"><span id="weeklyRepairedLabel">Repaired Today</span><strong id="weeklyTotalRepaired">0</strong></div>
       <div class="weekly-repair-kpi"><span>Total Approved</span><strong id="weeklyLatestApprovedBasis">0</strong><small id="weeklyLatestApprovedNote"></small></div>
     </div>
@@ -797,7 +800,7 @@ body.mobile-app{
     <div class="weekly-repair-legend">
       <span class="cumulative-bar"><i></i>Total Approved</span>
       <span class="repaired"><i></i>Repaired</span>
-      <span class="cumulative-line"><i></i>Repair Productivity (Repaired/Approved in %)</span>
+      <span class="cumulative-line"><i></i>Repair Productivity(Approved/Repaired %)</span>
     </div>
     <div id="weeklyDailyBreakdown" class="weekly-daily-breakdown"></div>
   </div>
@@ -1941,21 +1944,23 @@ function approvedInventoryOutgoingCounts(record,asOfDate){
     total:['CMA','ONE','MAERSK'].reduce((sum,line)=>sum+num(counts[line]),0)
   };
 }
-function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents){
+function selectedMnrShippingLine(){
+  const value=String($('mnrShippingLine')?.value||'ALL').toUpperCase();
+  return ['CMA','ONE','MAERSK'].includes(value)?value:'ALL';
+}
+function mnrScopedCount(counts,line){
+  return line&&line!=='ALL'?num((counts||{})[line]):sumApprovedScopeRepairCounts(counts);
+}
+function mnrShippingLineLabel(line){return line&&line!=='ALL'?line:'All Shipping Lines';}
+function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents,shippingLine='ALL'){
   const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
   const today=isoLocal(new Date());
   const dates=dateRangeDays(start,end);
   const repairs=repairEvents||repairedLifecycleEvents();
-  const resetEverySunday=reportMode==='weekly';
-  let previousTotalApproved=0;
 
   return dates.map(date=>{
     const dateObj=parseLocal(date);
 
-    // WEEKLY GRAPH RULE: Sunday is Day 1 of a new monitoring week.
-    // Never carry the previous Saturday's cumulative Total Approved into
-    // the new Sunday-to-Saturday week.
-    if(resetEverySunday&&dateObj.getDay()===0)previousTotalApproved=0;
     // In the current weekly view, future dates stay visually empty until
     // that calendar day actually arrives. Keep the day/date label, but do
     // not fabricate a zero, repeat yesterday's Total Approved, or draw a
@@ -1979,27 +1984,22 @@ function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents)
 
     const source=weeklySnapshotForDate(date,byDate,today);
     const approved=approvedInventoryOutgoingCounts(source,date);
+    const scopedApproved=mnrScopedCount(approved.counts,shippingLine);
 
-    // Repaired bar = repaired on this date only.
+    // Repaired bar = repaired on this date only, optionally filtered by
+    // the MnR Shipping Line selector. Repaired is NEVER added to Approved.
     const repairedByLine=repairedCountsForRange(date,date,repairs);
-    const repaired=sumApprovedScopeRepairCounts(repairedByLine);
+    const repaired=mnrScopedCount(repairedByLine,shippingLine);
 
-    // Total Approved = Current Approved + repaired accumulated only inside
-    // the active week. For Weekly mode the cumulative window always starts
-    // on Sunday, so every Sunday begins a fresh weekly cumulative total.
-    const cumulativeStart=resetEverySunday?isoLocal(startOfSundayWeek(dateObj)):start;
-    const cumulativeRepairedByLine=repairedCountsForRange(cumulativeStart,date,repairs);
-    const cumulativeRepaired=sumApprovedScopeRepairCounts(cumulativeRepairedByLine);
-    const calculatedTotal=approved.total+cumulativeRepaired;
-
-    // Total Approved is cumulative monitoring. A later date must never erase
-    // an Approved lifecycle already represented by the previous date.
-    const totalApproved=Math.max(previousTotalApproved,calculatedTotal);
-    previousTotalApproved=totalApproved;
+    // Total Approved = the complete Approved count present in THIS DAY'S
+    // snapshot only for the selected shipping line. Do not add previous days,
+    // do not add repaired, and do not filter by the APPROVED date in Remarks.
+    const cumulativeRepaired=repaired;
+    const totalApproved=scopedApproved;
 
     return{
       date,
-      approvedBase:approved.total,
+      approvedBase:scopedApproved,
       approvedByLine:approved.counts,
       repaired,
       cumulativeRepaired,
@@ -2033,7 +2033,7 @@ function monthBounds(year,monthIndex){
   const end=isoLocal(new Date(year,monthIndex+1,0));
   return{start,end};
 }
-function monthlyRepairRows(selectedDate,periodRows){
+function monthlyRepairRows(selectedDate,periodRows,shippingLine='ALL'){
   const today=isoLocal(new Date());
   const buckets=monthWeekBuckets(selectedDate);
   const byDate=new Map((periodRows||[]).map(item=>[item.date,item.record]));
@@ -2054,22 +2054,20 @@ function monthlyRepairRows(selectedDate,periodRows){
     const source=items.length?items[items.length-1].record:null;
     const sourceDate=items.length?items[items.length-1].date:'';
     const approved=approvedInventoryOutgoingCounts(source,sourceDate);
+    const scopedApproved=mnrScopedCount(approved.counts,shippingLine);
 
-    // Green bar = repairs made inside this week bucket only.
+    // Green bar = repairs made inside this week bucket only for the selected line.
     const repairedByLine=repairedCountsForRange(bucket.start,bucket.end,repairs);
-    const repaired=sumApprovedScopeRepairCounts(repairedByLine);
+    const repaired=mnrScopedCount(repairedByLine,shippingLine);
 
-    // Blue Total Approved carries every repaired lifecycle forward from the
-    // start of the displayed monthly period. It must never go down.
-    const cumulativeRepairedByLine=repairedCountsForRange(periodStart,bucket.end,repairs);
-    const cumulativeRepaired=sumApprovedScopeRepairCounts(cumulativeRepairedByLine);
-    const calculatedTotal=approved.total+cumulativeRepaired;
-    const totalApproved=Math.max(previousTotalApproved,calculatedTotal);
-    previousTotalApproved=totalApproved;
+    // Monthly blue bar follows the same Approved-only rule: use the Approved
+    // count in the latest snapshot of that week bucket. Repaired stays separate.
+    const cumulativeRepaired=repaired;
+    const totalApproved=scopedApproved;
 
     return{
       ...bucket,
-      approvedBase:approved.total,
+      approvedBase:scopedApproved,
       repaired,
       cumulativeRepaired,
       totalApproved,
@@ -2086,10 +2084,12 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
 
   const repairedLabel=$('weeklyRepairedLabel');
   const breakdown=$('weeklyDailyBreakdown');
+  const shippingLine=selectedMnrShippingLine();
+  const shippingLineLabel=mnrShippingLineLabel(shippingLine);
 
   if(reportMode==='monthly'){
     const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
-    const weeks=monthlyRepairRows(selectedDate,periodRows);
+    const weeks=monthlyRepairRows(selectedDate,periodRows,shippingLine);
     const availableWeeks=weeks.filter(row=>row.hasData);
     const latestWeek=availableWeeks.length?availableWeeks[availableWeeks.length-1]:null;
     const totalRepaired=weeks.reduce((sum,row)=>sum+row.repaired,0);
@@ -2097,10 +2097,10 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     const totalApproved=latestWeek?.totalApproved||0;
 
     if(repairedLabel)repairedLabel.textContent='Repaired This Month';
-    $('weeklyTotalApproved').textContent=fmt(approvedBase);
+    if($('weeklyTotalApproved'))$('weeklyTotalApproved').textContent=fmt(approvedBase);
     $('weeklyTotalRepaired').textContent=fmt(totalRepaired);
     $('weeklyLatestApprovedBasis').textContent=fmt(totalApproved);
-    $('weeklyLatestApprovedNote').textContent=latestWeek?`${latestWeek.label}: ${formatShortDate(latestWeek.start)} - ${formatShortDate(latestWeek.end)}`:'';
+    $('weeklyLatestApprovedNote').textContent=latestWeek?`${shippingLineLabel} • ${latestWeek.label}: ${formatShortDate(latestWeek.start)} - ${formatShortDate(latestWeek.end)}`:'';
 
     if(breakdown){
       breakdown.classList.add('monthly-breakdown');
@@ -2127,17 +2127,17 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
 
   const events=approvedEvents||approvedEventLedger();
   const repairEvents=repairedLifecycleEvents();
-  const days=weeklyRepairDailyRows(start,end,periodRows,events,repairEvents);
+  const days=weeklyRepairDailyRows(start,end,periodRows,events,repairEvents,shippingLine);
   const availableDays=days.filter(row=>row.hasSnapshot);
   const latest=availableDays.length?availableDays[availableDays.length-1]:null;
   const totalRepaired=days.reduce((sum,row)=>sum+num(row.repaired),0);
 
-  $('weeklyTotalApproved').textContent=fmt(latest?.approvedBase||0);
+  if($('weeklyTotalApproved'))$('weeklyTotalApproved').textContent=fmt(latest?.approvedBase||0);
   $('weeklyTotalRepaired').textContent=fmt(totalRepaired);
   $('weeklyLatestApprovedBasis').textContent=fmt(latest?.totalApproved||0);
   $('weeklyLatestApprovedNote').textContent=reportMode==='weekly'
-    ?`Week ${sundayWeekNumber(parseLocal(start))}: ${formatShortDate(start)} - ${formatShortDate(end)}`
-    :'';
+    ?`${shippingLineLabel} • Week ${sundayWeekNumber(parseLocal(start))}: ${formatShortDate(start)} - ${formatShortDate(end)}`
+    :shippingLineLabel;
 
   if(breakdown){
     breakdown.classList.remove('monthly-breakdown');
@@ -2152,7 +2152,9 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     days.map(row=>formatDayLabel(row.date)),
     days.map(row=>row.approvedBase),
     days.map(row=>row.repaired),
-    days.map(row=>row.totalApproved),
+    // Blue graph bar = this day's Approved snapshot ONLY.
+    // Repaired is a separate green bar and is never added to Approved.
+    days.map(row=>row.approvedBase),
     days.map(row=>row.isFuture?null:row.pct)
   );
 }
@@ -2223,7 +2225,8 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative,repairPerc
     const cumulativeX=cx-bw-2;
     const repairedX=cx+2;
 
-    // Total Approved bar. Future dates are null, so no bar is drawn yet.
+    // Total Approved bar = Approved snapshot for this day only. Repaired is NOT added.
+    // Future dates are null, so no bar is drawn yet.
     if(hasCumulative){
       ctx.fillStyle='#2855d9';
       ctx.fillRect(cumulativeX,h-m.b,bw,-cumulativeHeight);
@@ -3257,7 +3260,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(right,1);
 }
 const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);if($('mnrShippingLine'))$('mnrShippingLine').value='ALL';$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
