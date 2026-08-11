@@ -476,9 +476,16 @@ body.mobile-app{
   width:18px;
   height:3px;
   border-radius:999px;
-  background:#a15c00;
+  background:#dc2626;
 }
 
+
+/* Weekly report dates shown below the graphs */
+.weekly-day-card .date.weekly-report-date-highlight,
+.movement-day-card .date.weekly-report-date-highlight{
+  color:#dc2626!important;
+  font-weight:950!important;
+}
 
 /* Simplified weekly report: Approved/Repaired + Movement only */
 .compact-report-head{display:flex!important;flex-direction:row!important;align-items:flex-end!important;justify-content:space-between;gap:10px}
@@ -506,10 +513,10 @@ body.mobile-app{
 .movement-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .movement-legend .received i{background:#e67e22}
 .movement-legend .release i{background:#0891b2}
-.movement-legend .loaded-in i{background:#3b82f6}
+.movement-legend .loaded-in i{background:#facc15}
 .movement-legend .loaded-out i{background:#16a34a}
 .movement-legend .total i{background:#a15c00}
-.movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#7a3db8}
+.movement-legend .per24 i{width:18px;height:3px;border-radius:999px;background:#dc2626}
 .movement-daily-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
 .movement-day-card{min-width:0;padding:9px 6px;border:1px solid #dbe4ef;border-radius:11px;background:#fff;text-align:center}
 .movement-day-card .day{color:#344054;font-size:10px;font-weight:950;text-transform:uppercase}
@@ -779,7 +786,7 @@ body.mobile-app{
 
   <div id="weeklyRepairSection" class="section weekly-repair-section">
     <div class="section-head compact-report-head">
-      <div><h2>Total Approved &amp; Repaired</h2></div>
+      <div><h2 id="mnrProductivityTitle">Total Approved &amp; Repaired</h2></div>
     </div>
     <div class="weekly-repair-kpis">
       <div class="weekly-repair-kpi"><span>Approved (Inv + Out)</span><strong id="weeklyTotalApproved">0</strong></div>
@@ -797,7 +804,7 @@ body.mobile-app{
 
   <div id="movementReportSection" class="section movement-report-section">
     <div class="section-head">
-      <div><h2>Incoming &amp; Outgoing Movement of Empty &amp; Loaded Containers</h2></div>
+      <div><h2 id="operationProductivityTitle">Incoming &amp; Outgoing Movement of Empty &amp; Loaded Containers</h2></div>
     </div>
     <div class="movement-kpis">
       <div class="movement-kpi"><span>Empty Received</span><strong id="movementReceivedTotal">0</strong></div>
@@ -2007,6 +2014,19 @@ function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents)
 }
 function formatDayLabel(date){return parseLocal(date).toLocaleDateString('en-PH',{weekday:'short'});}
 function formatShortDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric'});}
+function formatProductivityHeadingDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
+function updateProductivityReportHeadings(start,end){
+  const mnrTitle=$('mnrProductivityTitle');
+  const operationTitle=$('operationProductivityTitle');
+  if(reportMode==='weekly'){
+    const weekNo=sundayWeekNumber(parseLocal(start));
+    if(mnrTitle)mnrTitle.textContent=`MnR Productivity Report Week ${weekNo}`;
+    if(operationTitle)operationTitle.textContent=`Operation Productivity Report for Week ${weekNo}`;
+  }else{
+    if(mnrTitle)mnrTitle.textContent='Total Approved & Repaired';
+    if(operationTitle)operationTitle.textContent='Incoming & Outgoing Movement of Empty & Loaded Containers';
+  }
+}
 function formatMonthLabel(monthIndex){return new Date(2000,monthIndex,1).toLocaleDateString('en-PH',{month:'short'});}
 function monthBounds(year,monthIndex){
   const start=isoLocal(new Date(year,monthIndex,1));
@@ -2122,7 +2142,7 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     breakdown.classList.remove('monthly-breakdown');
     breakdown.innerHTML=days.map(row=>{
       const dailyPercent=row.hasSnapshot?`${row.pct.toFixed(1)}%`:'—';
-      return `<div class="weekly-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="repair-pct">${dailyPercent}</div></div>`;
+      return `<div class="weekly-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date weekly-report-date-highlight">${formatShortDate(row.date)}</div><div class="repair-pct">${dailyPercent}</div></div>`;
     }).join('');
   }
 
@@ -2230,7 +2250,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
   // Keep Total Approved line on top of the bars.
   if(points.length){
     ctx.save();
-    ctx.strokeStyle='#a15c00';
+    ctx.strokeStyle='#dc2626';
     ctx.lineWidth=compact?2.5:3;
     ctx.lineJoin='round';
     ctx.lineCap='round';
@@ -2240,7 +2260,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative){
     ctx.stroke();
 
     for(const [x,y,value] of points){
-      ctx.fillStyle='#a15c00';
+      ctx.fillStyle='#dc2626';
       ctx.beginPath();
       ctx.arc(x,y,compact?3:4,0,Math.PI*2);
       ctx.fill();
@@ -2452,7 +2472,7 @@ function renderMovementSection(start,end,periodRows){
     breakdown.innerHTML=days.map(row=>{
       const total=row.hasSnapshot?fmt(row.total):'—';
       const rate=row.hasSnapshot?row.per24.toFixed(2):'—';
-      return `<div class="movement-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date">${formatShortDate(row.date)}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
+      return `<div class="movement-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date weekly-report-date-highlight">${formatShortDate(row.date)}</div><div class="movement-summary-values"><div class="movement-summary-item total"><span>Total</span><strong>${total}</strong></div><div class="movement-summary-item average"><span>Average</span><strong>${rate}</strong></div></div></div>`;
     }).join('');
   }
 
@@ -2500,7 +2520,7 @@ function drawMovementChart(id,labels,received,release,loadedIncoming,loadedOutgo
     const values=[
       [safeReceived[i],startX,'#e67e22','#a94f08'],
       [safeRelease[i],startX+(bw+barGap),'#0891b2','#066678'],
-      [safeLoadedIncoming[i],startX+2*(bw+barGap),'#3b82f6','#1d4f91'],
+      [safeLoadedIncoming[i],startX+2*(bw+barGap),'#facc15','#a16207'],
       [safeLoadedOutgoing[i],startX+3*(bw+barGap),'#16a34a','#11632f']
     ];
     values.forEach(([value,x,color,labelColor])=>{
@@ -2529,12 +2549,12 @@ function drawMovementChart(id,labels,received,release,loadedIncoming,loadedOutgo
 
   if(linePoints.length){
     ctx.save();
-    ctx.strokeStyle='#7a3db8';ctx.lineWidth=compact?2:2.5;ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.strokeStyle='#dc2626';ctx.lineWidth=compact?2:2.5;ctx.lineJoin='round';ctx.lineCap='round';
     ctx.beginPath();linePoints.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
     for(const [x,y,value] of linePoints){
-      ctx.fillStyle='#7a3db8';ctx.beginPath();ctx.arc(x,y,compact?2.5:3.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#dc2626';ctx.beginPath();ctx.arc(x,y,compact?2.5:3.5,0,Math.PI*2);ctx.fill();
       if(value>0){
-        ctx.fillStyle='#6f36a8';ctx.font=`900 ${compact?'6.5':'8'}px Segoe UI`;ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillStyle='#dc2626';ctx.font=`900 ${compact?'6.5':'8'}px Segoe UI`;ctx.textAlign='center';ctx.textBaseline='bottom';
         ctx.fillText(value.toFixed(1),x,y-5);
       }
     }
@@ -2699,6 +2719,7 @@ function renderReport(){
   INCLUDED_LINES=lines;
 
   const approvedEvents=approvedEventLedger();
+  updateProductivityReportHeadings(start,end);
   if(reportMode==='monthly'){
     const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
     const buckets=monthWeekBuckets(selectedDate);
