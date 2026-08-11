@@ -421,9 +421,6 @@ body.mobile-app{
 .mobile-app .overall-jpg-btn{min-height:40px;font-size:9px}
 
 
-/* MnR Productivity Report: dashboard KPI cards removed from view */
-.weekly-repair-kpis{display:none!important}
-
 /* Weekly Approved / Repaired performance */
 .weekly-repair-section{background:linear-gradient(180deg,#fff,#f8fbff)}
 .weekly-repair-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
@@ -800,7 +797,7 @@ body.mobile-app{
     <div class="weekly-repair-legend">
       <span class="cumulative-bar"><i></i>Total Approved</span>
       <span class="repaired"><i></i>Repaired</span>
-      <span class="cumulative-line"><i></i>Approved/Repaired %</span>
+      <span class="cumulative-line"><i></i>Repair Productivity (Repaired/Approved in %)</span>
     </div>
     <div id="weeklyDailyBreakdown" class="weekly-daily-breakdown"></div>
   </div>
@@ -822,7 +819,7 @@ body.mobile-app{
       <span class="release"><i></i>Empty Release</span>
       <span class="loaded-in"><i></i>Loaded Incoming</span>
       <span class="loaded-out"><i></i>Loaded Outgoing</span>
-      <span class="per24"><i></i>Productivity per hour</span>
+      <span class="per24"><i></i>Productivity per Hour</span>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -2023,7 +2020,7 @@ function updateProductivityReportHeadings(start,end){
   const operationTitle=$('operationProductivityTitle');
   if(reportMode==='weekly'){
     const weekNo=sundayWeekNumber(parseLocal(start));
-    if(mnrTitle)mnrTitle.textContent=`MnR Productivity Report for Week ${weekNo}`;
+    if(mnrTitle)mnrTitle.textContent=`MnR Productivity Report Week ${weekNo}`;
     if(operationTitle)operationTitle.textContent=`Operation Productivity Report for Week ${weekNo}`;
   }else{
     if(mnrTitle)mnrTitle.textContent='Total Approved & Repaired';
