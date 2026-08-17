@@ -508,6 +508,9 @@ body.mobile-app{
 .movement-kpi:nth-child(5){border-color:#d9c7ed;background:#faf7fd}
 .movement-kpi:nth-child(5) strong{color:#6f36a8}
 .movement-total-kpi{grid-column:1/-1}
+.movement-chart-grid{display:grid;grid-template-columns:1fr;gap:18px}
+.movement-chart-card{min-width:0}
+.movement-chart-title{margin:0 0 8px;color:#344054;font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em}
 .movement-chart{height:340px}
 .movement-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;color:#667085;font-size:9px;font-weight:800}
 .movement-legend span{display:inline-flex;align-items:center;gap:6px}
@@ -587,6 +590,8 @@ body.mobile-app{
   .movement-kpi span{font-size:7px;letter-spacing:.03em}
   .movement-kpi strong{font-size:20px}
   .movement-total-kpi{grid-column:1/-1}
+  .movement-chart-grid{grid-template-columns:1fr;gap:12px}
+  .movement-chart-title{font-size:10px}
   .movement-chart{height:330px}
   .movement-legend{gap:8px;font-size:7px}
 }
@@ -818,13 +823,25 @@ body.mobile-app{
       <div class="movement-kpi"><span>Loaded Outgoing</span><strong id="movementLoadedOutgoingTotal">0</strong></div>
       <div class="movement-kpi movement-total-kpi"><span>Total Movement</span><strong id="movementGrandTotal">0</strong></div>
     </div>
-    <div class="chart movement-chart"><canvas id="movementChart"></canvas></div>
-    <div class="movement-legend">
-      <span class="received"><i></i>Empty Received</span>
-      <span class="release"><i></i>Empty Release</span>
-      <span class="loaded-in"><i></i>Loaded Incoming</span>
-      <span class="loaded-out"><i></i>Loaded Outgoing</span>
-      <span class="per24"><i></i>Productivity per Hour</span>
+    <div class="movement-chart-grid">
+      <div class="movement-chart-card">
+        <h3 class="movement-chart-title">Empty In &amp; Out</h3>
+        <div class="chart movement-chart"><canvas id="emptyMovementChart"></canvas></div>
+        <div class="movement-legend">
+          <span class="received"><i></i>Empty Received</span>
+          <span class="release"><i></i>Empty Release</span>
+          <span class="per24"><i></i>Productivity per Hour</span>
+        </div>
+      </div>
+      <div class="movement-chart-card">
+        <h3 class="movement-chart-title">Loaded In &amp; Out</h3>
+        <div class="chart movement-chart"><canvas id="loadedMovementChart"></canvas></div>
+        <div class="movement-legend">
+          <span class="loaded-in"><i></i>Loaded Incoming</span>
+          <span class="loaded-out"><i></i>Loaded Outgoing</span>
+          <span class="per24"><i></i>Productivity per Hour</span>
+        </div>
+      </div>
     </div>
     <div id="movementDailyBreakdown" class="movement-daily-breakdown"></div>
   </div>
@@ -861,7 +878,7 @@ body.mobile-app{
 </section>
 </div>
 <script>
-const FIREBASE_BASE='https://yardutilization-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE_BASE='https://yardactivity-c4581-default-rtdb.asia-southeast1.firebasedatabase.app';
 const ROOT='irsDailyData';
 const REQUIRED_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','EVG'];
 // UI label and Firebase client key are intentionally separate.
@@ -2469,8 +2486,7 @@ function renderMovementSection(start,end,periodRows){
       }).join('');
     }
 
-    drawMovementChart(
-      'movementChart',
+    drawSeparatedMovementCharts(
       weeks.map(row=>row.shortLabel),
       weeks.map(row=>row.received),
       weeks.map(row=>row.release),
@@ -2503,8 +2519,7 @@ function renderMovementSection(start,end,periodRows){
     }).join('');
   }
 
-  drawMovementChart(
-    'movementChart',
+  drawSeparatedMovementCharts(
     days.map(row=>formatDayLabel(row.date)),
     days.map(row=>row.received),
     days.map(row=>row.release),
@@ -2513,20 +2528,41 @@ function renderMovementSection(start,end,periodRows){
     days.map(row=>row.per24)
   );
 }
-function drawMovementChart(id,labels,received,release,loadedIncoming,loadedOutgoing,per24){
+function drawSeparatedMovementCharts(labels,received,release,loadedIncoming,loadedOutgoing,per24){
+  // Keep the original movement computation unchanged. Only split the visual
+  // presentation into Empty and Loaded charts. The red Productivity per Hour
+  // line still uses the same combined Total Movement / 24 values on both charts.
+  drawMovementPairChart(
+    'emptyMovementChart',
+    labels,
+    received,
+    release,
+    per24,
+    ['#e67e22','#0891b2'],
+    ['#a94f08','#066678']
+  );
+  drawMovementPairChart(
+    'loadedMovementChart',
+    labels,
+    loadedIncoming,
+    loadedOutgoing,
+    per24,
+    ['#facc15','#16a34a'],
+    ['#a16207','#11632f']
+  );
+}
+function drawMovementPairChart(id,labels,firstSeries,secondSeries,per24,barColors,labelColors){
   const{ctx,w,h}=fitCanvas(id);drawBase(ctx,w,h);
   const compact=w<420;
   const m={l:compact?38:52,r:14,t:46,b:48};
   const cw=w-m.l-m.r,ch=h-m.t-m.b;
-  const safeReceived=received.map(v=>Math.max(0,num(v)));
-  const safeRelease=release.map(v=>Math.max(0,num(v)));
-  const safeLoadedIncoming=loadedIncoming.map(v=>Math.max(0,num(v)));
-  const safeLoadedOutgoing=loadedOutgoing.map(v=>Math.max(0,num(v)));
+  const safeFirst=firstSeries.map(v=>Math.max(0,num(v)));
+  const safeSecond=secondSeries.map(v=>Math.max(0,num(v)));
   const safePer24=per24.map(v=>Math.max(0,num(v)));
-  const max=Math.max(1,...safeReceived,...safeRelease,...safeLoadedIncoming,...safeLoadedOutgoing,...safePer24);
+  const max=Math.max(1,...safeFirst,...safeSecond,...safePer24);
   const step=cw/Math.max(1,labels.length);
-  const bw=Math.min(compact?5:10,step*.13);
-  const barGap=compact?1:2;
+  const bw=Math.min(compact?8:15,step*.22);
+  const barGap=compact?2:4;
 
   ctx.font=`${compact?'8':'9'}px Segoe UI`;
   ctx.textBaseline='middle';
@@ -2542,28 +2578,23 @@ function drawMovementChart(id,labels,received,release,loadedIncoming,loadedOutgo
   const linePoints=[];
   labels.forEach((label,i)=>{
     const cx=m.l+step*i+step/2;
-    const groupW=4*bw+3*barGap;
+    const groupW=2*bw+barGap;
     const startX=cx-groupW/2;
     const values=[
-      [safeReceived[i],startX,'#e67e22','#a94f08'],
-      [safeRelease[i],startX+(bw+barGap),'#0891b2','#066678'],
-      [safeLoadedIncoming[i],startX+2*(bw+barGap),'#facc15','#a16207'],
-      [safeLoadedOutgoing[i],startX+3*(bw+barGap),'#16a34a','#11632f']
+      [safeFirst[i],startX,barColors[0],labelColors[0]],
+      [safeSecond[i],startX+bw+barGap,barColors[1],labelColors[1]]
     ];
     values.forEach(([value,x,color,labelColor])=>{
       const bh=ch*value/max;
       const topY=h-m.b-bh;
       ctx.fillStyle=color;
       ctx.fillRect(x,h-m.b,bw,-bh);
-
-      // Show the exact Received / Release number above every bar.
       ctx.fillStyle=labelColor;
       ctx.font=`900 ${compact?'7':'9'}px Segoe UI`;
       ctx.textAlign='center';
       ctx.textBaseline='bottom';
       ctx.fillText(fmt(value),x+bw/2,Math.max(m.t-2,topY-4));
     });
-
 
     const py=h-m.b-ch*safePer24[i]/max;
     linePoints.push([cx,py,safePer24[i]]);
