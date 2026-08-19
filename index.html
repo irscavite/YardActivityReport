@@ -690,6 +690,60 @@ body.mobile-app{
 .line-report-table .report-weather-value{color:#173f73;font-weight:900;text-align:center;line-height:1.45}
 .mobile-app .line-report-table .report-weather-value{font-size:9px}
 @media(max-width:370px){.weather-compact{grid-template-columns:auto minmax(0,1fr)}.weather-quick{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.weather-quick span{text-align:center}}
+
+/* Added Utilization tab only */
+.utilization-history-section{padding:18px;overflow:hidden}
+.utilization-history-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.utilization-history-head h2{margin:0;font-size:18px}
+.utilization-history-head small{display:block;margin-top:5px;color:var(--muted)}
+.utilization-basis{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.utilization-basis span{padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:#f8fafc;color:#475467;font-size:10px;font-weight:900}
+.utilization-view-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px;padding:5px;border:1px solid var(--line);border-radius:13px;background:#f4f7fb}
+.utilization-view-btn{border:0;border-radius:9px;padding:9px 7px;background:transparent;color:#667085;font:inherit;font-size:11px;font-weight:900;cursor:pointer}
+.utilization-view-btn.active{background:#fff;color:#2147b1;box-shadow:0 3px 10px rgba(15,23,42,.08)}
+.utilization-filter-bar{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:13px;background:#fbfcfe}
+.utilization-filter-field{flex:1 1 150px;min-width:0}
+.utilization-filter-field label{display:block;margin-bottom:5px;color:#667085;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.utilization-filter-field input{width:100%;min-width:0;height:38px;border:1px solid #d7dee8;border-radius:9px;padding:7px 9px;background:#fff;color:#111827;font:inherit;font-size:11px;font-weight:800}
+.utilization-list-block{display:none;margin-top:14px}
+.utilization-list-block.active{display:block}
+.utilization-list-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}
+.utilization-list-title h3{margin:0;font-size:14px;color:#111827}
+.utilization-list-title small{color:var(--muted);font-size:9px;text-align:right}
+#utilizationPanel .table-wrap{width:100%;overflow:hidden;border-radius:12px}
+.utilization-history-table{width:100%;min-width:0!important;table-layout:fixed}
+.utilization-history-table th,.utilization-history-table td{padding:9px 4px;text-align:center;white-space:nowrap;font-size:10px;letter-spacing:0}
+.utilization-history-table th{font-size:8.5px}
+.utilization-history-table th:first-child,.utilization-history-table td:first-child{width:25%;text-align:left;white-space:normal;line-height:1.25;padding-left:7px}
+.utilization-history-table th:not(:first-child),.utilization-history-table td:not(:first-child){width:12.5%}
+.utilization-history-table .total-col{font-weight:900;background:#f4fff9}
+.utilization-empty{padding:20px 7px!important;text-align:center!important;color:var(--muted);white-space:normal!important}
+#utilizationHistoryStatus{font-size:10px;padding:8px 10px}
+@media(max-width:650px){
+  .utilization-history-section{padding:11px}
+  .utilization-history-head h2{font-size:16px}
+  .utilization-history-head small{font-size:9px;line-height:1.35}
+  .utilization-basis{gap:4px;margin-top:8px}
+  .utilization-basis span{padding:5px 6px;font-size:8px}
+  .utilization-view-switch{margin-top:10px}
+  .utilization-view-btn{padding:8px 4px;font-size:10px}
+  .utilization-filter-bar{margin-top:9px;padding:8px;gap:6px}
+  .utilization-filter-field{flex-basis:120px}
+  .utilization-filter-field input{height:34px;padding:5px 7px;font-size:10px}
+  .utilization-list-block{margin-top:10px}
+  .utilization-list-title h3{font-size:12px}
+  .utilization-list-title small{font-size:8px}
+  .utilization-history-table th,.utilization-history-table td{padding:7px 2px;font-size:8.5px}
+  .utilization-history-table th{font-size:7.3px}
+  .utilization-history-table th:first-child,.utilization-history-table td:first-child{width:25%;padding-left:4px}
+}
+@media(max-width:390px){
+  .utilization-history-table th,.utilization-history-table td{font-size:7.7px;padding:6px 1px}
+  .utilization-history-table th{font-size:6.8px}
+  .utilization-history-table th:first-child,.utilization-history-table td:first-child{width:27%}
+  .utilization-history-table th:not(:first-child),.utilization-history-table td:not(:first-child){width:12.16%}
+}
+
 </style>
 </head>
 <body class="mobile-app">
@@ -701,6 +755,7 @@ body.mobile-app{
 <nav class="tabs" aria-label="Mobile navigation">
   <button type="button" id="summaryTab" class="tab active" onclick="showPanel('summary')" aria-label="Current Summary"><span class="tab-icon">⌂</span><span class="tab-label">Summary</span></button>
   <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Reports"><span class="tab-icon">▦</span><span class="tab-label">Reports</span></button>
+  <button type="button" id="utilizationTab" class="tab" onclick="showPanel('utilization')" aria-label="Utilization"><span class="tab-icon">%</span><span class="tab-label">Utilization</span></button>
 </nav>
 
 <section id="summaryPanel" class="panel active">
@@ -876,6 +931,70 @@ body.mobile-app{
 
   <div id="reportStatus" class="status hidden"></div>
 </section>
+
+<section id="utilizationPanel" class="panel">
+  <div class="section utilization-history-section">
+    <div class="utilization-history-head">
+      <div>
+        <h2>Utilization</h2>
+        <small>Present month by default. Select another month or an exact date when needed.</small>
+      </div>
+    </div>
+    <div class="utilization-basis">
+      <span>1,850 = 100%</span>
+      <span>Bacao 750 = 40.54%</span>
+      <span>Enlin 1,100 = 59.46%</span>
+    </div>
+
+    <div class="utilization-view-switch" aria-label="Utilization period">
+      <button type="button" id="utilizationDailyBtn" class="utilization-view-btn active" onclick="setUtilizationView('daily')">Daily</button>
+      <button type="button" id="utilizationWeeklyBtn" class="utilization-view-btn" onclick="setUtilizationView('weekly')">Weekly</button>
+      <button type="button" id="utilizationMonthlyBtn" class="utilization-view-btn" onclick="setUtilizationView('monthly')">Monthly</button>
+    </div>
+
+    <div class="utilization-filter-bar">
+      <div class="utilization-filter-field">
+        <label for="utilizationMonthFilter">Month</label>
+        <input type="month" id="utilizationMonthFilter" onchange="onUtilizationMonthChange()">
+      </div>
+      <div class="utilization-filter-field" id="utilizationDateFilterWrap">
+        <label for="utilizationDateFilter">Exact Date (optional)</label>
+        <input type="date" id="utilizationDateFilter" onchange="onUtilizationDateChange()">
+      </div>
+    </div>
+
+    <div id="utilizationDailyBlock" class="utilization-list-block active">
+      <div class="utilization-list-title"><h3>Daily</h3><small id="utilizationDailyLabel">Present month</small></div>
+      <div class="table-wrap">
+        <table class="utilization-history-table">
+          <thead><tr><th>Date</th><th>Bacao</th><th>%</th><th>Enlin</th><th>%</th><th>Total</th><th>%</th></tr></thead>
+          <tbody id="utilizationDailyBody"><tr><td colspan="7" class="utilization-empty">Open this tab to load utilization history.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="utilizationWeeklyBlock" class="utilization-list-block">
+      <div class="utilization-list-title"><h3>Weekly</h3><small id="utilizationWeeklyLabel">Present month only</small></div>
+      <div class="table-wrap">
+        <table class="utilization-history-table">
+          <thead><tr><th>Week</th><th>Bacao</th><th>%</th><th>Enlin</th><th>%</th><th>Total</th><th>%</th></tr></thead>
+          <tbody id="utilizationWeeklyBody"><tr><td colspan="7" class="utilization-empty">No weekly data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="utilizationMonthlyBlock" class="utilization-list-block">
+      <div class="utilization-list-title"><h3>Monthly</h3><small id="utilizationMonthlyLabel">Selected whole month</small></div>
+      <div class="table-wrap">
+        <table class="utilization-history-table">
+          <thead><tr><th>Month</th><th>Bacao</th><th>%</th><th>Enlin</th><th>%</th><th>Total</th><th>%</th></tr></thead>
+          <tbody id="utilizationMonthlyBody"><tr><td colspan="7" class="utilization-empty">No monthly data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="utilizationHistoryStatus" class="status">Waiting for history data…</div>
+  </div>
+</section>
 </div>
 <script>
 const FIREBASE_BASE='https://yardactivity-c4581-default-rtdb.asia-southeast1.firebasedatabase.app';
@@ -912,7 +1031,7 @@ let latestData=null,historyData={},reportMode='daily',lastReportRows=[],prepared
 const $=id=>document.getElementById(id);
 const num=v=>Number(v)||0;
 const fmt=v=>num(v).toLocaleString();
-function showPanel(name){for(const n of ['summary','report']){$(n+'Panel').classList.toggle('active',name===n);$(n+'Tab').classList.toggle('active',name===n);}if(name==='report'&&!Object.keys(historyData).length)loadHistory();else if(name==='report')renderReport();}
+function showPanel(name){for(const n of ['summary','report','utilization']){$(n+'Panel').classList.toggle('active',name===n);$(n+'Tab').classList.toggle('active',name===n);}if(name==='report'&&!Object.keys(historyData).length)loadHistory();else if(name==='report')renderReport();if(name==='utilization'&&!Object.keys(historyData).length)loadUtilizationHistory();else if(name==='utilization')renderUtilizationHistory();}
 function setStatus(id,text,error=false){const el=$(id);el.textContent=text;el.className='status '+(error?'error':'ok');}
 function setConnection(ok,text){const el=$('connectionBadge');el.textContent=text;el.className='badge '+(ok?'online':'error');}
 async function getJson(path){const r=await fetch(`${FIREBASE_BASE}/${path}.json?ts=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw new Error(`Firebase HTTP ${r.status}`);return r.json();}
@@ -3074,6 +3193,7 @@ async function refreshAll(){
   try{
     await Promise.allSettled([loadLatest(),loadWeather()]);
     if($('reportPanel').classList.contains('active'))await loadHistory();
+    if($('utilizationPanel')?.classList.contains('active'))await loadUtilizationHistory();
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Refresh Now';}
   }
@@ -3124,6 +3244,134 @@ function renderLatest(){
     evgHiddenTotal
   );
 }
+
+const UTILIZATION_TOTAL_CAPACITY=1850;
+let utilizationView='daily';
+let utilizationFilterInitialized=false;
+function utilizationSnapshot(record){
+  const counts=yardCounts(record||{});
+  const bacao=num(counts.cez1)+num(getLoadedActivity(record||{}).inventory);
+  const enlin=num(counts.cez2);
+  const total=bacao+enlin;
+  return{bacao,enlin,total,bacaoPct:bacao/UTILIZATION_TOTAL_CAPACITY*100,enlinPct:enlin/UTILIZATION_TOTAL_CAPACITY*100,totalPct:total/UTILIZATION_TOTAL_CAPACITY*100};
+}
+function utilizationDate(value){
+  const raw=String(value||'').trim();
+  const m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m?`${m[1]}-${m[2]}-${m[3]}`:'';
+}
+function utilizationAverage(rows){
+  const count=rows.length||1;
+  const sums=rows.reduce((a,r)=>{a.bacao+=r.bacao;a.enlin+=r.enlin;a.total+=r.total;return a;},{bacao:0,enlin:0,total:0});
+  const bacao=sums.bacao/count,enlin=sums.enlin/count,total=sums.total/count;
+  return{bacao,enlin,total,bacaoPct:bacao/UTILIZATION_TOTAL_CAPACITY*100,enlinPct:enlin/UTILIZATION_TOTAL_CAPACITY*100,totalPct:total/UTILIZATION_TOTAL_CAPACITY*100};
+}
+function utilizationNumber(v){
+  const n=num(v);
+  return Number.isInteger(n)?fmt(n):n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function utilizationCells(v){
+  return `<td>${utilizationNumber(v.bacao)}</td><td>${v.bacaoPct.toFixed(2)}%</td><td>${utilizationNumber(v.enlin)}</td><td>${v.enlinPct.toFixed(2)}%</td><td class="total-col">${utilizationNumber(v.total)}</td><td class="total-col">${v.totalPct.toFixed(2)}%</td>`;
+}
+function utilizationCurrentMonth(){
+  const now=new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+function utilizationAllDaily(){
+  return Object.entries(historyData||{})
+    .map(([key,record])=>{const date=utilizationDate(normalizeDateKey(key,record));return date?{date,...utilizationSnapshot(record)}:null;})
+    .filter(Boolean)
+    .sort((a,b)=>b.date.localeCompare(a.date));
+}
+function utilizationDefaultMonth(daily){
+  const current=utilizationCurrentMonth();
+  if(daily.some(r=>r.date.startsWith(current)))return current;
+  return daily.length?daily[0].date.slice(0,7):current;
+}
+function utilizationMonthText(monthKey,style='long'){
+  if(!/^\d{4}-\d{2}$/.test(monthKey||''))return 'Selected month';
+  return parseLocal(`${monthKey}-01`).toLocaleDateString('en-PH',{month:style,year:'numeric'});
+}
+function setUtilizationView(view){
+  utilizationView=['daily','weekly','monthly'].includes(view)?view:'daily';
+  for(const name of ['daily','weekly','monthly']){
+    const cap=name[0].toUpperCase()+name.slice(1);
+    $(`utilization${cap}Btn`)?.classList.toggle('active',name===utilizationView);
+    $(`utilization${cap}Block`)?.classList.toggle('active',name===utilizationView);
+  }
+  $('utilizationDateFilterWrap')?.classList.toggle('hidden',utilizationView!=='daily');
+  renderUtilizationHistory();
+}
+function onUtilizationMonthChange(){
+  const month=$('utilizationMonthFilter')?.value||utilizationCurrentMonth();
+  const dateInput=$('utilizationDateFilter');
+  if(dateInput?.value&&!dateInput.value.startsWith(month))dateInput.value='';
+  renderUtilizationHistory();
+}
+function onUtilizationDateChange(){
+  const date=$('utilizationDateFilter')?.value||'';
+  if(date){
+    const month=date.slice(0,7);
+    if($('utilizationMonthFilter'))$('utilizationMonthFilter').value=month;
+  }
+  renderUtilizationHistory();
+}
+function renderUtilizationHistory(){
+  if(!$('utilizationPanel')?.classList.contains('active'))return;
+  const allDaily=utilizationAllDaily();
+  const monthInput=$('utilizationMonthFilter');
+  if(monthInput&&!utilizationFilterInitialized){
+    monthInput.value=utilizationDefaultMonth(allDaily);
+    utilizationFilterInitialized=true;
+  }
+  const selectedMonth=monthInput?.value||utilizationDefaultMonth(allDaily);
+  const exactDate=$('utilizationDateFilter')?.value||'';
+  const monthDaily=allDaily.filter(r=>r.date.startsWith(selectedMonth));
+  const daily=exactDate?monthDaily.filter(r=>r.date===exactDate):monthDaily;
+  const monthLabel=utilizationMonthText(selectedMonth);
+
+  if($('utilizationDailyLabel'))$('utilizationDailyLabel').textContent=exactDate?parseLocal(exactDate).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):monthLabel;
+  if($('utilizationWeeklyLabel'))$('utilizationWeeklyLabel').textContent=`${monthLabel} only`;
+  if($('utilizationMonthlyLabel'))$('utilizationMonthlyLabel').textContent=monthLabel;
+
+  const dailyBody=$('utilizationDailyBody');
+  dailyBody.innerHTML=daily.length?daily.map(r=>`<tr><td>${parseLocal(r.date).toLocaleDateString('en-PH',{month:'short',day:'2-digit'})}</td>${utilizationCells(r)}</tr>`).join(''):'<tr><td colspan="7" class="utilization-empty">No daily utilization record for this filter.</td></tr>';
+
+  const weeklyGroups=new Map();
+  for(const row of monthDaily){
+    const d=parseLocal(row.date);
+    const weekNo=sundayWeekNumber(d);
+    if(!weeklyGroups.has(weekNo))weeklyGroups.set(weekNo,[]);
+    weeklyGroups.get(weekNo).push(row);
+  }
+  const weekly=[...weeklyGroups.entries()].map(([weekNo,rows])=>{
+    const dates=rows.map(r=>r.date).sort();
+    const avg=utilizationAverage(rows);
+    const first=parseLocal(dates[0]).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+    const last=parseLocal(dates[dates.length-1]).toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+    return{sort:dates[dates.length-1],label:`W${weekNo} ${first}–${last}`,...avg};
+  }).sort((a,b)=>b.sort.localeCompare(a.sort));
+  const weeklyBody=$('utilizationWeeklyBody');
+  weeklyBody.innerHTML=weekly.length?weekly.map(r=>`<tr><td>${r.label}</td>${utilizationCells(r)}</tr>`).join(''):'<tr><td colspan="7" class="utilization-empty">No weekly utilization record for this month.</td></tr>';
+
+  const monthly=monthDaily.length?[{key:selectedMonth,label:utilizationMonthText(selectedMonth,'short'),...utilizationAverage(monthDaily)}]:[];
+  const monthlyBody=$('utilizationMonthlyBody');
+  monthlyBody.innerHTML=monthly.length?monthly.map(r=>`<tr><td>${r.label}</td>${utilizationCells(r)}</tr>`).join(''):'<tr><td colspan="7" class="utilization-empty">No monthly utilization record for this month.</td></tr>';
+
+  const shownCount=utilizationView==='daily'?daily.length:utilizationView==='weekly'?weekly.length:monthly.length;
+  setStatus('utilizationHistoryStatus',shownCount?`${monthLabel} • ${utilizationView[0].toUpperCase()+utilizationView.slice(1)} utilization`:`No ${utilizationView} utilization found for ${monthLabel}.`,!shownCount);
+}
+async function loadUtilizationHistory(){
+  try{
+    const data=await readWithFallback('records');
+    historyData=data||{};
+    utilizationFilterInitialized=false;
+    renderUtilizationHistory();
+  }catch(e){
+    setStatus('utilizationHistoryStatus',e.message,true);
+  }
+}
+
 async function loadHistory(){try{const data=await readWithFallback('records');historyData=data||{};if($('reportPanel').classList.contains('active'))renderReport();}catch(e){historyData={};setStatus('reportStatus',e.message,true);}}
 function normalizeDateKey(key,r){return r?.recordDate||key;}
 function fitCanvas(id){const c=$(id),dpr=window.devicePixelRatio||1,rect=c.parentElement.getBoundingClientRect();c.width=Math.max(320,rect.width)*dpr;c.height=Math.max(250,rect.height)*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w:rect.width,h:rect.height};}
