@@ -2458,7 +2458,11 @@ function lineInventoryStats(record,line){
       row?.remarks??row?.Remarks??row?.REMARKS??row?.remark??row?.Remark??
       fieldByPattern(row,[/remark/i,/comment/i,/note/i])
     );
-    if(isApprovedInventoryRecord(row))approved++;
+    // Shipping Line Summary rule: if Remarks contains both APPROVED and
+    // CANCELLED (including "CANCELLED WW"), keep the row counted as Approved.
+    // This override is intentionally limited to this per-shipping-line table.
+    const approvedAndCancelled=/\bapproved\b/.test(remarks)&&/\bcancel(?:led|ed)?\b/.test(remarks);
+    if(approvedAndCancelled||isApprovedInventoryRecord(row))approved++;
     if(/\bhold\b/.test(remarks))hold++;
     if(/\bfor\s+repo\b/.test(remarks))forRepo++;
 
