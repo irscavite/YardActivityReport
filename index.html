@@ -2869,10 +2869,10 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
       :0;
   }
 
-  // Overall Summary is shown in Daily and Weekly.
+  // Overall Summary is shown in Daily only.
   const overallAside=$('dailyOverallSummary');
   const overallLayout=$('operationalTableLayout');
-  const showOverall=reportMode==='daily'||reportMode==='weekly';
+  const showOverall=reportMode==='daily';
   if(overallAside)overallAside.classList.toggle('hidden',!showOverall);
   if(overallLayout)overallLayout.classList.toggle('overall-hidden',!showOverall);
   if(showOverall&&$('overallReportBody')){
@@ -2978,11 +2978,11 @@ function renderReport(){
   }
 
   // Mode layout:
-  // Daily   = restored Shipping Line table only.
-  // Weekly  = graphs + restored Shipping Line table.
+  // Daily   = Shipping Line and Overall Summary tables only.
+  // Weekly  = MnR and Operation productivity sections only.
   // Monthly = graphs only.
   const showGraphs=reportMode==='weekly'||reportMode==='monthly';
-  const showTable=reportMode==='daily'||reportMode==='weekly';
+  const showTable=reportMode==='daily';
 
   const approvedSection=$('weeklyRepairSection');
   const movementSection=$('movementReportSection');
