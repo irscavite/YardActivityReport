@@ -441,7 +441,39 @@ body.mobile-app{
 .weekly-day-card .formula{margin-top:7px;color:#667085;font-size:7px;line-height:1.35}
 .weekly-day-card .formula strong{color:var(--navy);font-size:11px}
 .weekly-day-card .repair-pct{display:inline-block;margin-top:8px;padding:6px 9px;border-radius:999px;background:#e6f4ec;color:#176b43;font-size:12px;font-weight:950}
+.weekly-repair-table-wrap{width:100%;margin-bottom:14px;overflow:hidden;border:1px solid #cbd8e7;border-radius:14px;background:#fff;box-shadow:0 6px 18px rgba(15,47,95,.06)}
+.weekly-repair-table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed}
+.weekly-repair-table col:nth-child(1){width:30%}.weekly-repair-table col:nth-child(2){width:17%}.weekly-repair-table col:nth-child(3){width:17%}.weekly-repair-table col:nth-child(4){width:36%}
+.weekly-repair-table th,.weekly-repair-table td{padding:10px 6px;border-right:1px solid #dbe4ef;border-bottom:1px solid #dbe4ef;text-align:center;overflow-wrap:anywhere}
+.weekly-repair-table th:last-child,.weekly-repair-table td:last-child{border-right:0}
+.weekly-repair-table thead th{background:#173f73;color:#fff;font-size:9px;font-weight:950;line-height:1.25;text-transform:uppercase;letter-spacing:.02em}
+.weekly-repair-table tbody tr:nth-child(even){background:#f8fafc}
+.weekly-repair-table tbody td{color:#344054;font-size:11px;font-weight:850}
+.weekly-repair-table .weekly-date-cell{color:#173f73;font-weight:950;text-align:left}
+.weekly-repair-table .weekly-date-cell small{display:block;margin-top:2px;color:#667085;font-size:8px;font-weight:800}
+.weekly-repair-table .weekly-approved-value{color:#2855d9;font-weight:950}
+.weekly-repair-table .weekly-repaired-value{color:#176b43;font-weight:950}
+.weekly-repair-table .weekly-productivity-value{display:inline-block;min-width:72px;padding:5px 9px;border:1px solid #bad9c6;border-radius:999px;background:#dcefe3;color:#176b43;font-weight:950}
+.weekly-repair-table tfoot td{border-bottom:0;background:#eaf1f9;color:#173f73;font-size:11px;font-weight:950}
+.weekly-repair-table tfoot .weekly-average-label{text-align:right;text-transform:uppercase;letter-spacing:.03em}
+.weekly-repair-table tfoot .weekly-average-repair-value{color:#176b43;font-size:14px}
+.weekly-repair-table tfoot .weekly-average-value{color:#176b43;font-size:15px}
+.weekly-repair-table tfoot .weekly-average-metric{text-align:center}
+.weekly-repair-table tfoot .weekly-average-caption{display:block;margin-bottom:3px;color:#667085;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.03em}
+.weekly-repair-table tfoot .weekly-average-number{display:block;color:#176b43;font-size:14px;font-weight:950}
+.weekly-average-productivity-summary{margin-top:5px;color:#dc2626;font-size:13px;font-weight:950;line-height:1.35;text-align:left}
 @media(max-width:650px){.weekly-repair-kpis{grid-template-columns:1fr 1fr;gap:7px}.weekly-repair-kpi{padding:10px}.weekly-repair-kpi strong{font-size:22px}.weekly-repair-chart{height:300px}.weekly-daily-breakdown{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.weekly-day-card{padding:7px 2px;border-radius:8px}.weekly-day-card .day{font-size:7px}.weekly-day-card .date{font-size:6px}.weekly-day-card .formula{font-size:5.5px}.weekly-day-card .formula strong{font-size:9px}.weekly-day-card .repair-pct{padding:5px 6px;font-size:9px}}
+@media(max-width:650px){.weekly-repair-table th,.weekly-repair-table td{padding:8px 3px;font-size:7px}.weekly-repair-table thead th{font-size:6.5px;letter-spacing:0}.weekly-repair-table .weekly-date-cell{font-size:8px}.weekly-repair-table .weekly-date-cell small{font-size:6px}.weekly-repair-table .weekly-productivity-value{min-width:0;padding:4px 3px}.weekly-repair-table tfoot td{font-size:7px}.weekly-repair-table tfoot .weekly-average-repair-value,.weekly-repair-table tfoot .weekly-average-value{font-size:10px}}
+.mobile-app .weekly-repair-table-wrap{overflow:hidden}
+.mobile-app .weekly-repair-table{width:100%;min-width:0;table-layout:fixed}
+.mobile-app .weekly-repair-table th,.mobile-app .weekly-repair-table td{padding:7px 2px;font-size:7px;line-height:1.25}
+.mobile-app .weekly-repair-table thead th{font-size:6px;letter-spacing:0}
+.mobile-app .weekly-repair-table .weekly-date-cell{font-size:7.5px}
+.mobile-app .weekly-repair-table .weekly-date-cell small{font-size:5.5px}
+.mobile-app .weekly-repair-table .weekly-productivity-value{min-width:0;padding:3px 2px;font-size:7px}
+.mobile-app .weekly-repair-table .weekly-average-caption{font-size:5px}
+.mobile-app .weekly-repair-table .weekly-average-number{font-size:9px}
+.mobile-app .weekly-average-productivity-summary{margin-top:4px;font-size:9px;line-height:1.35;text-align:left}
 
 
 /* Vertical letter-by-letter tab labels */
@@ -852,11 +884,21 @@ body.mobile-app{
 
   <div id="weeklyRepairSection" class="section weekly-repair-section">
     <div class="section-head compact-report-head">
-      <div><h2 id="mnrProductivityTitle">Total Approved &amp; Repaired</h2></div>
+      <div><h2 id="mnrProductivityTitle">Total Approved &amp; Repaired</h2><div id="weeklyAverageProductivitySummary" class="weekly-average-productivity-summary hidden"></div></div>
     </div>
-    <div class="weekly-repair-kpis">
+    <div id="weeklyRepairKpis" class="weekly-repair-kpis">
       <div class="weekly-repair-kpi"><span id="weeklyRepairedLabel">Repaired Today</span><strong id="weeklyTotalRepaired">0</strong></div>
       <div class="weekly-repair-kpi"><span>Total Approved</span><strong id="weeklyLatestApprovedBasis">0</strong><small id="weeklyLatestApprovedNote"></small></div>
+    </div>
+    <div id="weeklyRepairTableWrap" class="weekly-repair-table-wrap hidden">
+      <table class="weekly-repair-table">
+        <colgroup><col><col><col><col></colgroup>
+        <thead><tr><th id="weeklyRepairWeekHeader">Week</th><th>Approved</th><th>Repaired</th><th>Repaired Productivity %</th></tr></thead>
+        <tbody id="weeklyRepairTableBody"></tbody>
+        <tfoot>
+          <tr><td colspan="2" class="weekly-average-label">Average MNR Productivity</td><td class="weekly-average-metric weekly-average-repair-value"><span class="weekly-average-caption">Average Repair</span><strong id="weeklyAverageRepair" class="weekly-average-number">—</strong></td><td class="weekly-average-metric weekly-average-value"><span class="weekly-average-caption">Average %</span><strong id="weeklyAverageMnrProductivity" class="weekly-average-number">—</strong></td></tr>
+        </tfoot>
+      </table>
     </div>
     <div class="chart weekly-repair-chart"><canvas id="weeklyRepairChart"></canvas></div>
     <div class="weekly-repair-legend">
@@ -2150,6 +2192,7 @@ function weeklyRepairDailyRows(start,end,periodRows,approvedEvents,repairEvents,
 }
 function formatDayLabel(date){return parseLocal(date).toLocaleDateString('en-PH',{weekday:'short'});}
 function formatShortDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric'});}
+function formatWeeklyTableDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
 function formatProductivityHeadingDate(date){return parseLocal(date).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
 function updateProductivityReportHeadings(start,end){
   const mnrTitle=$('mnrProductivityTitle');
@@ -2220,10 +2263,17 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
 
   const repairedLabel=$('weeklyRepairedLabel');
   const breakdown=$('weeklyDailyBreakdown');
+  const kpis=$('weeklyRepairKpis');
+  const tableWrap=$('weeklyRepairTableWrap');
+  const averageSummary=$('weeklyAverageProductivitySummary');
   const shippingLine=selectedMnrShippingLine();
   const shippingLineLabel=mnrShippingLineLabel(shippingLine);
 
   if(reportMode==='monthly'){
+    if(kpis)kpis.classList.remove('hidden');
+    if(tableWrap)tableWrap.classList.add('hidden');
+    if(breakdown)breakdown.classList.remove('hidden');
+    if(averageSummary)averageSummary.classList.add('hidden');
     const selectedDate=parseLocal($('reportDate').value||isoLocal(new Date()));
     const weeks=monthlyRepairRows(selectedDate,periodRows,shippingLine);
     const availableWeeks=weeks.filter(row=>row.hasData);
@@ -2257,9 +2307,10 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     return;
   }
 
-  if(repairedLabel){
-    repairedLabel.textContent=reportMode==='daily'?'Repaired Today':'Repaired This Week';
-  }
+  if(kpis)kpis.classList.add('hidden');
+  if(tableWrap)tableWrap.classList.remove('hidden');
+  if(breakdown)breakdown.classList.add('hidden');
+  if(averageSummary)averageSummary.classList.remove('hidden');
 
   const events=approvedEvents||approvedEventLedger();
   const repairEvents=repairedLifecycleEvents();
@@ -2275,11 +2326,25 @@ function renderWeeklyRepairSection(start,end,periodRows,approvedEvents){
     ?`${shippingLineLabel} • Week ${sundayWeekNumber(parseLocal(start))}: ${formatShortDate(start)} - ${formatShortDate(end)}`
     :shippingLineLabel;
 
-  if(breakdown){
-    breakdown.classList.remove('monthly-breakdown');
-    breakdown.innerHTML=days.map(row=>{
-      const dailyPercent=row.hasSnapshot?`${row.pct.toFixed(1)}%`:'—';
-      return `<div class="weekly-day-card"><div class="day">${formatDayLabel(row.date)}</div><div class="date weekly-report-date-highlight">${formatShortDate(row.date)}</div><div class="repair-pct">${dailyPercent}</div></div>`;
+  const weekNo=sundayWeekNumber(parseLocal(start));
+  if($('weeklyRepairWeekHeader'))$('weeklyRepairWeekHeader').textContent=`Week ${weekNo}`;
+  const productivityDays=days.filter(row=>row.hasSnapshot&&num(row.approvedBase)>0);
+  const averageProductivity=productivityDays.length
+    ?productivityDays.reduce((sum,row)=>sum+num(row.pct),0)/productivityDays.length
+    :null;
+  const completedRepairDays=days.filter(row=>!row.isFuture);
+  const averageRepair=completedRepairDays.length
+    ?completedRepairDays.reduce((sum,row)=>sum+num(row.repaired),0)/completedRepairDays.length
+    :null;
+  if($('weeklyAverageRepair'))$('weeklyAverageRepair').textContent=averageRepair===null?'—':averageRepair.toFixed(1);
+  if($('weeklyAverageMnrProductivity'))$('weeklyAverageMnrProductivity').textContent=averageProductivity===null?'—':`${averageProductivity.toFixed(1)}%`;
+  if(averageSummary)averageSummary.textContent=`Average Repair Productivity for Week ${weekNo}`;
+  if($('weeklyRepairTableBody')){
+    $('weeklyRepairTableBody').innerHTML=days.map(row=>{
+      const approved=row.hasSnapshot?fmt(row.approvedBase):'—';
+      const repaired=row.isFuture?'—':fmt(row.repaired);
+      const productivity=row.hasSnapshot&&num(row.approvedBase)>0?`${row.pct.toFixed(1)}%`:'—';
+      return `<tr><td class="weekly-date-cell">${formatWeeklyTableDate(row.date)}<small>${formatDayLabel(row.date)} • ${shippingLineLabel}</small></td><td class="weekly-approved-value">${approved}</td><td class="weekly-repaired-value">${repaired}</td><td><span class="weekly-productivity-value">${productivity}</span></td></tr>`;
     }).join('');
   }
 
