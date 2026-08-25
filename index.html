@@ -656,7 +656,7 @@ body.mobile-app{
 .mobile-app #operationalTableSection .report-section-title{margin-bottom:7px}
 .operational-table-layout.overall-hidden{grid-template-columns:1fr}
 .mobile-app .operational-table-layout{display:flex;flex-direction:column;gap:11px}
-.mobile-app #dailyOverallSummary{order:-1;width:100%}
+.mobile-app #dailyOverallSummary{width:100%}
 
 /* Easier-to-read Shipping Line Summary table */
 .mobile-app .line-report-date{
@@ -786,7 +786,7 @@ body.mobile-app{
 </header>
 <nav class="tabs" aria-label="Mobile navigation">
   <button type="button" id="summaryTab" class="tab active" onclick="showPanel('summary')" aria-label="Current Summary"><span class="tab-icon">⌂</span><span class="tab-label">Summary</span></button>
-  <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Reports"><span class="tab-icon">▦</span><span class="tab-label">Reports</span></button>
+  <button type="button" id="reportTab" class="tab" onclick="showPanel('report')" aria-label="Shipping Line"><span class="tab-icon">▦</span><span class="tab-label">Shipping Line</span></button>
   <button type="button" id="utilizationTab" class="tab" onclick="showPanel('utilization')" aria-label="Utilization"><span class="tab-icon">%</span><span class="tab-label">Utilization</span></button>
 </nav>
 
@@ -866,6 +866,21 @@ body.mobile-app{
     <div class="chart distribution-chart"><canvas id="distributionChart"></canvas></div>
     <div class="distribution-legend"></div>
   </div>
+  <div id="dailyOverallSummary" class="section overall-summary-section">
+    <div class="overall-card">
+      <div id="overallCaptureArea" class="overall-capture-area">
+        <div class="overall-title"><span>▥</span> Overall Summary</div>
+        <table class="overall-table"><thead><tr><th>Item</th><th>Volume</th></tr></thead><tbody id="overallReportBody"></tbody></table>
+        <div class="overall-yard21-row">
+          <span class="overall-yard21-label">Yard 2.1 Containers</span>
+          <strong id="overallYard21Value" class="overall-yard21-value">0</strong>
+        </div>
+      </div>
+      <div class="overall-jpg-actions">
+        <button type="button" class="action-btn primary overall-jpg-btn" onclick="downloadOverallJpg()">Download Overall JPG</button>
+      </div>
+    </div>
+  </div>
   <div id="summaryStatus" class="status">Connecting...</div>
 </section>
 
@@ -944,7 +959,7 @@ body.mobile-app{
   </div>
 
   <div id="operationalTableSection" class="section operational-sheet hidden">
-    <div id="operationalTableLayout" class="report-layout operational-table-layout">
+    <div id="operationalTableLayout" class="report-layout operational-table-layout overall-hidden">
       <div>
         <div class="report-section-title line-selector-title"><span class="title-icon">▦</span><div><h2>Shipping Line Summary</h2></div></div>
         <div class="report-filter-bar">
@@ -953,21 +968,6 @@ body.mobile-app{
         </div>
         <div id="shippingLineReportTables" class="shipping-report-grid single-line-grid"></div>
       </div>
-      <aside id="dailyOverallSummary" class="hidden">
-        <div class="overall-card">
-          <div id="overallCaptureArea" class="overall-capture-area">
-            <div class="overall-title"><span>▥</span> Overall Summary</div>
-            <table class="overall-table"><thead><tr><th>Item</th><th>Volume</th></tr></thead><tbody id="overallReportBody"></tbody></table>
-            <div class="overall-yard21-row">
-              <span class="overall-yard21-label">Yard 2.1 Containers</span>
-              <strong id="overallYard21Value" class="overall-yard21-value">0</strong>
-            </div>
-          </div>
-          <div class="overall-jpg-actions">
-            <button type="button" class="action-btn primary overall-jpg-btn" onclick="downloadOverallJpg()">Download Overall JPG</button>
-          </div>
-        </div>
-      </aside>
     </div>
   </div>
 
@@ -2806,6 +2806,61 @@ function drawMovementPairChart(id,labels,firstSeries,secondSeries,per24,barColor
   }
 }
 
+function renderOverallSummary(record){
+  if(!$('overallReportBody'))return;
+
+  // HRD = CMA + MAERSK + ONE. Damage uses the existing statusCategory(),
+  // where For Box R.E. / For Repair R.E. are classified as Damage.
+  const inventorySnapshot=record||latestData||{};
+  const hrdLines=new Set(['CMA','MAERSK','ONE']);
+  const inventoryRowsForOverall=inventoryRecords(inventorySnapshot);
+  let hrdAvailable=0,hrdDamage=0,hrdEmpty=0,otherEmpty=0;
+
+  if(inventoryRowsForOverall.length){
+    for(const row of inventoryRowsForOverall){
+      if(!includeInSummaryInventory(row))continue;
+      const category=statusCategory(row);
+      if(category!=='available'&&category!=='damage')continue;
+      const line=recordLine(row);
+      if(hrdLines.has(line)){
+        hrdEmpty++;
+        if(category==='available')hrdAvailable++;
+        else if(category==='damage')hrdDamage++;
+      }else{
+        otherEmpty++;
+      }
+    }
+  }else{
+    // Compatibility fallback for older snapshots that only have line totals.
+    const byLine=getSummaryByLine(inventorySnapshot);
+    hrdEmpty=['CMA','MAERSK','ONE'].reduce((sum,line)=>sum+num(byLine[line]),0);
+    const reportEmptyInventory=Object.values(byLine).reduce((sum,value)=>sum+num(value),0);
+    otherEmpty=Math.max(0,reportEmptyInventory-hrdEmpty);
+    for(const line of ['CMA','MAERSK','ONE']){
+      const stats=lineInventoryStats(inventorySnapshot,line);
+      hrdAvailable+=num(stats.available);
+      hrdDamage+=num(stats.damage);
+    }
+  }
+
+  const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
+  const reportYard21Inventory=Math.max(0,yard21ContainerCount(inventorySnapshot));
+  const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
+  const pctOfHrdEmpty=value=>hrdEmpty>0?(num(value)/hrdEmpty)*100:0;
+  const hrdAvailablePct=pctOfHrdEmpty(hrdAvailable);
+  const hrdDamagePct=pctOfHrdEmpty(hrdDamage);
+
+  $('overallReportBody').innerHTML=`
+    <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td></tr>
+    <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td></tr>
+    <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td></tr>
+    <tr class="overall-ratio-row"><td>HRD Containers Available/Damage Ratio</td><td class="overall-value">${hrdAvailablePct.toFixed(2)}% / ${hrdDamagePct.toFixed(2)}%</td></tr>
+    <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td></tr>
+    <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td></tr>
+    <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td></tr>`;
+  if($('overallYard21Value'))$('overallYard21Value').textContent=fmt(reportYard21Inventory);
+}
+
 function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEvents){
   const section=$('operationalTableSection');
   if(!section)return;
@@ -2869,69 +2924,6 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
       :0;
   }
 
-  // Overall Summary is shown in Daily only.
-  const overallAside=$('dailyOverallSummary');
-  const overallLayout=$('operationalTableLayout');
-  const showOverall=reportMode==='daily';
-  if(overallAside)overallAside.classList.toggle('hidden',!showOverall);
-  if(overallLayout)overallLayout.classList.toggle('overall-hidden',!showOverall);
-  if(showOverall&&$('overallReportBody')){
-    // Recreated Daily Overall Summary.
-    // HRD = CMA + MAERSK + ONE. Damage uses the existing statusCategory(),
-    // where For Box R.E. / For Repair R.E. are classified as Damage.
-    const hrdLines=new Set(['CMA','MAERSK','ONE']);
-    const inventoryRowsForOverall=inventoryRecords(inventorySnapshot);
-    let hrdAvailable=0,hrdDamage=0,hrdEmpty=0,otherEmpty=0;
-
-    if(inventoryRowsForOverall.length){
-      for(const row of inventoryRowsForOverall){
-        if(!includeInSummaryInventory(row))continue;
-        const category=statusCategory(row);
-        if(category!=='available'&&category!=='damage')continue;
-        const line=recordLine(row);
-        if(hrdLines.has(line)){
-          hrdEmpty++;
-          if(category==='available')hrdAvailable++;
-          else if(category==='damage')hrdDamage++;
-        }else{
-          otherEmpty++;
-        }
-      }
-    }else{
-      // Compatibility fallback for older snapshots that only have line totals.
-      const byLine=getSummaryByLine(inventorySnapshot);
-      hrdEmpty=['CMA','MAERSK','ONE'].reduce((sum,line)=>sum+num(byLine[line]),0);
-      const reportEmptyInventory=Object.values(byLine).reduce((sum,value)=>sum+num(value),0);
-      otherEmpty=Math.max(0,reportEmptyInventory-hrdEmpty);
-      // Available/Damage require detailed Inventory Records; use detailed current
-      // snapshot if available so these two HRD rows stay status-based.
-      for(const line of ['CMA','MAERSK','ONE']){
-        const stats=lineInventoryStats(inventorySnapshot,line);
-        hrdAvailable+=num(stats.available);
-        hrdDamage+=num(stats.damage);
-      }
-    }
-
-    const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
-    const reportYard21Inventory=Math.max(0,yard21ContainerCount(inventorySnapshot));
-    const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
-
-    // HRD Available/Damage ratio uses Total Empty Containers for HRD as 100%.
-    const pctOfHrdEmpty=value=>hrdEmpty>0?(num(value)/hrdEmpty)*100:0;
-    const hrdAvailablePct=pctOfHrdEmpty(hrdAvailable);
-    const hrdDamagePct=pctOfHrdEmpty(hrdDamage);
-
-    $('overallReportBody').innerHTML=`
-      <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td></tr>
-      <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td></tr>
-      <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td></tr>
-      <tr class="overall-ratio-row"><td>HRD Containers Available/Damage Ratio</td><td class="overall-value">${hrdAvailablePct.toFixed(2)}% / ${hrdDamagePct.toFixed(2)}%</td></tr>
-      <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td></tr>
-      <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td></tr>
-      <tr class="overall-total-row"><td>Total Inventory</td><td class="overall-value">${fmt(reportTotalInventory)}</td></tr>`;
-    if($('overallYard21Value'))$('overallYard21Value').textContent=fmt(reportYard21Inventory);
-  }
-
   preparedReportRows=rows;
   const lineFilter=$('reportLineFilter');
   const previousLine=lineFilter?.value;
@@ -2978,7 +2970,7 @@ function renderReport(){
   }
 
   // Mode layout:
-  // Daily   = Shipping Line and Overall Summary tables only.
+  // Daily   = Shipping Line table only.
   // Weekly  = MnR and Operation productivity sections only.
   // Monthly = graphs only.
   const showGraphs=reportMode==='weekly'||reportMode==='monthly';
@@ -3089,8 +3081,9 @@ async function downloadSelectedLineJpg(){
 }
 async function downloadOverallJpg(){
   const source=$('overallCaptureArea');
+  const overallStatusId=$('summaryPanel')?.classList.contains('active')?'summaryStatus':'reportStatus';
   if(!source||!$('overallReportBody')?.children.length){
-    setStatus('reportStatus','No Overall Summary table available to download.',true);
+    setStatus(overallStatusId,'No Overall Summary table available to download.',true);
     return;
   }
 
@@ -3140,9 +3133,9 @@ async function downloadOverallJpg(){
     a.click();
     a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
-    setStatus('reportStatus','Overall Summary table downloaded as JPG.');
+    setStatus(overallStatusId,'Overall Summary table downloaded as JPG.');
   }catch(error){
-    setStatus('reportStatus',`Unable to download Overall Summary image: ${error.message}`,true);
+    setStatus(overallStatusId,`Unable to download Overall Summary image: ${error.message}`,true);
   }finally{
     if(button){button.disabled=false;button.textContent=oldText||'Download Overall JPG';}
   }
@@ -3285,6 +3278,7 @@ function renderLatest(){
   if($('reportShippingLineAsOf'))$('reportShippingLineAsOf').textContent=`As of ${stamp(latestData)}`;
   $('yard21ContainerCount').textContent=fmt(yard21ContainerCount(latestData));
   renderYard21Breakdown(latestData);
+  renderOverallSummary(latestData);
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
   const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div></div>`).join('');
