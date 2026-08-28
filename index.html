@@ -2871,7 +2871,7 @@ function renderOverallSummary(record){
     <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td></tr>
     <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td></tr>
     <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td></tr>
-    <tr class="overall-approved-row"><td>Total Approved</td><td class="overall-value">${fmt(totalApproved)}</td></tr>
+    <tr class="overall-approved-row"><td>Total Approved for repair</td><td class="overall-value">${fmt(totalApproved)}</td></tr>
     <tr class="overall-repaired-row"><td>Total Repaired (${yesterdayLabel})</td><td class="overall-value">${fmt(totalRepairedYesterday)}</td></tr>
     <tr class="overall-ratio-row"><td>HRD Containers Available/Damage Ratio</td><td class="overall-value">${hrdAvailablePct.toFixed(2)}% / ${hrdDamagePct.toFixed(2)}%</td></tr>
     <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td></tr>
