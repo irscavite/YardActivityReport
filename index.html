@@ -91,7 +91,7 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
 }
 .mobile-app .overall-yard21-row{padding:9px 6px}
 .mobile-app .overall-yard21-label{font-size:9px}
-.mobile-app .overall-yard21-value{font-size:13px}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#f8fafc}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
+.mobile-app .overall-yard21-value{font-size:13px}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#dbeafe;color:#1d4ed8;font-weight:950}.overall-table .overall-approved-row td:first-child{box-shadow:inset 5px 0 #2563eb}.overall-table .overall-repaired-row td{background:#dcfce7;color:#15803d;font-weight:950}.overall-table .overall-repaired-row td:first-child{box-shadow:inset 5px 0 #16a34a}.overall-table .overall-approved-row .overall-value,.overall-table .overall-repaired-row .overall-value{font-size:14px}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
 @media(max-width:650px){.line-jpg-btn{width:100%;margin-left:0}}
 
 /* ==========================================================
@@ -2846,6 +2846,23 @@ function renderOverallSummary(record){
   const reportLoadedInventory=Math.max(0,getLoadedActivity(inventorySnapshot).inventory);
   const reportYard21Inventory=Math.max(0,yard21ContainerCount(inventorySnapshot));
   const reportTotalInventory=Math.max(0,hrdEmpty+otherEmpty+reportLoadedInventory);
+  // Total Approved follows the three current Shipping Line summaries and uses
+  // only the latest Inventory snapshot for CMA/APL, ONE and MAERSK.
+  const totalApproved=REPORT_DROPDOWN_LINES.reduce(
+    (sum,line)=>sum+num(lineInventoryStats(inventorySnapshot,line).approved),
+    0
+  );
+  // Total Repaired is yesterday's deduplicated CMA/APL + ONE + MAERSK repair
+  // count. The existing lifecycle ledger combines Latest and saved records.
+  const yesterdayDate=new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate()-1);
+  const yesterdayKey=isoLocal(yesterdayDate);
+  const yesterdayLabel=parseLocal(yesterdayKey).toLocaleDateString('en-PH',{
+    month:'short',day:'numeric',year:'numeric'
+  });
+  const totalRepairedYesterday=sumApprovedScopeRepairCounts(
+    repairedCountsForRange(yesterdayKey,yesterdayKey)
+  );
   const pctOfHrdEmpty=value=>hrdEmpty>0?(num(value)/hrdEmpty)*100:0;
   const hrdAvailablePct=pctOfHrdEmpty(hrdAvailable);
   const hrdDamagePct=pctOfHrdEmpty(hrdDamage);
@@ -2854,6 +2871,8 @@ function renderOverallSummary(record){
     <tr><td>Total Available Containers for HRD</td><td class="overall-value">${fmt(hrdAvailable)}</td></tr>
     <tr><td>Total Damage Containers for HRD</td><td class="overall-value overall-danger">${fmt(hrdDamage)}</td></tr>
     <tr class="overall-total-row"><td>Total Empty Containers for HRD</td><td class="overall-value">${fmt(hrdEmpty)}</td></tr>
+    <tr class="overall-approved-row"><td>Total Approved</td><td class="overall-value">${fmt(totalApproved)}</td></tr>
+    <tr class="overall-repaired-row"><td>Total Repaired (${yesterdayLabel})</td><td class="overall-value">${fmt(totalRepairedYesterday)}</td></tr>
     <tr class="overall-ratio-row"><td>HRD Containers Available/Damage Ratio</td><td class="overall-value">${hrdAvailablePct.toFixed(2)}% / ${hrdDamagePct.toFixed(2)}%</td></tr>
     <tr><td>Other Empty Containers</td><td class="overall-value">${fmt(otherEmpty)}</td></tr>
     <tr class="loaded-row"><td>Total HRD Loaded Inventory</td><td class="overall-value">${fmt(reportLoadedInventory)}</td></tr>
@@ -3252,7 +3271,7 @@ async function refreshAll(){
   if(btn){btn.disabled=true;btn.textContent='Refreshing…';}
   try{
     await Promise.allSettled([loadLatest(),loadWeather()]);
-    if($('reportPanel').classList.contains('active'))await loadHistory();
+    if($('summaryPanel').classList.contains('active')||$('reportPanel').classList.contains('active'))await loadHistory();
     if($('utilizationPanel')?.classList.contains('active'))await loadUtilizationHistory();
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Refresh Now';}
@@ -3433,7 +3452,7 @@ async function loadUtilizationHistory(){
   }
 }
 
-async function loadHistory(){try{const data=await readWithFallback('records');historyData=data||{};if($('reportPanel').classList.contains('active'))renderReport();}catch(e){historyData={};setStatus('reportStatus',e.message,true);}}
+async function loadHistory(){try{const data=await readWithFallback('records');historyData=data||{};if(latestData)renderOverallSummary(latestData);if($('reportPanel').classList.contains('active'))renderReport();}catch(e){historyData={};setStatus('reportStatus',e.message,true);}}
 function normalizeDateKey(key,r){return r?.recordDate||key;}
 function fitCanvas(id){const c=$(id),dpr=window.devicePixelRatio||1,rect=c.parentElement.getBoundingClientRect();c.width=Math.max(320,rect.width)*dpr;c.height=Math.max(250,rect.height)*dpr;c.style.width=rect.width+'px';c.style.height=rect.height+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w:rect.width,h:rect.height};}
 function drawBase(ctx,w,h){ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}
@@ -3604,7 +3623,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(right,1);
 }
 const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);if($('mnrShippingLine'))$('mnrShippingLine').value='ALL';$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);if($('mnrShippingLine'))$('mnrShippingLine').value='ALL';$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadHistory();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
