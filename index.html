@@ -1359,16 +1359,29 @@ function includeInInventoryTotals(row){
   return recordLine(row)!=='OOCL'||isCez1OrCez2(row);
 }
 
-// Current Summary only: YARD 2.1 and IRS/NSM are outside Bacao/Enlin
-// utilization, so exclude them from Inventory by Shipping Line totals too.
+// Current Summary cards remain limited to the Bacao/Enlin inventory view.
+// Yard 2.1 is added separately to HRD-only totals below, while IRS/NSM stays
+// excluded from both views.
+function isYard21InventoryLocation(row){
+  const loc=inventoryRowLocation(row);
+  return loc==='YARD-2.1'||loc.startsWith('YARD-2.1-');
+}
 function isExcludedSummaryInventoryLocation(row){
   const loc=inventoryRowLocation(row);
-  return loc==='YARD-2.1'||loc.startsWith('YARD-2.1-')||
+  return isYard21InventoryLocation(row)||
     loc==='IRS/NSM'||loc.startsWith('IRS/NSM-')||
     loc==='IRS-NSM'||loc.startsWith('IRS-NSM-');
 }
 function includeInSummaryInventory(row){
   return includeInInventoryTotals(row)&&!isExcludedSummaryInventoryLocation(row);
+}
+
+// CMA, ONE and MAERSK containers at Yard 2.1 belong in the Shipping Line
+// report and Containers for HRD totals. The location is not shown as a new
+// table row; its records are folded into the existing line totals only.
+function includeInHrdInventoryTotals(row){
+  return includeInSummaryInventory(row)||
+    (APPROVED_REPORT_LINES.has(recordLine(row))&&isYard21InventoryLocation(row));
 }
 
 function yard21ContainerCount(record){
@@ -2071,7 +2084,7 @@ function approvedSnapshotMap(record){
   for(const row of inventoryRecords(record)){
     const line=recordLine(row);
     if(!APPROVED_REPORT_LINES.has(line))continue;
-    if(!includeInSummaryInventory(row))continue;
+    if(!includeInHrdInventoryTotals(row))continue;
     if(!isApprovedInventoryRecord(row))continue;
 
     const id=recordContainerIdentity(row)||approvedRecordIdentity(row);
@@ -2104,7 +2117,7 @@ function approvedInventoryOutgoingCounts(record,asOfDate){
       if(!row||typeof row!=='object')continue;
       const line=recordLine(row)||resolvedLifecycleLine(row,snapshotDate,lookup);
       if(!APPROVED_REPORT_LINES.has(line))continue;
-      if(group.inventory&&!includeInSummaryInventory(row))continue;
+      if(group.inventory&&!includeInHrdInventoryTotals(row))continue;
       if(!isApprovedInventoryRecord(row))continue;
 
       // Current Approved deduplication follows the lifecycle:
@@ -2513,7 +2526,10 @@ function lineInventoryStats(record,line){
   if(!inventoryRows.length&&latestData&&latestData!==record)inventoryRows=inventoryRecords(latestData);
   for(const row of inventoryRows){
     if(recordLine(row)!==line)continue;
-    if(!includeInSummaryInventory(row))continue;
+    const includeRow=APPROVED_REPORT_LINES.has(line)
+      ?includeInHrdInventoryTotals(row)
+      :includeInSummaryInventory(row);
+    if(!includeRow)continue;
 
     const category=statusCategory(row);
     if(category==='damage')damage++;
@@ -2818,10 +2834,13 @@ function renderOverallSummary(record){
 
   if(inventoryRowsForOverall.length){
     for(const row of inventoryRowsForOverall){
-      if(!includeInSummaryInventory(row))continue;
+      const line=recordLine(row);
+      const includeRow=hrdLines.has(line)
+        ?includeInHrdInventoryTotals(row)
+        :includeInSummaryInventory(row);
+      if(!includeRow)continue;
       const category=statusCategory(row);
       if(category!=='available'&&category!=='damage')continue;
-      const line=recordLine(row);
       if(hrdLines.has(line)){
         hrdEmpty++;
         if(category==='available')hrdAvailable++;
@@ -2934,12 +2953,12 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
 
   // HRD Empty Share % uses Total Empty Containers for HRD as the 100% basis.
   // HRD empty inventory = CMA + ONE + MAERSK empty containers only.
-  const currentByLine=getSummaryByLine(inventorySnapshot);
-  const totalEmptyContainersForHRD=['CMA','ONE','MAERSK']
-    .reduce((sum,line)=>sum+num(currentByLine[line]),0);
+  const totalEmptyContainersForHRD=rows
+    .filter(row=>APPROVED_REPORT_LINES.has(row.line))
+    .reduce((sum,row)=>sum+num(row.volume),0);
   for(const row of rows){
     row.shippingPct=totalEmptyContainersForHRD>0
-      ?(num(currentByLine[row.line])/totalEmptyContainersForHRD)*100
+      ?(num(row.volume)/totalEmptyContainersForHRD)*100
       :0;
   }
 
@@ -3170,7 +3189,6 @@ function exportReportCsv(){
     const stats=lineInventoryStats(currentSource,line);
     lineRows.push({line,...stats});
   }
-  const currentByLine=getSummaryByLine(currentSource);
   const totalStatus=getEmptyStatusTotals(currentSource);
   const totalAvailable=totalStatus.available;
   const totalDamage=totalStatus.damage;
@@ -3194,10 +3212,11 @@ function exportReportCsv(){
     [],
     reportMode==='weekly'?['Shipping Line','Available','Damage','Volume','HRD Empty Share %','Approved','Repaired','HOLD','FOR REPO']:['Shipping Line','Available','Damage','Volume','HRD Empty Share %','Approved','HOLD','FOR REPO']
   ];
-  const exportHrdEmptyTotal=['CMA','ONE','MAERSK']
-    .reduce((sum,line)=>sum+num(currentByLine[line]),0);
+  const exportHrdEmptyTotal=lineRows
+    .filter(row=>APPROVED_REPORT_LINES.has(row.line))
+    .reduce((sum,row)=>sum+num(row.volume),0);
   for(const r of lineRows){
-    const share=exportHrdEmptyTotal>0?(num(currentByLine[r.line])/exportHrdEmptyTotal)*100:0;
+    const share=exportHrdEmptyTotal>0?(num(r.volume)/exportHrdEmptyTotal)*100:0;
     rows.push(reportMode==='weekly'?[displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.repaired,r.hold,r.forRepo]:[displayLineName(r.line),r.available,r.damage,r.volume,share.toFixed(1)+'%',r.approved,r.hold,r.forRepo]);
   }
   const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
