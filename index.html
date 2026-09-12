@@ -280,7 +280,7 @@ body.mobile-app{
 .mobile-app .distribution-total{padding:7px 8px;border-radius:10px}
 .mobile-app .distribution-total span{display:none}
 .mobile-app .distribution-total strong{font-size:17px}
-.mobile-app .distribution-chart{height:470px;border-radius:13px}
+.mobile-app .distribution-chart{height:280px;border-radius:13px}
 .mobile-app .distribution-legend{justify-content:flex-start;flex-wrap:wrap;gap:11px;margin-top:8px;font-size:8px}
 .mobile-app .distribution-legend i{width:8px;height:8px}
 
@@ -349,7 +349,7 @@ body.mobile-app{
   .mobile-app .badge{max-width:none}
   .mobile-app .metric strong,.mobile-app .empty-activity-row .metric strong{font-size:23px}
   .mobile-app .loaded-activity-row .metric strong{font-size:19px}
-  .mobile-app .distribution-chart{height:450px}
+  .mobile-app .distribution-chart{height:270px}
 }
 
 @media(min-width:461px){
@@ -3503,7 +3503,7 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
 
   const colors=['#123b70','#326bd1','#10a3b5','#d19a18','#13945a','#f08a32','#7b61c9'];
   const cx=w/2;
-  const cy=Math.min(182,h*.34);
+  const cy=h/2;
   const radius=Math.max(88,Math.min(w*.25,h*.20));
 
   const spotlight=ctx.createRadialGradient(cx,cy,15,cx,cy,radius*1.5);
