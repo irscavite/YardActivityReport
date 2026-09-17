@@ -89,6 +89,10 @@ body{background:linear-gradient(180deg,#f6f8fc 0%,#eef3f8 100%)}
   font-weight:950;
   color:var(--navy);
 }
+.line-report-table .yard-available-row .value{
+  font-weight:950;
+  color:var(--navy);
+}
 .mobile-app .overall-yard21-row{padding:9px 6px}
 .mobile-app .overall-yard21-label{font-size:9px}
 .mobile-app .overall-yard21-value{font-size:13px}.overall-table .overall-total-row td{background:#f1f6fc}.overall-table .overall-approved-row td{background:#dbeafe;color:#1d4ed8;font-weight:950}.overall-table .overall-approved-row td:first-child{box-shadow:inset 5px 0 #2563eb}.overall-table .overall-repaired-row td{background:#dcfce7;color:#15803d;font-weight:950}.overall-table .overall-repaired-row td:first-child{box-shadow:inset 5px 0 #16a34a}.overall-table .overall-approved-row .overall-value,.overall-table .overall-repaired-row .overall-value{font-size:14px}.utilization-row td{background:#f1f6fc}.utilization-value{font-weight:950;color:var(--navy)}
@@ -1359,9 +1363,8 @@ function includeInInventoryTotals(row){
   return recordLine(row)!=='OOCL'||isCez1OrCez2(row);
 }
 
-// Current Summary cards remain limited to the Bacao/Enlin inventory view.
-// Yard 2.1 is added separately to HRD-only totals below, while IRS/NSM stays
-// excluded from both views.
+// Shipping-line reporting and HRD container totals use the same Bacao/Enlin
+// inventory scope. Yard 2.1 and IRS/NSM remain in their separate views.
 function isYard21InventoryLocation(row){
   const loc=inventoryRowLocation(row);
   return loc==='YARD-2.1'||loc.startsWith('YARD-2.1-');
@@ -1376,12 +1379,10 @@ function includeInSummaryInventory(row){
   return includeInInventoryTotals(row)&&!isExcludedSummaryInventoryLocation(row);
 }
 
-// CMA, ONE and MAERSK containers at Yard 2.1 belong in the Shipping Line
-// report and Containers for HRD totals. The location is not shown as a new
-// table row; its records are folded into the existing line totals only.
+// HRD (CMA, ONE, MAERSK) follows the same exclusion as every shipping line:
+// no Yard 2.1 or IRS/NSM records in per-line or Containers for HRD totals.
 function includeInHrdInventoryTotals(row){
-  return includeInSummaryInventory(row)||
-    (APPROVED_REPORT_LINES.has(recordLine(row))&&isYard21InventoryLocation(row));
+  return includeInSummaryInventory(row);
 }
 
 function yard21ContainerCount(record){
@@ -1445,8 +1446,24 @@ function renderYard21Breakdown(record){
     `<tr class="yard21-total-row"><td>TOTAL</td><td>${fmt(totals.size20ST)}</td><td>${fmt(totals.size20OT)}</td><td>${fmt(totals.size40ST)}</td><td>${fmt(totals.size40HC)}</td><td>${fmt(grandTotal)}</td></tr>`;
 }
 
-function yardCounts(record){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2,totalRecords:inventoryRecords(record).length};}
-function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=normalizeLocation(row?.location??row?.Location??row?.yardLocation??fieldByPattern(row,[/location/i,/yard/i,/site/i]));if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
+function inventoryLocation(row){
+  // Match the flexible location lookup already used by the shipping-line breakdown.
+  // A blank primary field must not hide a populated alternate location field.
+  const direct=[row?.location,row?.Location,row?.yardLocation,row?.YardLocation]
+    .find(value=>value!==undefined&&value!==null&&String(value).trim()!=='');
+  return normalizeLocation(direct??fieldByPattern(row,[/location/i,/yard/i,/site/i]));
+}
+function yardCounts(record){
+  let cez1=0,cez2=0;
+  const rows=inventoryRecords(record);
+  for(const row of rows){
+    const loc=inventoryLocation(row);
+    if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;
+    else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;
+  }
+  return{cez1,cez2,totalRecords:rows.length};
+}
+function lineYardCounts(record,line){let cez1=0,cez2=0;for(const row of inventoryRecords(record)){if(recordLine(row)!==line)continue;const loc=inventoryLocation(row);if(loc==='CEZ-1'||loc.startsWith('CEZ-1-'))cez1++;else if(loc==='CEZ-2'||loc.startsWith('CEZ-2-'))cez2++;}return{cez1,cez2};}
 function renderUtilization(record){const {cez1:emptyCez1,cez2,totalRecords}=yardCounts(record);const loadedInventory=getLoadedActivity(record).inventory;const cez1=emptyCez1+loadedInventory;const p1=cez1/750*100,p2=cez2/1100*100;$('cez1Count').textContent=`${fmt(cez1)} / 750`;$('cez2Count').textContent=`${fmt(cez2)} / 1,100`;$('cez1Percent').textContent=`${p1.toFixed(2)}%`;$('cez2Percent').textContent=`${p2.toFixed(2)}%`;$('cez1Bar').style.width=`${Math.min(100,p1)}%`;$('cez2Bar').style.width=`${Math.min(100,p2)}%`;$('utilizationNote').textContent=(totalRecords||loadedInventory)?`Enlin: ${fmt(cez2)} empty container slot(s). Bacao: ${fmt(emptyCez1)} empty + ${fmt(loadedInventory)} loaded inventory = ${fmt(cez1)} occupied slot(s).`:'No inventory location records or loaded inventory found in Firebase latest data.';}
 function getIncoming(record){return num(record?.totals?.incoming??record?.incoming?.total??record?.incoming);}
 function getOutgoing(record){return num(record?.totals?.outgoing??record?.outgoing?.total??record?.outgoing);}
@@ -2516,6 +2533,7 @@ function drawWeeklyRepairChart(id,labels,approved,repaired,cumulative,repairPerc
 
 function lineInventoryStats(record,line){
   let available=0,damage=0,approved=0,repaired=0,hold=0,forRepo=0;
+  let bacaoAvailable=0,enlinAvailable=0;
 
   // Available, Damage, Volume, Approved, HOLD and FOR REPO come from Inventory.
   // The report's Repaired value is replaced later by the exact four-source,
@@ -2526,14 +2544,16 @@ function lineInventoryStats(record,line){
   if(!inventoryRows.length&&latestData&&latestData!==record)inventoryRows=inventoryRecords(latestData);
   for(const row of inventoryRows){
     if(recordLine(row)!==line)continue;
-    const includeRow=APPROVED_REPORT_LINES.has(line)
-      ?includeInHrdInventoryTotals(row)
-      :includeInSummaryInventory(row);
-    if(!includeRow)continue;
+    if(!includeInSummaryInventory(row))continue;
 
     const category=statusCategory(row);
     if(category==='damage')damage++;
-    else if(category==='available')available++;
+    else if(category==='available'){
+      available++;
+      const location=inventoryRowLocation(row);
+      if(location==='CEZ-1'||location.startsWith('CEZ-1-'))bacaoAvailable++;
+      else if(location==='CEZ-2'||location.startsWith('CEZ-2-'))enlinAvailable++;
+    }
 
     const remarks=normalizeRemarks(
       row?.remarks??row?.Remarks??row?.REMARKS??row?.remark??row?.Remark??
@@ -2555,6 +2575,8 @@ function lineInventoryStats(record,line){
     available,
     damage,
     volume:available+damage,
+    bacaoAvailable,
+    enlinAvailable,
     approved,
     repaired,
     hold,
@@ -2572,7 +2594,7 @@ function renderSelectedShippingLine(){
   if(!r){holder.innerHTML='<div class="line-report-empty">No report data found.</div>';return;}
   const overall=reportOverallUtilization;
   const displayLine=displayLineName(r.line);
-  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="date-time-wrap"><span class="stamp">${reportPeriodLabel}</span><span class="asof-time">As of ${latestActivityTime(latestData)}</span></span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label hrd-share-label">HRD Empty Share %<small class="hrd-share-note">vs Total Empty Containers for HRD</small></td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr><tr class="report-weather-row"><td colspan="2" class="label">CURRENT WEATHER (GENERAL TRIAS, CAVITE)</td><td colspan="2" class="report-weather-value">${reportWeatherText()}</td></tr></tbody></table></article>`;
+  holder.innerHTML=`<article class="line-report-card"><div class="line-report-date"><span>${displayLine}</span><span class="date-time-wrap"><span class="stamp">${reportPeriodLabel}</span><span class="asof-time">As of ${latestActivityTime(latestData)}</span></span></div><table class="line-report-table"><thead><tr><th>Lines</th><th>Available</th><th>Damage</th><th>Volume</th></tr></thead><tbody><tr><td class="line-name">${displayLine}</td><td class="main-summary-value">${fmt(r.available)}</td><td class="main-summary-value">${fmt(r.damage)}</td><td class="main-summary-value">${fmt(r.volume)}</td></tr><tr class="approved-repair-row"><td colspan="2" class="label">APPROVED FOR REPAIR</td><td colspan="2" class="value">${fmt(r.approvedForRepair)}</td></tr><tr class="yard-available-row"><td colspan="2" class="label">BACAO AVAILABLE</td><td colspan="2" class="value">${fmt(r.bacaoAvailable)}</td></tr><tr class="yard-available-row"><td colspan="2" class="label">ENLIN AVAILABLE</td><td colspan="2" class="value">${fmt(r.enlinAvailable)}</td></tr><tr class="hold-row"><td colspan="2" class="label">HOLD</td><td colspan="2" class="value">${fmt(r.hold)}</td></tr><tr class="repo-row"><td colspan="2" class="label">FOR REPO</td><td colspan="2" class="value">${fmt(r.forRepo)}</td></tr><tr class="rate-row"><td colspan="2" class="label hrd-share-label">HRD Empty Share %<small class="hrd-share-note">vs Total Empty Containers for HRD</small></td><td colspan="2"><span class="rate-pill">${r.shippingPct.toFixed(1)}%</span></td></tr><tr class="utilization-row"><td colspan="2" class="label">Enlin Utilization (Overall)</td><td colspan="2" class="utilization-value"><strong>${overall.enlinPct.toFixed(2)}%</strong> &nbsp; ${fmt(overall.enlinOccupied)} / 1,100</td></tr><tr class="report-weather-row"><td colspan="2" class="label">CURRENT WEATHER (GENERAL TRIAS, CAVITE)</td><td colspan="2" class="report-weather-value">${reportWeatherText()}</td></tr></tbody></table></article>`;
 }
 
 function movementRawValue(record,type){
@@ -2835,10 +2857,7 @@ function renderOverallSummary(record){
   if(inventoryRowsForOverall.length){
     for(const row of inventoryRowsForOverall){
       const line=recordLine(row);
-      const includeRow=hrdLines.has(line)
-        ?includeInHrdInventoryTotals(row)
-        :includeInSummaryInventory(row);
-      if(!includeRow)continue;
+      if(!includeInSummaryInventory(row))continue;
       const category=statusCategory(row);
       if(category!=='available'&&category!=='damage')continue;
       if(hrdLines.has(line)){
@@ -3641,8 +3660,8 @@ function drawInventoryDistributionPie(id,labels,values,visibleTotal,grandTotal,e
   drawCalloutGroup(left,-1);
   drawCalloutGroup(right,1);
 }
-const AUTO_REFRESH_MS=15*60*1000; // 15 minutes
-function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);if($('mnrShippingLine'))$('mnrShippingLine').value='ALL';$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadHistory();loadWeather();setInterval(()=>{refreshAll();},AUTO_REFRESH_MS);window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
+const AUTO_REFRESH_MS=60*1000; // Refresh latest Firebase inventory every minute
+function initialize(){const now=new Date();$('reportDate').value=isoLocal(now);if($('mnrShippingLine'))$('mnrShippingLine').value='ALL';$('shippingLineCards').innerHTML=inventoryCardLines().map(x=>`<div class="line-card"><div class="name">${displayLineName(x)}</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>waiting for data</small></div>`).join('')+`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">0</div><span class="inventory-share">0.0%</span></div><small>loaded inventory</small></div><div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">0</div><span class="inventory-share">100.0%</span></div><small>empty + loaded</small></div>`;loadLatest();loadHistory();loadWeather();setInterval(()=>{if(!document.hidden)refreshAll();},AUTO_REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll();});window.addEventListener('resize',()=>{if(latestData)renderLatest();if(Object.keys(historyData).length&&$('reportPanel').classList.contains('active'))renderReport();});}
 initialize();
 
 <!-- Approved cumulative lifecycle fix: Container Number + DATE IN; Inventory + Outgoing; Incoming DATE IN lookup only. -->
