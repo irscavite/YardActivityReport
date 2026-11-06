@@ -1385,6 +1385,15 @@ function includeInHrdInventoryTotals(row){
   return includeInSummaryInventory(row);
 }
 
+function includeInShippingLineReport(row,line){
+  // Only CMA/APL, ONE and MAERSK absorb their Yard 2.1 containers in
+  // Shipping Line tab totals. Other shipping lines and IRS/NSM retain
+  // the existing Bacao/Enlin-only reporting scope.
+  if(includeInSummaryInventory(row))return true;
+  return ['CMA','ONE','MAERSK'].includes(line)&&
+    isYard21InventoryLocation(row)&&includeInInventoryTotals(row);
+}
+
 function yard21ContainerCount(record){
   let count=0;
   for(const row of inventoryRecords(record)){
@@ -2544,7 +2553,7 @@ function lineInventoryStats(record,line){
   if(!inventoryRows.length&&latestData&&latestData!==record)inventoryRows=inventoryRecords(latestData);
   for(const row of inventoryRows){
     if(recordLine(row)!==line)continue;
-    if(!includeInSummaryInventory(row))continue;
+    if(!includeInShippingLineReport(row,line))continue;
 
     const category=statusCategory(row);
     if(category==='damage')damage++;
@@ -2971,7 +2980,8 @@ function renderOperationalTableSection(start,end,all,snapshot,lines,approvedEven
   };
 
   // HRD Empty Share % uses Total Empty Containers for HRD as the 100% basis.
-  // HRD empty inventory = CMA + ONE + MAERSK empty containers only.
+  // HRD empty inventory = CMA + ONE + MAERSK, including their Yard 2.1
+  // records in the same snapshot (no separate addition / double counting).
   const totalEmptyContainersForHRD=rows
     .filter(row=>APPROVED_REPORT_LINES.has(row.line))
     .reduce((sum,row)=>sum+num(row.volume),0);
