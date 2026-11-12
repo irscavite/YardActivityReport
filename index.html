@@ -2860,8 +2860,8 @@ function drawMovementPairChart(id,labels,firstSeries,secondSeries,per24,barColor
 function renderOverallSummary(record){
   if(!$('overallReportBody'))return;
 
-  // HRD = CMA + MAERSK + ONE. Damage uses the existing statusCategory(),
-  // where For Box R.E. / For Repair R.E. are classified as Damage.
+  // HRD = CMA + MAERSK + ONE, including their Yard 2.1 inventory.
+  // Damage uses statusCategory(): For Box/Repair R.E. count as Damage.
   const inventorySnapshot=record||latestData||{};
   const hrdLines=new Set(['CMA','MAERSK','ONE']);
   const inventoryRowsForOverall=inventoryRecords(inventorySnapshot);
@@ -2870,10 +2870,18 @@ function renderOverallSummary(record){
   if(inventoryRowsForOverall.length){
     for(const row of inventoryRowsForOverall){
       const line=recordLine(row);
-      if(!includeInSummaryInventory(row))continue;
+      const isHrdLine=hrdLines.has(line);
+      // HRD totals include CMA/APL, ONE and MAERSK from Bacao, Enlin
+      // AND Yard 2.1. Other shipping lines retain the existing scope.
+      // Count every eligible inventory row once; do not add Yard 2.1
+      // again separately to Total Inventory.
+      const inScope=isHrdLine
+        ?includeInShippingLineReport(row,line)
+        :includeInSummaryInventory(row);
+      if(!inScope)continue;
       const category=statusCategory(row);
       if(category!=='available'&&category!=='damage')continue;
-      if(hrdLines.has(line)){
+      if(isHrdLine){
         hrdEmpty++;
         if(category==='available')hrdAvailable++;
         else if(category==='damage')hrdDamage++;
