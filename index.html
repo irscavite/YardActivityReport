@@ -1043,7 +1043,7 @@ body.mobile-app{
 <script>
 const FIREBASE_BASE='https://yardactivity8-default-rtdb.asia-southeast1.firebasedatabase.app';
 const ROOT='irsDailyData';
-const REQUIRED_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','EVG'];
+const REQUIRED_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','HPL','EVG'];
 // UI label and Firebase client key are intentionally separate.
 // CMA is display-only; its Firebase data remains under APL.
 const FIREBASE_LINE_KEY={'CMA':'APL'};
@@ -1057,15 +1057,18 @@ const REPORT_DROPDOWN_LINES=['CMA','ONE','MAERSK'];
 // Historical Approved calculations are limited to APL/CMA, ONE and MAERSK only.
 const APPROVED_REPORT_LINES=new Set(['CMA','ONE','MAERSK']);
 
-// Current Summary pie chart only. EVG is hidden but included in Grand Total.
-const SUMMARY_PIE_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD'];
+// Current Summary: OTHERS combines ODD and EVG; HPL remains separate.
+const SUMMARY_PIE_LINES=['CMA','OOCL','ONE','WAN HAI','MAERSK','ODD','HPL'];
+function summaryDisplayCount(line,by){
+  return num(by[line])+(line==='ODD'?num(by.EVG):0);
+}
 
 function displayLineName(line){
   const key=String(line||'').toUpperCase();
   return USER_LINE_LABELS[key]||line;
 }
-// EVG remains included in Firebase calculations, Yard Utilization and reports.
-// It is hidden from the Current Summary cards and Inventory Distribution view.
+// EVG is combined with ODD only in the inventory summary and pie chart.
+// Original EVG records and other report calculations remain unchanged.
 function inventoryCardLines(){
   return INCLUDED_LINES.filter(line=>String(line||'').toUpperCase()!=='EVG');
 }
@@ -1484,6 +1487,7 @@ function normalizeLine(value){
   if(v==='OCEAN NETWORK EXPRESS')return'ONE';
   if(v==='ORIENT OVERSEAS CONTAINER LINE'||v==='ORIENT OVERSEAS')return'OOCL';
   if(v==='MAERSK LINE'||v==='MAERSK LINES')return'MAERSK';
+  if(v==='HAPAG LLOYD'||v==='HAPAG LLOYD AG'||v==='HAPAGLLOYD')return'HPL';
   return v;
 } // CMA is display-only; Firebase APL data remains mapped to CMA.
 function allRecordRows(record){const groups=[inventoryRecords(record),movementRows(record,'incoming'),movementRows(record,'outgoing')];const rows=[],seen=new Set();for(const group of groups){for(const row of group){if(!row||typeof row!=='object')continue;const key=row.id??row.key??row.containerNo??row.containerNumber??row.ContainerNo??row.ContainerNumber??null;if(key!=null){const sig=String(key);if(seen.has(sig))continue;seen.add(sig);}rows.push(row);}}return rows;}
@@ -3348,21 +3352,20 @@ function renderLatest(){
   renderOverallSummary(latestData);
 
   const inventoryShare=value=>grandInventory?((num(value)/grandInventory)*100).toFixed(1):'0.0';
-  const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(by[line])}</div><span class="inventory-share">${inventoryShare(by[line])}%</span></div></div>`).join('');
+  const emptyCards=inventoryCardLines().map(line=>`<div class="line-card"><div class="name">${displayLineName(line)}</div><div class="count-row"><div class="count">${fmt(summaryDisplayCount(line,by))}</div><span class="inventory-share">${inventoryShare(summaryDisplayCount(line,by))}%</span></div></div>`).join('');
   const loadedCard=`<div class="line-card loaded-card"><div class="name">HRD Import Laden</div><div class="count-row"><div class="count">${fmt(loadedInventory)}</div><span class="inventory-share">${inventoryShare(loadedInventory)}%</span></div><small>loaded inventory</small></div>`;
   const totalCard=`<div class="line-card total-card"><div class="name">TOTAL INVENTORY</div><div class="count-row"><div class="count">${fmt(grandInventory)}</div><span class="inventory-share">100.0%</span></div><small>${fmt(emptyInventory)} empty + ${fmt(loadedInventory)} loaded</small></div>`;
   $('shippingLineCards').innerHTML=emptyCards+loadedCard+totalCard;
 
-  // Inventory Distribution is a user-facing view. EVG stays in Firebase,
-  // overall inventory calculations and Yard Utilization, but is excluded here.
+  // Combine EVG + ODD into OTHERS for visible chart and cards, exactly once.
   const distributionLines=SUMMARY_PIE_LINES;
-  const visibleEmptyTotal=distributionLines.reduce((sum,line)=>sum+num(by[line]),0);
-  const evgHiddenTotal=num(by.EVG);
+  const visibleEmptyTotal=distributionLines.reduce((sum,line)=>sum+summaryDisplayCount(line,by),0);
+  const evgHiddenTotal=0; // EVG is now included in OTHERS; do not add again.
   const visibleChartTotal=visibleEmptyTotal+loadedInventory;
-  const distributionGrandTotal=visibleChartTotal+evgHiddenTotal;
+  const distributionGrandTotal=visibleChartTotal;
   $('distributionGrandTotal').textContent=fmt(distributionGrandTotal);
   const chartLabels=[...distributionLines.map(displayLineName),'HRD Import Laden'];
-  const chartValues=[...distributionLines.map(line=>by[line]),loadedInventory];
+  const chartValues=[...distributionLines.map(line=>summaryDisplayCount(line,by)),loadedInventory];
   drawInventoryDistributionPie(
     'distributionChart',
     chartLabels,
